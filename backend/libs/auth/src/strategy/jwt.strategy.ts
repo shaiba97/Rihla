@@ -1,0 +1,24 @@
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { PassportStrategy } from '@nestjs/passport';
+import { ExtractJwt, Strategy } from 'passport-jwt';
+import { Request } from 'express';
+import { AuthService } from '../auth.service';
+
+@Injectable()
+export class JwtStrategy extends PassportStrategy(Strategy) {
+  constructor(private readonly authService: AuthService) {
+    super({
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      secretOrKey: process.env.JWT_SECRET || 'rihla_super_secret_jwt_key_2026',
+      algorithms: ['HS256'],
+    });
+  }
+
+  async validate(req: Request, payload: any) {
+    const token = ExtractJwt.fromAuthHeaderAsBearerToken()(req);
+    if (token && this.authService.isTokenBlacklisted(token)) {
+      throw new UnauthorizedException('انتهت جلسة تسجيل الدخول — يرجى تسجيل الدخول مجدداً');
+    }
+    return payload;
+  }
+}

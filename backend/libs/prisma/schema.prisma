@@ -1,0 +1,169 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// Bus Model
+model Bus {
+  id            String        @id @default(uuid())
+  companyId     String
+  company       User          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  name          String
+  /// Total number of passenger seats
+  chairs        Int
+  /// seatStartFrom:
+  ///     - LEFT  -> numbering starts from left side
+  ///     - RIGHT -> numbering starts from right side
+  seatStartFrom SeatStartFrom
+  /// Plate stored as JSON to support Sudan format
+  ///
+  ///     Example JSON:
+  ///     {
+  ///       "arabic": "س ع 1234",
+  ///       "english": "SA 1234",
+  ///       "numbers": "1234",
+  ///     }
+  plate         Json
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  trips         Trip[]
+}
+
+model Trip {
+  id            String   @id @default(uuid())
+
+  busId         String
+  bus           Bus      @relation(fields: [busId], references: [id], onDelete: Cascade)
+
+  presence_time DateTime
+
+  // SEARCHABLE FIELDS (CRITICAL)
+  departureDate DateTime
+  departureTime DateTime
+  fromState     String
+  fromCity      String
+  fromStation   String
+
+  // ARRIVAL FIELDS
+  arrivalTime   DateTime
+  arrivalDate   DateTime
+  toState       String
+  toCity        String
+  toStation     String
+
+  status        TripStatus
+
+  // PRICE FIELD
+  price         Decimal? @db.Decimal(10, 2)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+
+
+  bookings      Booking[]
+
+  @@index([fromCity, toCity])
+  @@index([departureDate])
+}
+
+model User {
+  id        String    @id @default(uuid())
+  name      String
+  email     String    @unique
+  password  String
+  role      Role
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  bookings  Booking[]
+  payments  Payment[]
+  buses     Bus[]
+
+  @@index([email])
+  @@map("users")
+}
+
+model Booking {
+  id               String        @id @default(uuid())
+  customerId       String
+  tripId           String
+  seatNumber       Int
+  passengerName    String
+  passengerAge     Int
+  passengerGender  Gender
+  passengerContact String
+  status           BookingStatus @default(PENDING)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  customer         User          @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  trip             Trip          @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  payment          Payment?
+  ticketPDF        TicketPDF?
+}
+
+model Payment {
+  id                String        @id @default(uuid())
+  bookingId         String        @unique
+  customerId        String
+  totalAmount       Decimal       @db.Decimal(10, 2)
+  companyAmount     Decimal       @db.Decimal(10, 2)
+  commissionAmount  Decimal       @db.Decimal(10, 2)
+  currency          String        @default("SDG")
+  status            PaymentStatus @default(PENDING)
+  transferReference String?
+  adminNotes        String?
+  confirmedBy       String?
+  paidAt            DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  booking           Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  customer          User          @relation(fields: [customerId], references: [id], onDelete: Cascade)
+}
+
+model TicketPDF {
+  id          String   @id @default(uuid())
+  bookingId   String   @unique
+  ticketUrl   String
+  generatedAt DateTime @default(now())
+  booking     Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+}
+
+enum SeatStartFrom {
+  LEFT
+  RIGHT
+}
+
+enum TripStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum Role {
+  USER
+  ADMIN
+  COMPANY
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
