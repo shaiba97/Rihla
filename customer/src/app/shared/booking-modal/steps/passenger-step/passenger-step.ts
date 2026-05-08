@@ -46,6 +46,8 @@ export class PassengerStepComponent
   selectedSeats = input.required<number[]>();
   price         = input.required<number>();
   currency      = input<string>('جنيه');
+  initialContact = input<ContactForm | null>(null);
+  initialPassengers = input<PassengerForm[]>([]);
   boookedSeats = signal<any>([]);
 
   nextStep  = output<{
@@ -116,6 +118,36 @@ export class PassengerStepComponent
 
   ngOnInit(){
     this.getBookedSeats();
+    this.restoreFormData();
+  }
+
+  restoreFormData(): void {
+    // Sync seats first
+    this.syncPassengerForms(this.selectedSeats());
+
+    // Restore contact if coming back
+    const contact = this.initialContact();
+    if (contact) {
+      this.contactGroup.patchValue({
+        countryCode:    contact.countryCode,
+        whatsappNumber: contact.whatsappNumber,
+      });
+    }
+
+    // Restore passenger data if coming back
+    const savedPassengers = this.initialPassengers();
+    if (savedPassengers.length > 0) {
+      savedPassengers.forEach((p, i) => {
+        const ctrl = this.passengersArray.at(i);
+        if (ctrl) {
+          ctrl.patchValue({
+            name:   p.name,
+            age:    p.age,
+            gender: p.gender,
+          });
+        }
+      });
+    }
   }
 
   syncPassengerForms(seats: number[]): void {
@@ -161,7 +193,6 @@ export class PassengerStepComponent
   }
 
   getBookedSeats(){
-
     this.bookingService.getBookedSeats(this.tripDetails().id).subscribe({
         next: (response: any) => {
           if(response.length){
@@ -172,7 +203,6 @@ export class PassengerStepComponent
           console.error('Error fetching selected seats:', error.error.message);
         }
     });
-
   }
 
   isFieldInvalid(

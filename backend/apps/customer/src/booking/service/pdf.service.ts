@@ -22,125 +22,818 @@ export class PDFService {
     const outputPath = path.join(outputDir, filename);
     const publicUrl = `/upload/${filename}`;
 
-    const booking = await this.prisma.booking.findUnique({
-      where: { id: bookingId },
-      include: { Trip: { include: { Bus: true } } },
+    const payment = await this.prisma.payment.findUnique({
+      where: { bookingId: bookingId },
+      include: {
+        Booking: {
+          include: {
+            Trip: { include: { Bus: true } },
+          },
+        },
+      },
     });
 
-    if (!booking) {
+    if (!payment) {
       throw new Error('الحجز غير موجود');
     }
 
-    const html = this.buildTicketHTML(booking);
+    const html = this.buildTicketHTML(payment);
 
     try {
       const puppeteer = await import('puppeteer');
       const browser = await puppeteer.launch({
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+        ],
       });
-
       try {
         const page = await browser.newPage();
-        await page.setContent(html, { waitUntil: 'networkidle0' });
+        await page.setContent(html, {
+          waitUntil: 'networkidle0',
+        });
         await page.pdf({
           path: outputPath,
-          format: 'A5',
+          format: 'A4',
           printBackground: true,
-          margin: { top: '10mm', bottom: '10mm', left: '10mm', right: '10mm' },
+          margin: {
+            top: '0mm',
+            bottom: '0mm',
+            left: '0mm',
+            right: '0mm',
+          },
         });
       } finally {
         await browser.close();
       }
     } catch (error) {
-      this.logger.warn('PDF generation failed, creating placeholder', error);
+      this.logger.warn('PDF generation failed', error);
       fs.writeFileSync(outputPath, 'PDF placeholder');
     }
 
     return { publicUrl, filePath: outputPath };
   }
 
-  private buildTicketHTML(booking: any): string {
+  private buildTicketHTML(payment: any): string {
+    const booking = payment.Booking;
     const trip = booking.Trip;
     const bus = trip?.Bus;
+    const passengers = Array.isArray(booking?.passenger)
+      ? booking?.passenger
+      : [booking?.passenger ?? {}];
 
-    const passenger = Array.isArray(booking.passenger)
-      ? booking.passenger
-      : [booking.passenger];
+    // ── Helpers ─────────────────────────────────────
 
-    const passengerRows = passenger
+    const fmtDate = (val: any): string => {
+      if (!val) return '—';
+      return new Date(val).toLocaleDateString('ar-SA', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      });
+    };
+
+    const fmtTime = (val: any): string => {
+      if (!val) return '—';
+
+      const date = new Date();
+
+      // 2. Extract hours and minutes from the string (assuming HH:mm format)
+      // Example: "14:30" -> hours = 14, minutes = 30
+      const [hours, minutes] = val.split(':').map(Number);
+
+      // 3. Set the time on our Date object
+      date.setHours(hours);
+      date.setMinutes(minutes);
+      date.setSeconds(0);
+      date.setMilliseconds(0);
+
+      return new Date(date).toLocaleTimeString('ar-SA', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      });
+    };
+
+    // ── Bus plate ────────────────────────────────────
+    const plate = bus?.plate
+      ? typeof bus.plate === 'string'
+        ? JSON.parse(bus.plate)
+        : bus.plate
+      : null;
+
+    const plateHTML = plate
+      ? `
+        <div style="
+          display:inline-flex;
+          flex-direction:column;
+          align-items:center;
+          border:2.5px solid #0D9488;
+          border-radius:6px;
+          overflow:hidden;
+          min-width:90px;
+        ">
+          <div style="
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:8px;
+            padding:4px 10px;
+            background:#CCFBF1;
+            width:100%;
+          ">
+            <span style="
+              font-size:13px;
+              font-weight:700;
+              color:#134E4A;
+              direction:rtl;
+            ">
+              ${plate.arabic ?? ''}
+            </span>
+            <span style="
+              width:1px;
+              height:16px;
+              background:#0D9488;
+              display:inline-block;
+            "></span>
+            <span style="
+              font-size:13px;
+              font-weight:700;
+              color:#134E4A;
+              direction:ltr;
+            ">
+              ${plate.english ?? ''}
+            </span>
+          </div>
+          <div style="
+            padding:3px 10px;
+            background:#0D9488;
+            width:100%;
+            text-align:center;
+          ">
+            <span style="
+              font-size:14px;
+              font-weight:700;
+              color:#ffffff;
+              letter-spacing:2px;
+            ">
+              ${plate.numbers ?? ''}
+            </span>
+          </div>
+        </div>
+      `
+      : '<span style="color:#5EEAD4;font-size:12px">—</span>';
+
+    // ── Passenger rows ───────────────────────────────
+    const passengerRows = passengers
       .map(
         (p: any, i: number) => `
-        <tr style="border-bottom:1px solid #E8E0D8">
-          <td style="padding:8px 12px;text-align:right;font-family:Tajawal,sans-serif">${i + 1}</td>
-          <td style="padding:8px 12px;text-align:right;font-family:Tajawal,sans-serif">${p.name ?? '--'}</td>
-          <td style="padding:8px 12px;text-align:right;font-family:Tajawal,sans-serif">${p.age ?? '--'}</td>
-          <td style="padding:8px 12px;text-align:right;font-family:Tajawal,sans-serif">${p.gender === 'MALE' ? 'ذكر' : 'أنثى'}</td>
+        <tr style="
+          border-bottom:1px solid #99F6E4;
+          background:${i % 2 === 0 ? '#ffffff' : '#F0FDFA'};
+        ">
+          <td style="
+            padding:10px 14px;
+            text-align:right;
+            font-size:13px;
+            color:#134E4A;
+            font-weight:600;
+          ">${p.name ?? '—'}</td>
+          <td style="
+            padding:10px 14px;
+            text-align:right;
+            font-size:13px;
+            color:#134E4A;
+            font-weight:600;
+          ">${p.age ?? '—'}</td>
+          <td style="
+            padding:10px 14px;
+            text-align:center;
+            font-size:13px;
+            color:#0F766E;
+          ">${p.gender === 'MALE' ? 'ذكر' : 'أنثى'}</td>
+          <td style="
+            padding:10px 14px;
+            text-align:center;
+          ">
+            <span style="
+              display:inline-block;
+              background:#0D9488;
+              color:white;
+              font-size:12px;
+              font-weight:700;
+              padding:3px 10px;
+              border-radius:20px;
+              min-width:32px;
+              text-align:center;
+            ">${booking.seatNumbers[i]}</span>
+          </td>
         </tr>
       `,
       )
       .join('');
 
+    // ── Payment method label ─────────────────────────
+    const methodMap: Record<string, string> = {
+      bankak: 'بنكك',
+      fawry: 'فوري',
+      mashriq: 'المشرق',
+      bravo: 'برافو',
+    };
+    const paymentMethodLabel =
+      methodMap[payment?.paymentMethod ?? ''] ?? payment?.paymentMethod ?? '—';
+
+    const totalAmount = payment?.totalAmount
+      ? Number(payment.totalAmount).toLocaleString('ar-SA')
+      : '—';
+
+    const ticketPrice = Number(payment.price).toLocaleString('ar-SA');
+
+    const currency = payment?.currency ?? 'جنيه سوداني';
+
+    // ── Booking date ─────────────────────────────────
+    const bookingDate = fmtDate(booking.createdAt);
+
     return `
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Tajawal', sans-serif; background: #f5f7fa; padding: 20px; direction: rtl; }
-.ticket { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-.ticket-header { background: linear-gradient(135deg, #8B5E3C, #6E472D); color: white; padding: 24px; text-align: center; }
-.ticket-header h1 { font-size: 28px; font-weight: 700; margin-bottom: 4px; }
-.ticket-header p { font-size: 14px; opacity: 0.85; }
-.ticket-body { padding: 24px; }
-.route-section { display: flex; align-items: center; justify-content: space-between; background: #F5EFEA; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
-.route-city { text-align: center; }
-.route-city .city-name { font-size: 22px; font-weight: 700; color: #1F2937; }
-.route-city .city-sub { font-size: 12px; color: #6B7280; margin-top: 4px; }
-.route-arrow { font-size: 28px; color: #8B5E3C; }
-.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-.info-item { background: #f9f9f9; border: 1px solid #E8E0D8; border-radius: 10px; padding: 12px; }
-.info-item .label { font-size: 11px; color: #9CA3AF; margin-bottom: 4px; }
-.info-item .value { font-size: 15px; font-weight: 600; color: #1F2937; }
-.seat-badge { background: #8B5E3C; color: white; border-radius: 50%; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; margin: 0 auto 20px; }
-.divider { border: none; border-top: 2px dashed #E8E0D8; margin: 20px 0; }
-.booking-id { text-align: center; font-size: 12px; color: #9CA3AF; }
-.booking-id span { font-family: monospace; font-size: 11px; }
-.ticket-footer { background: #F5EFEA; padding: 16px 24px; text-align: center; font-size: 12px; color: #6B7280; }
-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-th { background: #F5EFEA; color: #6E472D; font-size: 11px; padding: 8px 12px; text-align: right; font-family: Tajawal, sans-serif; }
-td { font-family: Tajawal, sans-serif; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;600;700;800&display=swap');
+
+    /* ── Reset ── */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* ── Base ── */
+    body {
+      font-family: 'Tajawal', sans-serif;
+      background: #F0FDFA;
+      direction: rtl;
+      color: #134E4A;
+      font-size: 14px;
+      line-height: 1.5;
+      padding: 24px;
+      min-height: 100vh;
+    }
+
+    /* ── Ticket shell ── */
+    .ticket {
+      background: #ffffff;
+      border-radius: 16px;
+      border: 1px solid #99F6E4;
+      overflow: hidden;
+      box-shadow:
+        0 4px 24px rgba(13,148,136,0.10),
+        0 1px 4px  rgba(13,148,136,0.06);
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    /* ── HEADER ── */
+    .ticket-header {
+      background: linear-gradient(
+        135deg, #0D9488 0%, #0F766E 100%
+      );
+      padding: 28px 32px 24px;
+      text-align: center;
+      position: relative;
+    }
+    .ticket-header::after {
+      content: '';
+      display: block;
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 20px;
+      background: #ffffff;
+      clip-path: ellipse(55% 100% at 50% 100%);
+    }
+    .header-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+    .header-logo-icon {
+      width: 44px;
+      height: 44px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+    }
+    .header-logo-text {
+      font-size: 30px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.5px;
+    }
+    .header-sub {
+      font-size: 13px;
+      color: rgba(255,255,255,0.80);
+      font-weight: 400;
+      margin-top: 2px;
+    }
+    .header-booking-id {
+      margin-top: 14px;
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.30);
+      border-radius: 20px;
+      padding: 4px 16px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.90);
+      letter-spacing: 0.5px;
+    }
+
+    /* ── BODY ── */
+    .ticket-body {
+      padding: 32px 28px 24px;
+    }
+
+    /* ── Section title ── */
+    .section-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #0D9488;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #99F6E4;
+    }
+
+    /* ── Section wrapper ── */
+    .section {
+      margin-bottom: 24px;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: #F0FDFA;
+      border: 1px solid #99F6E4;
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    /* ── BUS DETAILS ── */
+    .bus-details {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .bus-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: #134E4A;
+    }
+    .bus-meta {
+      font-size: 12px;
+      color: #0F766E;
+      margin-top: 4px;
+    }
+    .bus-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
+    /* ── TRIP DETAILS ── */
+    .trip-section {
+      display: grid;
+      grid-template-columns: 1fr 40px 1fr;
+      gap: 0;
+      align-items: stretch;
+    }
+    .trip-side {
+      padding: 16px;
+    }
+    .trip-side-departure {
+      border-radius: 12px 0 0 12px;
+      background: #F0FDFA;
+      border: 1px solid #99F6E4;
+      border-left: none;
+    }
+    .trip-side-arrival {
+      border-radius: 0 12px 12px 0;
+      background: #F0FDFA;
+      border: 1px solid #99F6E4;
+      border-right: none;
+    }
+    .trip-divider {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #0D9488;
+      position: relative;
+    }
+    .trip-divider-arrow {
+      color: #ffffff;
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .trip-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: #0D9488;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+    .trip-state {
+      font-size: 11px;
+      color: #5EEAD4;
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+    .trip-city {
+      font-size: 20px;
+      font-weight: 800;
+      color: #134E4A;
+      line-height: 1.2;
+      margin-bottom: 3px;
+    }
+    .trip-station {
+      font-size: 11px;
+      color: #0F766E;
+      margin-bottom: 12px;
+    }
+    .trip-time-block {
+      margin-top: 4px;
+    }
+    .trip-date {
+      font-size: 12px;
+      color: #0F766E;
+      font-weight: 500;
+    }
+    .trip-time {
+      font-size: 22px;
+      font-weight: 700;
+      color: #0D9488;
+      line-height: 1.2;
+    }
+
+    /* ── TABLES ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid #99F6E4;
+    }
+    thead tr {
+      background: linear-gradient(
+        135deg, #0D9488, #0F766E
+      );
+    }
+    thead th {
+      padding: 11px 14px;
+      text-align: right;
+      font-size: 12px;
+      font-weight: 600;
+      color: #ffffff;
+      letter-spacing: 0.3px;
+    }
+
+    /* ── PAYMENT TABLE ── */
+    .payment-table tbody tr td:first-child {
+      font-weight: 600;
+      color: #0F766E;
+    }
+    .payment-table tbody tr td:last-child {
+      font-weight: 700;
+      color: #134E4A;
+      text-align: left;
+      direction: ltr;
+    }
+    .payment-table tbody tr:last-child {
+      background: #CCFBF1 !important;
+    }
+    .payment-table tbody tr:last-child td {
+      font-size: 15px;
+      font-weight: 800;
+      color: #0D9488 !important;
+    }
+
+    /* ── DASHED DIVIDER ── */
+    .dashed-divider {
+      border: none;
+      border-top: 2px dashed #99F6E4;
+      margin: 24px 0;
+    }
+
+    /* ── FOOTER ── */
+    .ticket-footer {
+      background: linear-gradient(
+        135deg, #0D9488 0%, #0F766E 100%
+      );
+      padding: 16px 28px;
+      text-align: center;
+    }
+    .footer-text {
+      font-size: 12px;
+      color: rgba(255,255,255,0.90);
+      font-weight: 400;
+    }
+    .footer-booking-ref {
+      margin-top: 6px;
+      font-size: 10px;
+      color: rgba(255,255,255,0.60);
+      letter-spacing: 0.5px;
+    }
+  </style>
 </head>
 <body>
 <div class="ticket">
-<div class="ticket-header"><h1>رحلة</h1><p>تذكرة سفر — Bus Ticket</p></div>
-<div class="ticket-body">
-<div class="route-section">
-<div class="route-city"><div class="city-name">${trip?.fromCity || '—'}</div><div class="city-sub">${trip?.fromStation || ''}</div></div>
-<div class="route-arrow">←</div>
-<div class="route-city"><div class="city-name">${trip?.toCity || '—'}</div><div class="city-sub">${trip?.toStation || ''}</div></div>
-</div>
-<div class="seat-badge">${booking.seatNumber}</div>
-<div class="info-grid">
-<div class="info-item"><div class="label">رقم المقعد</div><div class="value">${booking.seatNumber}</div></div>
-<div class="info-item"><div class="label">تاريخ السفر</div><div class="value">${trip?.departureDate ? new Date(trip.departureDate).toLocaleDateString('ar-SD') : '—'}</div></div>
-<div class="info-item"><div class="label">وقت الانطلاق</div><div class="value">${trip?.departureTime ? new Date(trip.departureTime).toLocaleTimeString('ar-SD') : '—'}</div></div>
-<div class="info-item"><div class="label">الحافلة</div><div class="value">${bus?.name || '—'}</div></div>
-</div>
-<p style="font-size:12px;font-weight:700;color:#1F2937;margin-bottom:8px">بيانات الركاب</p>
-<table>
-<thead><tr><th>#</th><th>الاسم</th><th>العمر</th><th>الجنس</th></tr></thead>
-<tbody>${passengerRows}</tbody>
-</table>
-<hr class="divider">
-<div class="booking-id">رقم الحجز<br><span>${booking.id}</span></div>
-</div>
-<div class="ticket-footer">يُرجى الحضور قبل موعد الانطلاق بـ 30 دقيقة</div>
+
+  <!-- ══════════════════════════════════ -->
+  <!-- HEADER                            -->
+  <!-- ══════════════════════════════════ -->
+  <div class="ticket-header">
+    <div class="header-logo">
+      <span class="header-logo-text">رحلة</span>
+    </div>
+    <div class="header-sub">
+      تذكرة سفر — Bus Ticket
+    </div>
+    <div style="
+      font-size:11px;
+      color:rgba(255,255,255,0.65);
+      margin-top:6px;
+    ">
+      تاريخ الحجز: ${bookingDate}
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════ -->
+  <!-- BODY                              -->
+  <!-- ══════════════════════════════════ -->
+  <div class="ticket-body">
+
+    <!-- ── BUS DETAILS ── -->
+    <div class="section">
+      <div class="section-title">تفاصيل الحافلة</div>
+      <div class="card">
+        <div class="bus-details">
+
+          <!-- Bus name + chairs -->
+          <div>
+            <div class="bus-name">
+              ${bus?.name ?? '—'}
+            </div>
+            <div class="bus-meta">
+              عدد المقاعد: ${bus?.chairs ?? '—'} مقعد
+            </div>
+          </div>
+
+          <!-- Plate -->
+          <div class="bus-right">
+            <div style="
+              font-size:10px;
+              color:#5EEAD4;
+              font-weight:600;
+              text-align:center;
+              margin-bottom:4px;
+              letter-spacing:0.5px;
+            ">
+              رقم اللوحة
+            </div>
+            ${plateHTML}
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TRIP DETAILS ── -->
+    <div class="section">
+      <div class="section-title">تفاصيل الرحلة</div>
+      <div class="trip-section">
+
+        <!-- Departure (RIGHT in RTL) -->
+        <div class="trip-side trip-side-departure">
+          <div class="trip-label">المغادرة</div>
+          <div class="trip-state">
+            ${trip?.fromState ?? ''}
+          </div>
+          <div class="trip-city">
+            ${trip?.fromCity ?? '—'}
+          </div>
+          <div class="trip-station">
+            ${trip?.fromStation ?? ''}
+          </div>
+          <div class="trip-time-block">
+            <div class="trip-date">
+              ${fmtDate(trip?.departureDate)}
+            </div>
+            <div class="trip-time">
+              ${fmtTime(trip?.departureTime)}
+            </div>
+          </div>
+        </div>
+
+        <!-- Arrow divider -->
+        <div class="trip-divider">
+          <div class="trip-divider-arrow">←</div>
+        </div>
+
+        <!-- Arrival (LEFT in RTL) -->
+        <div class="trip-side trip-side-arrival"
+             style="text-align:left;direction:ltr;">
+          <div class="trip-label"
+               style="text-align:left">
+            الوصول
+          </div>
+          <div class="trip-state"
+               style="text-align:left">
+            ${trip?.toState ?? ''}
+          </div>
+          <div class="trip-city"
+               style="text-align:left">
+            ${trip?.toCity ?? '—'}
+          </div>
+          <div class="trip-station"
+               style="text-align:left">
+            ${trip?.toStation ?? ''}
+          </div>
+          <div class="trip-time-block">
+            <div class="trip-date"
+                 style="text-align:left">
+              ${fmtDate(trip?.arrivalDate)}
+            </div>
+            <div class="trip-time"
+                 style="text-align:left">
+              ${fmtTime(trip?.arrivalTime)}
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <hr class="dashed-divider">
+
+    <!-- ── PASSENGER DETAILS ── -->
+    <div class="section">
+      <div class="section-title">بيانات الركاب</div>
+      <table>
+        <thead>
+          <tr>
+            <th style="text-align:right">
+              اسم الراكب
+            </th>
+            <th style="text-align:center">
+              العمر
+            </th>
+            <th style="text-align:center">
+              الجنس
+            </th>
+            <th style="text-align:center">
+              رقم المقعد
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          ${passengerRows}
+        </tbody>
+      </table>
+    </div>
+
+    <hr class="dashed-divider">
+
+    <!-- ── PAYMENT DETAILS ── -->
+    <div class="section">
+      <div class="section-title">تفاصيل الدفع</div>
+      <table class="payment-table">
+        <thead>
+          <tr>
+            <th style="text-align:right">
+              البيان
+            </th>
+            <th style="text-align:left;
+                       direction:ltr">
+              المبلغ
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="
+            border-bottom:1px solid #99F6E4;
+          ">
+            <td style="
+              padding:10px 14px;
+              font-size:13px;
+            ">
+              سعر التذكرة الواحدة
+            </td>
+            <td style="
+              padding:10px 14px;
+              font-size:13px;
+              text-align:left;
+              direction:ltr;
+            ">
+              ${ticketPrice} ${currency}
+            </td>
+          </tr>
+          <tr style="
+            border-bottom:1px solid #99F6E4;
+            background:#F0FDFA;
+          ">
+            <td style="
+              padding:10px 14px;
+              font-size:13px;
+            ">
+              عدد المقاعد المحجوزة
+            </td>
+            <td style="
+              padding:10px 14px;
+              font-size:13px;
+              text-align:left;
+              direction:ltr;
+            ">
+              ${passengers.length} مقعد
+            </td>
+          </tr>
+          <tr style="
+            border-bottom:1px solid #99F6E4;
+          ">
+            <td style="
+              padding:10px 14px;
+              font-size:13px;
+            ">
+              طريقة الدفع
+            </td>
+            <td style="
+              padding:10px 14px;
+              font-size:13px;
+              text-align:left;
+              direction:ltr;
+            ">
+              ${paymentMethodLabel}
+            </td>
+          </tr>
+          <tr style="background:#CCFBF1;">
+            <td style="
+              padding:12px 14px;
+              font-size:15px;
+              font-weight:800;
+              color:#0D9488;
+            ">
+              الإجمالي المدفوع
+            </td>
+            <td style="
+              padding:12px 14px;
+              font-size:15px;
+              font-weight:800;
+              color:#0D9488;
+              text-align:left;
+              direction:ltr;
+            ">
+              ${totalAmount} ${currency}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════ -->
+  <!-- FOOTER                            -->
+  <!-- ══════════════════════════════════ -->
+  <div class="ticket-footer">
+    <div class="footer-text">
+      يُرجى الحضور قبل موعد الانطلاق بـ 30 دقيقة
+    </div>
+  </div>
+
 </div>
 </body>
-</html>`;
+</html>
+    `;
   }
 }

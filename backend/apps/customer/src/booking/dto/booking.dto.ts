@@ -123,6 +123,10 @@ export class CreatePaymentDto {
   @IsString()
   @IsOptional()
   receiptFile?: string;
+
+  @IsString()
+  @IsOptional()
+  paymentMethod?: string;
 }
 
 export class UpdatePaymentDto {
@@ -171,4 +175,8 @@ export class UpdatePaymentDto {
   @IsOptional()
   @IsString()
   receiptFile?: string;
+
+  @IsOptional()
+  @IsString()
+  paymentMethod?: string;
 }

@@ -81,6 +81,7 @@ export class PaymentService {
         status: createPaymentDto.status || PaymentStatus.SUCCESS,
         transactionId: createPaymentDto.transactionId,
         receiptFile: createPaymentDto.receiptFile,
+        paymentMethod: createPaymentDto.paymentMethod,
       },
       include: { Booking: { include: { Trip: true } } },
     });

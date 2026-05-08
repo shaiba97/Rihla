@@ -2,19 +2,19 @@ import {
   Component, input, output, computed,
   inject, signal
 } from '@angular/core';
-import { NgClass, JsonPipe } from '@angular/common';
+import { NgClass } from '@angular/common';
 import {
   LucideArmchair,
   LucideBus,
   LucideCalendar,
   LucideChevronLeft,
   LucideCircle,
+  LucideClock,
 } from '@lucide/angular';
 import { TimeFormatPipe } from '../../../../pipes/time-format/time-format-pipe';
 import { DatePipe } from '@angular/common';
 import { SeatMap } from '../../booking-modal/booking.interfaces';
 import { BookingService, TripDetails } from '../../../../core/services/booking/booking';
-import { SessionService } from '../../../../core/services/session/session';
 
 @Component({
   selector:   'app-seat-step',
@@ -23,12 +23,12 @@ import { SessionService } from '../../../../core/services/session/session';
     NgClass,
     DatePipe,
     TimeFormatPipe,
-    JsonPipe,
     LucideArmchair,
     LucideBus,
     LucideCalendar,
     LucideChevronLeft,
     LucideCircle,
+    LucideClock,
   ],
   templateUrl: './seat-step.html',
 })
@@ -41,11 +41,17 @@ export class SeatStepComponent {
   selectedSeats  = input.required<number[]>();
   price          = input.required<number>();
   currency       = input<string>('جنيه');
+  heldSeats      = input<number[]>([]);
+  remainingMs    = input<number>(420000);
+  remainingFormatted = input<string>('7:00');
 
   seatToggled    = output<SeatMap>();
   nextStep       = output<void>();
 
-  canProceed = computed(() => this.selectedSeats().length > 0);
+  canProceed = computed(
+    () => this.selectedSeats().length > 0 &&
+          this.remainingMs() > 0
+  );
   totalPrice = computed(() => this.selectedSeats().length * this.price());
 
   selectedSeat = signal<any>({});
@@ -69,6 +75,15 @@ export class SeatStepComponent {
     return { rows, backSeats, left, right };
   });
 
+  timerColor = computed((): string[] => {
+    const ms = this.remainingMs();
+    if (ms <= 60_000)
+      return ['text-red-500', 'font-extrabold', 'animate-pulse'];
+    if (ms <= 120_000)
+      return ['text-amber-500', 'font-bold'];
+    return ['text-[var(--primary)]', 'font-bold'];
+  });
+
   ngOnInit(): void {
     this.getSelectedSats();
     this.getBookedSeats();
@@ -86,31 +101,61 @@ export class SeatStepComponent {
   }
 
   seatClasses(seat: SeatMap): string[] {
-    
-    if (seat.status === 'selected') return ['text-white', 'drop-shadow-md', 'scale-110', 'cursor-pointer'];
-    if (seat.status === 'booked') return ['text-[var(--text-muted)]', 'opacity-40', 'cursor-not-allowed'];
-    return ['text-[var(--border)]', 'hover:text-[var(--primary)]', 'hover:scale-110', 'cursor-pointer', 'transition-all', 'duration-150'];
+    switch (seat.status) {
+      case 'reserved':
+        return [
+          'text-[var(--primary)]',
+          'drop-shadow-md',
+          'scale-110',
+          'cursor-pointer',
+          'transition-all',
+          'duration-150',
+        ];
+      case 'booked':
+        return [
+          'text-red-400',
+          'opacity-70',
+          'cursor-not-allowed',
+        ];
+      case 'held':
+        return [
+          'text-amber-400',
+          'opacity-70',
+          'cursor-not-allowed',
+        ];
+      default:
+        return [
+          'text-[var(--border)]',
+          'hover:text-[var(--primary)]',
+          'hover:scale-110',
+          'cursor-pointer',
+          'transition-all',
+          'duration-150',
+        ];
+    }
   }
 
   seatIconColor(seat: SeatMap): string {
-    if (seat.status === 'selected') return 'var(--primary)';
-    if (seat.status === 'booked') return 'var(--text-muted)';
-    return 'currentColor';
+    switch (seat.status) {
+      case 'reserved': return 'var(--primary)';
+      case 'booked':   return '#f87171';
+      case 'held':     return '#fbbf24';
+      default:         return 'currentColor';
+    }
   }
 
   onSeatClick(seat: SeatMap): void {
-    if (seat.status === 'booked') return;
+    if (seat.status === 'booked' ||
+        seat.status === 'held') return;
     this.seatToggled.emit(seat);
   }
 
-  onNext(): void {    
+  onNext(): void {
     if (!this.canProceed()) return;
     this.nextStep.emit();
-    
   }
 
   getBookedSeats(){
-
     this.bookingService.getBookedSeats(this.tripDetails().id).subscribe({
         next: (response: any) => {
           if(response.length){
@@ -121,6 +166,5 @@ export class SeatStepComponent {
           console.error('Error fetching selected seats:', error.error.message);
         }
     });
-
   }
 }

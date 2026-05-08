@@ -134,6 +134,7 @@ export interface CreatePaymentRequest {
   status?: string;
   transactionId?: string;
   receiptFile?: string;
+  paymentMethod: string
 }
 
 export interface UpdatePaymentRequest {
@@ -370,6 +371,15 @@ export class BookingService {
   ): Observable<{ data: number[] }> {
     return this.http.get<{ data: number[] }>(
       `${this.baseUrl}/get-booked-seats/tripId/${tripId}`
+    );
+  }
+
+  // Get Held Seats (seats other customers are currently holding)
+  getHeldSeats(
+    tripId: string
+  ): Observable<{ data: number[] }> {
+    return this.http.get<{ data: number[] }>(
+      `${this.baseUrl}/held-seats/${tripId}`
     );
   }
 }

@@ -16,7 +16,6 @@ export class BookingService {
   ) {}
 
   async create(createBookingDto: CreateBookingDto, customerId: string) {
-    console.log(createBookingDto);
     // Check if trip exists
     const trip = await this.prisma.trip.findUnique({
       where: { id: createBookingDto.tripId },

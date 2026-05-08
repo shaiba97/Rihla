@@ -2,7 +2,10 @@ export type BookingStep =
   'seat' | 'passenger' | 'payment';
 
 export type SeatStatus =
-  'available' | 'booked' | 'selected';
+  | 'available'   // no one has it
+  | 'reserved'    // THIS customer selected it (within 7min window)
+  | 'held'        // ANOTHER customer selected it (within their 7min window)
+  | 'booked';     // confirmed booking exists
 
 export interface SeatMap {
   seatNumber: number;
@@ -61,5 +64,18 @@ export interface BookingSession extends InitialBookingData {
   gender: 'MALE' | 'FEMALE';
   passengerContact?: string;
   passenger?: Passenger[];
+}
+
+export interface BookingSessionState {
+  tripId:           string;
+  ticketId:         string;
+  price:            number;
+  currency:         string;
+  selectedSeats:    number[];
+  step:             'seat' | 'passenger' | 'payment';
+  startedAt:        number;  // Date.now() timestamp
+  expiresAt:        number;  // startedAt + 7*60*1000
+  savedContact:     ContactForm | null;
+  savedPassengers:  PassengerForm[];
 }
 

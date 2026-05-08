@@ -10,41 +10,47 @@
               overflow-hidden
               min-h-[600px]">
 
-    <div class="flex items-center justify-between
-                px-6 py-4
-                bg-[var(--bg-card)]
-                border-b border-[var(--border)]
-                sticky top-0 z-10">
+    @if (isExpired()) {
+      <div class="flex flex-col items-center
+                  justify-center py-16 px-6 gap-6
+                  text-center" dir="rtl">
 
-      <div class="flex items-center gap-2">
-        @if (tripDetails()) {
-          <span class="text-base font-bold
-                       text-[var(--text-primary)]">
-            {{ tripDetails()!.fromCity }}
-          </span>
-          <svg lucideArrowLeft
-               class="w-4 h-4
-                      text-[var(--primary)]">
+        <div class="w-20 h-20 rounded-full
+                    bg-red-50
+                    dark:bg-red-950/30
+                    flex items-center justify-center">
+          <svg lucideClock
+               class="w-10 h-10 text-red-400">
           </svg>
-          <span class="text-base font-bold
-                       text-[var(--text-primary)]">
-            {{ tripDetails()!.toCity }}
-          </span>
-        }
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <h2 class="text-xl font-bold
+                     text-[var(--text-primary)]">
+            انتهت مهلة الحجز
+          </h2>
+          <p class="text-sm
+                    text-[var(--text-secondary)]
+                    max-w-sm mx-auto leading-relaxed">
+            تجاوزت الوقت المحدد (7 دقائق) لإتمام الحجز.
+            تم تحرير المقاعد المختارة.
+            يرجى البدء من جديد.
+          </p>
+        </div>
+
+        <button
+          (click)="onClose()"
+          class="px-8 py-3 rounded-xl
+                 bg-[var(--primary)] text-white
+                 text-sm font-bold
+                 hover:bg-[var(--primary-hover)]
+                 transition-all duration-150
+                 active:scale-95">
+          إغلاق والبدء من جديد
+        </button>
+
       </div>
-
-      <button
-        (click)="onClose()"
-        class="w-9 h-9 rounded-full
-               flex items-center justify-center
-               text-[var(--text-muted)]
-               hover:bg-[var(--primary-light)]
-               hover:text-[var(--primary)]
-               transition-all duration-150">
-        <svg lucideX class="w-5 h-5"></svg>
-      </button>
-
-    </div>
+    }
 
     @if (isSuccess()) {
       <div class="flex flex-col items-center
@@ -120,7 +126,43 @@
       </div>
     }
 
-    @if (!isSuccess()) {
+    @if (!isExpired() && !isSuccess()) {
+      <div class="flex items-center justify-between
+                  px-6 py-4
+                  bg-[var(--bg-card)]
+                  border-b border-[var(--border)]
+                  sticky top-0 z-10">
+
+        <div class="flex items-center gap-2">
+          @if (tripDetails()) {
+            <span class="text-base font-bold
+                         text-[var(--text-primary)]">
+              {{ tripDetails()!.fromCity }}
+            </span>
+            <svg lucideArrowLeft
+                 class="w-4 h-4
+                        text-[var(--primary)]">
+            </svg>
+            <span class="text-base font-bold
+                         text-[var(--text-primary)]">
+              {{ tripDetails()!.toCity }}
+            </span>
+          }
+        </div>
+
+        <button
+          (click)="onClose()"
+          class="w-9 h-9 rounded-full
+                 flex items-center justify-center
+                 text-[var(--text-muted)]
+                 hover:bg-[var(--primary-light)]
+                 hover:text-[var(--primary)]
+                 transition-all duration-150">
+          <svg lucideX class="w-5 h-5"></svg>
+        </button>
+
+      </div>
+
       <div class="flex items-center
                   bg-[var(--bg-card)]
                   border-b border-[var(--border)]
@@ -218,8 +260,11 @@
             [tripDetails]="tripDetails()!"
             [seatMap]="seatMap()"
             [selectedSeats]="selectedSeats()"
+            [heldSeats]="heldSeats()"
             [price]="price()"
             [currency]="currency()"
+            [remainingMs]="sessionService.remainingMs()"
+            [remainingFormatted]="sessionService.remainingFormatted()"
             (seatToggled)="toggleSeat($event)"
             (nextStep)="goToStep('passenger')">
           </app-seat-step>
@@ -231,6 +276,8 @@
             [selectedSeats]="selectedSeats()"
             [price]="price()"
             [currency]="currency()"
+            [initialContact]="savedContact()"
+            [initialPassengers]="savedPassengers()"
             (nextStep)="onPassengerComplete($event)">
           </app-passenger-step>
         }

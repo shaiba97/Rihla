@@ -97,6 +97,12 @@ export class BookingController {
     return await this.bookingService.getBookedSeats(tripId);
   }
 
+  @Get('held-seats/:tripId')
+  async getHeldSeats(@Param('tripId') tripId: string) {
+    // Alias: held-seats returns same as booked-seats
+    return await this.bookingService.getBookedSeats(tripId);
+  }
+
   // @Get('bookings/select-seat/customerId/:customerId/tripId/:tripId')
   @Get('get-bookings')
   async getBookings() {

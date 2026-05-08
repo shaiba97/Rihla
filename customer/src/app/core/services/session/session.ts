@@ -1,157 +1,224 @@
-import { Injectable, signal } from '@angular/core';
 import {
-  BookingSession,
-  InitialBookingData,
+  Injectable, signal, computed, OnDestroy,
+} from '@angular/core';
+import {
+  BookingSessionState,
   ContactForm,
   PassengerForm,
-  Passenger,
 } from '../../../shared/booking-modal/booking-modal/booking.interfaces';
 
-interface SessionWithExpiry {
-  data: InitialBookingData | BookingSession;
-  expiresAt: number;
-}
+const SESSION_KEY = 'rihla_booking_session';
+const TIMEOUT_MS  = 7 * 60 * 1000; // 7 minutes
 
-@Injectable({
-  providedIn: 'root',
-})
-export class SessionService {
-  private _session = signal<InitialBookingData | BookingSession | null>(null);
-  private expiryTimer: any = null;
-  private readonly SESSION_DURATION = 7 * 60 * 1000; // 7 minutes in milliseconds
+@Injectable({ providedIn: 'root' })
+export class SessionService implements OnDestroy {
 
-  session = this._session.asReadonly();
+  private _session =
+    signal<BookingSessionState | null>(null);
 
-  selectSeat(data: InitialBookingData): void {
-    // Store session with expiry timestamp
-    const sessionWithExpiry: SessionWithExpiry = {
-      data: data,
-      expiresAt: Date.now() + this.SESSION_DURATION,
-    };
-    
-    // Save to localStorage (optional, for persistence on refresh)
-    localStorage.setItem('selectSession', JSON.stringify(sessionWithExpiry));
-    
-    this._session.set(data);
-    this.startExpiryTimer();
+  private _remainingMs = signal<number>(TIMEOUT_MS);
+  private _timerInterval: ReturnType<typeof setInterval> | null = null;
+
+  private _onExpire: (() => void) | null = null;
+
+  session        = this._session.asReadonly();
+  remainingMs    = this._remainingMs.asReadonly();
+
+  remainingFormatted = computed(() => {
+    const ms      = this._remainingMs();
+    const total   = Math.max(0, Math.ceil(ms / 1000));
+    const minutes = Math.floor(total / 60);
+    const seconds = total % 60;
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  });
+
+  isExpired = computed(() =>
+    this._remainingMs() <= 0
+  );
+
+  isActive = computed(() =>
+    this._session() !== null && !this.isExpired()
+  );
+
+  constructor() {
+    this.restoreFromStorage();
   }
 
-  private startExpiryTimer(): void {
-    // Clear any existing timer
-    if (this.expiryTimer) {
-      clearTimeout(this.expiryTimer);
+  init(
+    tripId:   string,
+    ticketId: string,
+    price:    number,
+    currency: string,
+  ): void {
+    const existing = this._session();
+    if (existing && existing.tripId === tripId && !this.isExpired()) {
+      this.startTimer(existing.expiresAt);
+      return;
     }
-    
-    // Set new timer to clear session after 20 minutes
-    this.expiryTimer = setTimeout(() => {
-      this.clear();
-    }, this.SESSION_DURATION);
+
+    const now       = Date.now();
+    const expiresAt = now + TIMEOUT_MS;
+
+    const state: BookingSessionState = {
+      tripId,
+      ticketId,
+      price,
+      currency,
+      selectedSeats:   [],
+      step:            'seat',
+      startedAt:       now,
+      expiresAt,
+      savedContact:    null,
+      savedPassengers: [],
+    };
+
+    this._session.set(state);
+    this.saveToStorage(state);
+  }
+
+  startCountdown(): void {
+    const s = this._session();
+    if (!s) return;
+    if (this._timerInterval !== null) return;
+    this.startTimer(s.expiresAt);
+  }
+
+  private startTimer(expiresAt: number): void {
+    if (this._timerInterval !== null) {
+      clearInterval(this._timerInterval);
+    }
+
+    const tick = () => {
+      const remaining = expiresAt - Date.now();
+      this._remainingMs.set(Math.max(0, remaining));
+
+      if (remaining <= 0) {
+        this.onSessionExpired();
+      }
+    };
+
+    tick();
+    this._timerInterval = setInterval(tick, 1000);
+  }
+
+  private onSessionExpired(): void {
+    this.stopTimer();
+    this.clear();
+    if (this._onExpire) {
+      this._onExpire();
+    }
+  }
+
+  private stopTimer(): void {
+    if (this._timerInterval !== null) {
+      clearInterval(this._timerInterval);
+      this._timerInterval = null;
+    }
+  }
+
+  onExpire(callback: () => void): void {
+    this._onExpire = callback;
   }
 
   updateSeats(seats: number[]): void {
     const s = this._session();
     if (!s) return;
-    this._session.set({ ...s, seatNumbers: seats });
-    
-    // Refresh the session expiry when user interacts
-    this.refreshExpiry();
+
+    if (seats.length > 0 && this._timerInterval === null) {
+      this.startCountdown();
+    }
+
+    const updated = { ...s, selectedSeats: seats };
+    this._session.set(updated);
+    this.saveToStorage(updated);
   }
 
-  updateWithPassengerData(data: {
-    name: string;
-    age: number;
-    gender: 'MALE' | 'FEMALE';
-    passengerContact?: string;
-    passenger?: Passenger[];
-  }): void {
+  updateStep(step: 'seat' | 'passenger' | 'payment'): void {
     const s = this._session();
     if (!s) return;
-    
-    const updatedSession: BookingSession = {
-      ...s,
-      name: data.name,
-      age: data.age,
-      gender: data.gender,
-      passengerContact: data.passengerContact,
-      passenger: data.passenger,
-    };
-    
-    this._session.set(updatedSession);
-    this.refreshExpiry();
+    const updated = { ...s, step };
+    this._session.set(updated);
+    this.saveToStorage(updated);
   }
 
-  getSession(): InitialBookingData | BookingSession | null {
-    // Check expiry before returning session
-    if (this.isExpired()) {
-      this.clear();
-      return null;
-    }
-    return this._session();
+  updateContact(contact: ContactForm): void {
+    const s = this._session();
+    if (!s) return;
+    const updated = { ...s, savedContact: contact };
+    this._session.set(updated);
+    this.saveToStorage(updated);
   }
 
-  private isExpired(): boolean {
-    const stored = localStorage.getItem('selectSession');
-    if (!stored) return true;
-    
-    try {
-      const sessionWithExpiry: SessionWithExpiry = JSON.parse(stored);
-      if (Date.now() > sessionWithExpiry.expiresAt) {
-        return true; // Session has expired
-      }
-      return false;
-    } catch {
-      return true;
-    }
+  updatePassengers(passengers: PassengerForm[]): void {
+    const s = this._session();
+    if (!s) return;
+    const updated = { ...s, savedPassengers: passengers };
+    this._session.set(updated);
+    this.saveToStorage(updated);
   }
 
-  private refreshExpiry(): void {
-    const stored = localStorage.getItem('selectSession');
-    if (stored) {
-      try {
-        const sessionWithExpiry: SessionWithExpiry = JSON.parse(stored);
-        if (this._session()) {
-          // Refresh expiry timestamp
-          sessionWithExpiry.expiresAt = Date.now() + this.SESSION_DURATION;
-          localStorage.setItem('selectSession', JSON.stringify(sessionWithExpiry));
-        }
-      } catch (e) {
-        console.error('Failed to refresh session expiry', e);
-      }
-    }
-    
-    // Restart the timer
-    this.startExpiryTimer();
+  getSavedContact(): ContactForm | null {
+    return this._session()?.savedContact ?? null;
   }
 
-  clear(): void { 
+  getSavedPassengers(): PassengerForm[] {
+    return this._session()?.savedPassengers ?? [];
+  }
+
+  getSelectedSeats(): number[] {
+    return this._session()?.selectedSeats ?? [];
+  }
+
+  getCurrentStep(): 'seat' | 'passenger' | 'payment' {
+    return this._session()?.step ?? 'seat';
+  }
+
+  hasActiveSession(tripId: string): boolean {
+    const s = this._session();
+    return !!s && s.tripId === tripId && !this.isExpired();
+  }
+
+  clear(): void {
+    this.stopTimer();
     this._session.set(null);
-    localStorage.removeItem('selectSession');
-    if (this.expiryTimer) {
-      clearTimeout(this.expiryTimer);
-      this.expiryTimer = null;
+    this._remainingMs.set(TIMEOUT_MS);
+    this._onExpire = null;
+    try {
+      localStorage.removeItem(SESSION_KEY);
+    } catch { /* ignore */ }
+  }
+
+  private saveToStorage(state: BookingSessionState): void {
+    try {
+      localStorage.setItem(SESSION_KEY, JSON.stringify(state));
+    } catch { /* ignore */ }
+  }
+
+  private restoreFromStorage(): void {
+    try {
+      const raw = localStorage.getItem(SESSION_KEY);
+      if (!raw) return;
+
+      const state: BookingSessionState = JSON.parse(raw);
+
+      if (Date.now() >= state.expiresAt) {
+        localStorage.removeItem(SESSION_KEY);
+        return;
+      }
+
+      this._session.set(state);
+      const remaining = state.expiresAt - Date.now();
+      this._remainingMs.set(Math.max(0, remaining));
+
+      if (state.selectedSeats.length > 0) {
+        this.startTimer(state.expiresAt);
+      }
+    } catch {
+      localStorage.removeItem(SESSION_KEY);
     }
   }
-  
-  // Optional: Call this on app initialization to restore session from localStorage
-  restoreSession(): void {
-    const stored = localStorage.getItem('selectSession');
-    if (stored) {
-      try {
-        const sessionWithExpiry: SessionWithExpiry = JSON.parse(stored);
-        if (Date.now() <= sessionWithExpiry.expiresAt) {
-          this._session.set(sessionWithExpiry.data);
-          const remainingTime = sessionWithExpiry.expiresAt - Date.now();
-          if (remainingTime > 0) {
-            this.expiryTimer = setTimeout(() => {
-              this.clear();
-            }, remainingTime);
-          }
-        } else {
-          this.clear(); // Session expired
-        }
-      } catch (e) {
-        console.error('Failed to restore session', e);
-      }
-    }
+
+  ngOnDestroy(): void {
+    this.stopTimer();
   }
 }
