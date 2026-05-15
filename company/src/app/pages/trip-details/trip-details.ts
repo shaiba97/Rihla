@@ -3,12 +3,13 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { TripService, Trip, Booking } from '../../core/services/trip';
 import { BusService, Bus } from '../../core/services/bus';
-import { LucideBus, LucideArrowRight, LucideRoute, LucideArrowLeft } from '@lucide/angular';
+import { LucideBus, LucideArrowRight, LucideRoute, LucideArrowLeft, LucideDownload } from '@lucide/angular';
+import { environment } from '../../../environments/environment'
 
 @Component({
   selector: 'app-trip-details',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideBus, LucideArrowRight, LucideRoute, LucideArrowLeft],
+  imports: [CommonModule, RouterModule, LucideBus, LucideArrowRight, LucideRoute, LucideArrowLeft, LucideDownload],
   templateUrl: './trip-details.html',
   styleUrl: './trip-details.css',
 })
@@ -63,5 +64,13 @@ export class TripDetailsComponent implements OnInit {
 
   getBookingStatusColor(s: string): string {
     return { 'CONFIRMED': '#22c55e', 'PENDING': '#f59e0b', 'CANCELLED': '#ef4444' }[s] || 'var(--text-muted)';
+  }
+
+  genderLabel(g: string): string {
+    return g === 'MALE' ? 'ذكر' : g === 'FEMALE' ? 'أنثى' : g;
+  }
+
+  downloadTicket(url: string | undefined): void {
+    if (url) window.open(environment.apiUrl.customer+url, '_blank');
   }
 }

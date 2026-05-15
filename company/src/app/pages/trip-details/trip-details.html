@@ -57,7 +57,7 @@
             </div>
             <div class="flex flex-col gap-1">
               <span class="text-sm text-[var(--text-muted)]">عدد الحجوزات</span>
-              <span class="text-lg font-bold text-[var(--text-primary)]">{{ trip()!.bookings?.length || 0 }}</span>
+              <span class="text-lg font-bold text-[var(--text-primary)]">{{ trip()!.Booking?.length || 0 }}</span>
             </div>
             <div class="flex flex-col gap-1">
               <span class="text-sm text-[var(--text-muted)]">عدد التذاكر</span>
@@ -102,7 +102,8 @@
 
     <div class="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] shadow-[0_1px_3px_var(--shadow)] p-6">
       <h2 class="text-xl font-bold text-[var(--text-primary)] mb-4">الحجوزات</h2>
-      @if (trip()!.bookings && trip()!.bookings!.length > 0) {
+
+      @if (trip()?.Booking && trip()?.Booking!.length > 0) {
         <div class="overflow-x-auto">
           <table class="w-full text-sm text-right">
             <thead>
@@ -112,21 +113,32 @@
                 <th class="p-3 text-[var(--text-muted)]">الجنس</th>
                 <th class="p-3 text-[var(--text-muted)]">رقم المقعد</th>
                 <th class="p-3 text-[var(--text-muted)]">الحالة</th>
+                <th class="p-3 text-[var(--text-muted)]">التذكرة</th>
               </tr>
             </thead>
             <tbody>
-              @for (booking of trip()!.bookings!; track booking.id) {
-                <tr class="border-b border-[var(--border)] hover:bg-[var(--bg-hover)] transition">
-                  <td class="p-3 text-[var(--text-primary)] font-medium">{{ booking.passengerName }}</td>
-                  <td class="p-3 text-[var(--text-primary)]">{{ booking.passengerAge }}</td>
-                  <td class="p-3 text-[var(--text-primary)]">{{ booking.passengerGender }}</td>
-                  <td class="p-3 text-[var(--text-primary)]">{{ booking.seatNumber }}</td>
-                  <td class="p-3">
-                    <span class="px-2 py-1 rounded-full text-xs font-bold" [style.background]="getBookingStatusColor(booking.status) + '20'" [style.color]="getBookingStatusColor(booking.status)">
-                      {{ getBookingStatusLabel(booking.status) }}
-                    </span>
-                  </td>
-                </tr>
+              @for (booking of trip()?.Booking; track booking.id) {
+                @for (p of booking.passenger; track $index; let pi = $index) {
+                  <tr class="border-b border-[var(--border)] hover:bg-[var(--bg-hover)] transition">
+                    <td class="p-3 text-[var(--text-primary)] font-medium">{{ p.name }}</td>
+                    <td class="p-3 text-[var(--text-primary)]">{{ p.age }}</td>
+                    <td class="p-3 text-[var(--text-primary)]">{{ genderLabel(p.gender) }}</td>
+                    <td class="p-3 text-[var(--text-primary)]">{{ booking.seatNumbers[pi] }}</td>
+                    <td class="p-3">
+                      <span class="px-2 py-1 rounded-full text-xs font-bold" [style.background]="getBookingStatusColor(booking.status) + '20'" [style.color]="getBookingStatusColor(booking.status)">
+                        {{ getBookingStatusLabel(booking.status) }}
+                      </span>
+                    </td>
+                    <td class="p-3">
+                      @if (booking.TicketPDF?.ticketUrl) {
+                        <button (click)="downloadTicket(booking.TicketPDF?.ticketUrl)" class="flex items-center gap-1 px-2 py-1 rounded-lg bg-[var(--primary)] text-white text-xs font-bold active:scale-95 transition-all">
+                          <svg lucideDownload class="w-3 h-3"></svg>
+                          تحميل
+                        </button>
+                      }
+                    </td>
+                  </tr>
+                }
               }
             </tbody>
           </table>

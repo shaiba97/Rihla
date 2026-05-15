@@ -8,11 +8,10 @@ import {
   HttpCode,
   HttpStatus,
   Put,
-  // UseGuards,
+  UseGuards,
   Req,
-  // UnauthorizedException,
 } from '@nestjs/common';
-// import { AuthGuard } from '@nestjs/passport';
+import { AuthGuard } from '@nestjs/passport';
 import { BusesService } from '../service/buses.service';
 import { CreateBusDto, UpdateBusDto } from '../dto/bus.dto';
 
@@ -21,13 +20,12 @@ export class BusesController {
   constructor(private readonly busesService: BusesService) {}
 
   @Post('post-bus')
-  // @UseGuards(AuthGuard('local'))
+  @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.CREATED)
   async create(@Req() req: any, @Body() createBusDto: CreateBusDto) {
-    console.log(req.user);
     return this.busesService.create(
       createBusDto,
-      '5d35cf9e-225f-4655-8037-070c001ff8a6',
+      req.user.id,
     );
   }
 

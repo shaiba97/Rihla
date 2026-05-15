@@ -35,12 +35,12 @@ export class SignupComponent {
 
     this.authService.register({
       name: name!,
+      phone: email!,
       email: email!,
       password: password!,
       role: 'COMPANY',
     }).subscribe({
-      next: (res: { token: string; user: unknown }) => {
-        this.authService.setSession(res.token, res.user as never);
+      next: () => {
         this.router.navigate(['/auth/login']);
       },
       error: (err: { error?: { message?: string } }) => {

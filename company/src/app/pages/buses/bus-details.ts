@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { LucideBus, LucideMapPin, LucideClock, LucideCalendar, LucideArrowRight } from '@lucide/angular';
+import { BusService } from '../../core/services/bus';
+import { TripService } from '../../core/services/trip';
 
 interface Bus {
   id: string;
@@ -47,7 +49,10 @@ interface Trip {
 export class BusDetailsComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private http = inject(HttpClient);
+  private busService = inject(BusService)
+  private tripService = inject(TripService)
   private apiUrl = 'http://localhost:3001/api';
+
 
   busId = signal<string>('');
   bus = signal<Bus | null>(null);
@@ -63,20 +68,8 @@ export class BusDetailsComponent implements OnInit {
     }
   }
 
-  private getBusByProperty(property: string, value: string) {
-    return this.http.get<Bus>(
-      `${this.apiUrl}/buses/get-bus/property/${property}/value/${value}`
-    );
-  }
-
-  private getTripsByBusId(busId: string) {
-    return this.http.get<Trip[]>(
-      `${this.apiUrl}/buses/get-trips/property/busId/value/${busId}`
-    );
-  }
-
   loadBus(id: string) {
-    this.getBusByProperty('id', id).subscribe({
+    this.busService.getBusByProperty('id', id).subscribe({
       next: (bus: Bus) => {
         this.bus.set(bus);
         this.loading.set(false);
@@ -88,9 +81,9 @@ export class BusDetailsComponent implements OnInit {
   }
 
   loadTrips(id: string) {
-    this.getTripsByBusId(id).subscribe({
-      next: (trips: Trip[]) => {
-        this.trips.set(trips);
+    this.tripService.getTripByProperty('busId', id).subscribe({
+      next: (trip: Trip) => {
+        this.trips.set([trip]);
       },
       error: () => {},
     });
@@ -109,5 +102,13 @@ export class BusDetailsComponent implements OnInit {
 
   get seatDirection(): string {
     return this.bus()?.seatStartFrom === 'RIGHT' ? 'يمين' : 'يسار';
+  }
+
+  tripStatusLabel(status: string): string {
+    return { SCHEDULED: 'مجدولة', IN_PROGRESS: 'جارية', COMPLETED: 'مكتملة', CANCELLED: 'ملغاة' }[status] ?? status;
+  }
+
+  tripStatusColor(status: string): string {
+    return { SCHEDULED: 'var(--primary)', IN_PROGRESS: '#f59e0b', COMPLETED: '#22c55e', CANCELLED: '#ef4444' }[status] ?? 'var(--text-muted)';
   }
 }

@@ -31,18 +31,21 @@ export interface Trip {
       numbers: string;
     };
   };
-  bookings?: Booking[];
+  Booking?: Booking[];
   createdAt: string;
   updatedAt: string;
 }
 
 export interface Booking {
   id: string;
-  passengerName: string;
-  passengerAge: number;
-  passengerGender: string;
-  seatNumber: number;
+  passenger: [{
+    name: string;
+    age: number;
+    gender: string;
+  }]
+  seatNumbers: number[];
   status: string;
+  TicketPDF?: TicketPDF;
 }
 
 export interface CreateTripData {
@@ -59,6 +62,12 @@ export interface CreateTripData {
   price: number;
   status: string;
   busId: string;
+}
+
+export interface TicketPDF{
+  id: string;
+  bookingId: string;
+  ticketUrl: string;
 }
 
 @Injectable({ providedIn: 'root' })

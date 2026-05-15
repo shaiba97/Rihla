@@ -10,27 +10,12 @@ import {
   Put,
   UseGuards,
   Req,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { UsersService } from '../service/users.service';
 import { CreateUserDto, UpdateUserDto, UserResponseDto } from '../dto/user.dto';
 import { UserEntity } from '../entity/user.entity';
-
-function SessionAuthGuard() {
-  return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
-    const originalMethod = descriptor.value;
-    descriptor.value = function (...args: any[]) {
-      const req = args[0];
-      if (!req || !req.isAuthenticated?.()) {
-        throw new UnauthorizedException('غير مصرح — يرجى تسجيل الدخول');
-      }
-      return originalMethod.apply(this, args);
-    };
-    return descriptor;
-  };
-}
 
 @ApiTags('users')
 @Controller('users')
@@ -45,21 +30,16 @@ export class UsersController {
 
   @Post('logout')
   logout(@Req() req: any) {
-    return new Promise((resolve) => {
-      req.logout((err: Error) => {
-        if (err) {
-          resolve({ message: 'Error during logout', success: false });
-        } else {
-          req.session?.destroy(() => {
-            resolve({ message: 'تم تسجيل الخروج بنجاح', success: true });
-          });
-        }
-      });
-    });
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1];
+      this.usersService.logout(token);
+    }
+    return { message: 'تم تسجيل الخروج بنجاح' };
   }
 
   @Get('me')
-  @SessionAuthGuard()
+  @UseGuards(AuthGuard('jwt'))
   async getMe(@Req() req: any) {
     const user = await this.usersService.getUserById(req.user.id);
     return { data: user };
@@ -78,11 +58,23 @@ export class UsersController {
   }
 
   @Get('get-users')
+  @ApiOperation({ summary: 'Get all users' })
+  @ApiResponse({
+    status: 200,
+    description: 'Users retrieved successfully',
+    type: [UserResponseDto],
+  })
   async getUsers() {
     return this.usersService.getUsers();
   }
 
   @Get('get-users/property/:property/value/:value')
+  @ApiOperation({ summary: 'Get all users by property and value' })
+  @ApiResponse({
+    status: 200,
+    description: 'Users retrieved successfully',
+    type: [UserResponseDto],
+  })
   async getUsersByProperty(
     @Param('property') property: string,
     @Param('value') value: string,
@@ -91,6 +83,12 @@ export class UsersController {
   }
 
   @Get('get-user/property/:property/value/:value')
+  @ApiOperation({ summary: 'Get user by property and value' })
+  @ApiResponse({
+    status: 200,
+    description: 'User retrieved successfully',
+    type: UserResponseDto,
+  })
   async getUser(
     @Param('property') property: string,
     @Param('value') value: string,
@@ -99,6 +97,12 @@ export class UsersController {
   }
 
   @Put('update-user/:id')
+  @ApiOperation({ summary: 'Update user' })
+  @ApiResponse({
+    status: 200,
+    description: 'User updated successfully',
+    type: UserResponseDto,
+  })
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(id, updateUserDto);
   }

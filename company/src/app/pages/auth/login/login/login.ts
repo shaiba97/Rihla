@@ -34,7 +34,8 @@ export class LoginComponent {
 
     this.authService.login(email!, password!).subscribe({
       next: (res: any) => {
-        if (res?.success && res?.user?.id) {
+        if (res?.token && res?.user?.id) {
+          this.authService.setSession(res.token, res.user);
           this.router.navigateByUrl('/dashboard');
         } else {
           this.errorMessage.set(res?.message || 'فشل تسجيل الدخول');

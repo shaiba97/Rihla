@@ -1,12 +1,19 @@
 import { Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto, UpdateUserDto } from '../dto/user.dto';
-import { User, UserEntity, UserWithoutPassword } from '../entity/user.entity';
+import { UserEntity, UserWithoutPassword } from '../entity/user.entity';
+import { users } from '@prisma/client';
 import { PrismaService } from '@app/prisma';
 import * as bcrypt from 'bcrypt';
 
+const tokenBlacklist = new Set<string>();
+
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly jwtService: JwtService,
+  ) {}
 
   async validateUser(
     identifier: string,
@@ -39,25 +46,29 @@ export class UsersService {
   }
 
   login(user: UserWithoutPassword) {
+    const payload = {
+      id: user.id,
+      email: user.email,
+      phone: (user as any).phone,
+      role: user.role,
+      name: user.name,
+    };
+
+    const token = this.jwtService.sign(payload);
+
     return {
       message: 'تم تسجيل الدخول بنجاح',
-      user: {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        name: user.name,
-      },
+      token,
+      user: payload,
     };
   }
 
-  async findById(id: string): Promise<UserWithoutPassword | null> {
-    const user = await this.prisma.users.findUnique({
-      where: { id },
-    });
-    if (!user) return null;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password: _, ...result } = user;
-    return result;
+  logout(token: string): void {
+    tokenBlacklist.add(token);
+  }
+
+  isTokenBlacklisted(token: string): boolean {
+    return tokenBlacklist.has(token);
   }
 
   async create(createUserDto: CreateUserDto): Promise<{
@@ -83,13 +94,6 @@ export class UsersService {
         ? await this.prisma.users.findUnique({ where: { phone: normalizedPhone } })
         : null);
 
-    console.log(
-      'Email check result for:',
-      normalizedEmail,
-      '-> exists:',
-      existingUser !== null,
-    );
-
     if (existingUser) {
       return {
         success: false,
@@ -106,7 +110,7 @@ export class UsersService {
           email: normalizedEmail,
           phone: normalizedPhone,
           password: hashedPassword,
-          role: (createUserDto.role as any) ?? 'COMPANY',
+          role: (createUserDto.role as any) ?? 'USER',
           updatedAt: new Date(),
         },
       });
@@ -149,10 +153,10 @@ export class UsersService {
   }
 
   async getUser(property: string, value: string): Promise<UserEntity> {
-    const user: User | null = await this.prisma.users.findFirst({
+    const user: users | null = await this.prisma.users.findFirst({
       where: { [property]: value },
     });
-    return UserEntity.fromPrisma(user as User);
+    return UserEntity.fromPrisma(user as users);
   }
 
   // async search(query: string): Promise<UserEntity[]> {
@@ -164,7 +168,7 @@ export class UsersService {
   //       ],
   //     },
   //   });
-  //   return UserEntity.fromPrismaArray(users as User[]);
+  //   return UserEntity.fromPrismaArray(users as users[]);
   // }
 
   async update(
@@ -176,7 +180,7 @@ export class UsersService {
     data?: UserWithoutPassword;
   }> {
     try {
-      const user: User | null = await this.prisma.users.findUnique({
+      const user: users | null = await this.prisma.users.findUnique({
         where: { id },
       });
 
@@ -189,7 +193,7 @@ export class UsersService {
 
       if (updateUserDto.email && updateUserDto.email !== user.email) {
         const normalizedEmail = updateUserDto.email.toLowerCase().trim();
-        const existingUser: User | null = await this.prisma.users.findUnique({
+        const existingUser: users | null = await this.prisma.users.findUnique({
           where: { email: normalizedEmail },
         });
 
@@ -259,7 +263,7 @@ export class UsersService {
 
   async remove(id: string): Promise<{ success: boolean; message: string }> {
     try {
-      const user: User | null = await this.prisma.users.findUnique({
+      const user: users | null = await this.prisma.users.findUnique({
         where: { id },
       });
 

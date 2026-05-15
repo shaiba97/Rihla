@@ -55,6 +55,9 @@ export class TripsService {
     return this.prisma.trip.findMany({
       include: {
         Bus: true,
+        Booking: {
+          include: { TicketPDF: true },
+        },
       },
     });
   }
@@ -64,6 +67,7 @@ export class TripsService {
       where: { [property]: value },
       include: {
         Bus: true,
+        Booking: { include: { TicketPDF: true } },
       },
     });
   }
@@ -134,6 +138,7 @@ export class TripsService {
       },
       include: {
         Bus: true,
+        Booking: { include: { TicketPDF: true } },
       },
       orderBy: [{ departureDate: 'asc' }],
     });
@@ -151,6 +156,7 @@ export class TripsService {
       where: { [property]: value },
       include: {
         Bus: true,
+        Booking: { include: { TicketPDF: true } },
       },
     });
 
@@ -210,6 +216,7 @@ export class TripsService {
       data: updateData,
       include: {
         Bus: true,
+        Booking: { include: { TicketPDF: true } },
       },
     });
 

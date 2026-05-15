@@ -29,6 +29,9 @@ export class AuthService {
   userName     = computed(() =>
     this._user()?.name ?? 'المستخدم'
   );
+  customerEmail = computed(() =>
+    this._user()?.email ?? ''
+  );
 
   constructor() {
     const savedToken = localStorage.getItem(
@@ -59,26 +62,27 @@ export class AuthService {
     }
   }
 
-  login(email: string, password: string) {
+  login(identifier: string, password: string) {
     return this.http.post<{
       token: string;
       user:  AuthUser;
       message: string;
     }>(
-      `${this.apiUrl}/auth/post-login`,
-      { email, password }
+      `${this.apiUrl}/users/post-login`,
+      { phone: identifier, password }
     );
   } 
 
   register(data: {
     name: string;
-    email: string;
+    phone?: string;
+    email?: string;
     password: string;
     role: string;
   }) {
     return this.http.post<{
-      token: string;
-      user: AuthUser;
+      success: boolean;
+      data: AuthUser;
       message: string;
     }>(
       `${this.apiUrl}/users/post-user`,
@@ -117,5 +121,25 @@ export class AuthService {
 
   getToken(): string | null {
     return this._token();
+  }
+
+  updateProfile(data: { name?: string; email?: string }) {
+    const id = this._user()?.id;
+    if (!id) throw new Error('Not authenticated');
+    return this.http.put<any>(`${this.apiUrl}/users/update-user/${id}`, data);
+  }
+
+  updateLocalProfile(data: { name?: string; email?: string }): void {
+    const current = this._user();
+    if (!current) return;
+    const updated = { ...current, ...data };
+    this._user.set(updated);
+    localStorage.setItem('company_user', JSON.stringify(updated));
+  }
+
+  deleteAccount() {
+    const id = this._user()?.id;
+    if (!id) throw new Error('Not authenticated');
+    return this.http.delete<any>(`${this.apiUrl}/users/delete-user/${id}`);
   }
 }
