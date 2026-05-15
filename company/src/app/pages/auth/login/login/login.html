@@ -10,8 +10,8 @@
                   from-[var(--primary)]
                   to-[var(--primary-hover)]
                   flex items-center justify-center
-                  shadow-lg text-white text-2xl font-bold">
-        🚌
+                  shadow-lg text-white">
+        <svg lucideBus class="w-8 h-8"></svg>
       </div>
       <div class="text-center">
         <h1 class="text-2xl font-bold text-[var(--text-primary)]">
@@ -63,7 +63,7 @@
             <div class="absolute top-1/2 right-3
                         -translate-y-1/2
                         text-[var(--text-muted)]">
-              ✉️
+              <svg lucideMail class="w-4 h-4"></svg>
             </div>
           </div>
         </div>
@@ -92,7 +92,7 @@
             <div class="absolute top-1/2 right-3
                         -translate-y-1/2
                         text-[var(--text-muted)]">
-              🔒
+              <svg lucideLock class="w-4 h-4"></svg>
             </div>
             <button
               type="button"
@@ -102,11 +102,7 @@
                      text-[var(--text-muted)]
                      hover:text-[var(--primary)]
                      transition-colors">
-              @if (showPassword()) {
-                👁️
-              } @else {
-                👁️
-              }
+              <svg lucideEye class="w-4 h-4"></svg>
             </button>
           </div>
         </div>
@@ -117,7 +113,7 @@
                       bg-red-50 dark:bg-red-950/20
                       border border-red-200
                       dark:border-red-800">
-            <span>⚠️</span>
+            <svg lucideAlertCircle class="w-4 h-4 text-red-500 flex-shrink-0"></svg>
             <span class="text-sm text-red-600 dark:text-red-400">
               {{ errorMessage() }}
             </span>
@@ -138,10 +134,10 @@
                  disabled:cursor-not-allowed
                  transition-all duration-150">
           @if (isLoading()) {
-            <span>⏳</span>
+            <svg lucideLoaderCircle class="w-4 h-4 animate-spin"></svg>
             <span>جاري تسجيل الدخول...</span>
           } @else {
-            <span>➡️</span>
+            <svg lucideLogIn class="w-4 h-4"></svg>
             <span>تسجيل الدخول</span>
           }
         </button>

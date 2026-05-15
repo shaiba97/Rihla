@@ -1,4 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
+import { toArabicNumerals } from '../arabic-number/arabic-number.util';
 
 @Pipe({
   name:       'duration',
@@ -11,7 +12,6 @@ export class DurationPipe implements PipeTransform {
   ): string {
     if (!departure || !arrival) return '--';
     
-    // Handle string time format like "01:00"
     const dep = typeof departure === 'string' && departure.includes(':') 
       ? new Date(`1970-01-01T${departure}`)
       : new Date(departure);
@@ -28,8 +28,8 @@ export class DurationPipe implements PipeTransform {
     const minutes = Math.floor(
       (diff % 3_600_000) / 60_000
     );
-    if (hours === 0) return `${minutes} دقيقة`;
-    if (minutes === 0) return `${hours} ساعة`;
-    return `${hours}س ${minutes}د`;
+    if (hours === 0) return `${toArabicNumerals(minutes)} دقيقة`;
+    if (minutes === 0) return `${toArabicNumerals(hours)} ساعة`;
+    return `${toArabicNumerals(hours)}س ${toArabicNumerals(minutes)}د`;
   }
 }

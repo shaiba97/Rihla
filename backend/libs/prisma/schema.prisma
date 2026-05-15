@@ -74,9 +74,15 @@ model Trip {
 model users {
   id        String    @id @default(uuid())
   name      String
-  email     String    @unique
-  password  String
+  email     String?   @unique
+  phone     String?   @unique
+  password  String?
   role      Role
+  googleId  String?   @unique
+  facebookId String?  @unique
+  avatar    String?
+  isActive  Boolean   @default(true)
+  refreshToken String?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   Booking   Booking[]
@@ -143,7 +149,7 @@ enum TripStatus {
 }
 
 enum Role {
-  CUSTOMER
+  USER
   ADMIN
   COMPANY
 }

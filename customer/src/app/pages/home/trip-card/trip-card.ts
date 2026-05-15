@@ -2,7 +2,7 @@ import {
   Component, input, output, computed, signal,
   inject,
 } from '@angular/core';
-import { NgClass, DecimalPipe, DatePipe } from '@angular/common';
+import { NgClass, DatePipe } from '@angular/common';
 import {
   LucideBus,
   LucideClock,
@@ -17,6 +17,7 @@ import { DurationPipe }
 import { BookingModalComponent }
   from '../../../shared/booking-modal/booking-modal/booking-modal';
 import { BookingService } from '../../../core/services/booking/booking';
+import { ArabicNumberPipe } from '../../../pipes/arabic-number/arabic-number-pipe';
 
 export interface Trip {
   id: string;
@@ -72,8 +73,8 @@ export interface Booking {
     LucideChevronLeft,
     TimeFormatPipe,
     DurationPipe,
-    DecimalPipe,
     DatePipe,
+    ArabicNumberPipe,
     BookingModalComponent,
   ],
   templateUrl: './trip-card.html',
@@ -85,7 +86,7 @@ export class TripCardComponent {
   trip     = input.required<Trip>();
   selected = output<Trip>();
 
-  currency = 'جنيه سوداني';
+  currency = 'ج. س';
   showModal = signal<boolean>(false);
 
   seatsClasses = computed((): string[] => {
@@ -105,11 +106,6 @@ export class TripCardComponent {
             'dark:bg-red-950',
             'dark:text-emerald-400'];
   });
-
-  bottomInfo = [
-    'نقاط الصعود والنزول',
-    'سياسة الإلغاء',
-  ];
 
   bookedSeats = signal<number[]>([]);
 

@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { TripService, Trip, Booking } from '../../core/services/trip';
 import { BusService, Bus } from '../../core/services/bus';
+import { LucideBus, LucideArrowRight, LucideRoute, LucideArrowLeft } from '@lucide/angular';
 
 @Component({
   selector: 'app-trip-details',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, LucideBus, LucideArrowRight, LucideRoute, LucideArrowLeft],
   templateUrl: './trip-details.html',
   styleUrl: './trip-details.css',
 })

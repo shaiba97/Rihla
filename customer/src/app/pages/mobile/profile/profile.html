@@ -1,0 +1,149 @@
+<div dir="rtl" class="min-h-full bg-[var(--bg-base)] flex flex-col">
+  <div class="bg-[var(--bg-card)] px-4 py-4 border-b border-[var(--border)]">
+    <h1 class="text-[18px] font-extrabold text-[var(--text-primary)]">حسابي</h1>
+  </div>
+
+  @if (isLoggedIn()) {
+    <div class="flex flex-col items-center py-8 gap-3">
+      <div class="w-16 h-16 rounded-full bg-[var(--primary-light)] flex items-center justify-center">
+        <svg lucideUser class="w-8 h-8 text-[var(--primary)]"></svg>
+      </div>
+
+      @if (editMode()) {
+        <div class="flex flex-col gap-2 px-4 w-full max-w-xs">
+          <input type="text" [ngModel]="editName()" (ngModelChange)="editName.set($event)"
+            class="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-base)] text-[15px] font-semibold text-[var(--text-primary)] outline-none focus:border-[var(--primary)] text-center"
+            placeholder="الاسم">
+          <div class="flex items-center gap-2 px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-base)]">
+            <svg lucidePhone class="w-4 h-4 text-[var(--text-muted)] flex-shrink-0"></svg>
+            <input type="text" [ngModel]="editPhone()" (ngModelChange)="editPhone.set($event)"
+              class="flex-1 bg-transparent outline-none text-[14px] font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-center"
+              placeholder="رقم الهاتف">
+          </div>
+          <div class="flex items-center gap-2 px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-base)]">
+            <svg lucideMail class="w-4 h-4 text-[var(--text-muted)] flex-shrink-0"></svg>
+            <input type="email" [ngModel]="editEmail()" (ngModelChange)="editEmail.set($event)"
+              class="flex-1 bg-transparent outline-none text-[14px] font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-center"
+              placeholder="البريد الإلكتروني">
+          </div>
+        </div>
+      } @else {
+        <span class="text-[16px] font-bold text-[var(--text-primary)]">{{ customerName() }}</span>
+        @if (customerEmail()) {
+          <span class="text-[12px] text-[var(--text-secondary)]">{{ customerEmail() }}</span>
+        }
+        <span class="text-[13px] text-[var(--text-muted)]" dir="ltr">{{ customerPhone() }}</span>
+      }
+    </div>
+
+    @if (saveSuccess()) {
+      <div class="px-4 mb-3">
+        <p class="text-center text-[13px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 px-4 py-2.5 rounded-xl">{{ saveSuccess() }}</p>
+      </div>
+    }
+
+    @if (saveError()) {
+      <div class="px-4 mb-3">
+        <p class="text-center text-[13px] font-semibold text-red-600 bg-red-50 border border-red-200 px-4 py-2.5 rounded-xl">{{ saveError() }}</p>
+      </div>
+    }
+
+    <div class="px-4 flex flex-col gap-3">
+      <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)]">
+        <div class="flex items-center justify-between px-4 py-3.5 border-b border-[var(--border)]">
+          <span class="text-[14px] font-semibold text-[var(--text-primary)]">رقم الهاتف</span>
+          <span class="text-[13px] text-[var(--text-secondary)]" dir="ltr">{{ customerPhone() || '—' }}</span>
+        </div>
+        @if (!editMode()) {
+          <div class="flex items-center justify-between px-4 py-3.5">
+            <span class="text-[14px] font-semibold text-[var(--text-primary)]">البريد الإلكتروني</span>
+            <span class="text-[13px] text-[var(--text-secondary)]">{{ customerEmail() || '—' }}</span>
+          </div>
+        }
+      </div>
+
+      @if (editMode()) {
+        <div class="flex items-center gap-2">
+          <button (click)="saveProfile()" [disabled]="isSaving()"
+            class="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-[var(--primary)] text-white font-bold text-[14px] active:scale-[0.98] transition-all duration-150"
+            [class.opacity-60]="isSaving()">
+            <svg lucideCheck class="w-4 h-4"></svg>
+            <span>{{ isSaving() ? 'جاري الحفظ...' : 'حفظ' }}</span>
+          </button>
+          <button (click)="cancelEdit()"
+            class="flex items-center justify-center gap-2 px-5 py-3.5 rounded-2xl border border-[var(--border)] text-[var(--text-secondary)] font-bold text-[14px] active:scale-[0.98] transition-all duration-150">
+            <svg lucideX class="w-4 h-4"></svg>
+            <span>إلغاء</span>
+          </button>
+        </div>
+      } @else {
+        <button (click)="startEdit()"
+          class="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl border border-[var(--border)] text-[var(--text-primary)] font-bold text-[14px] active:scale-[0.98] transition-all duration-150">
+          <svg lucidePencil class="w-4 h-4"></svg>
+          <span>تعديل البيانات</span>
+        </button>
+      }
+
+      <button (click)="logout()" class="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl bg-red-50 border border-red-200 text-red-600 font-bold text-[14px] active:scale-[0.98] transition-all duration-150">
+        <svg lucideLogOut class="w-4 h-4"></svg>
+        <span>تسجيل الخروج</span>
+      </button>
+    </div>
+
+    <!-- Delete account -->
+    <div class="px-4 mt-6 mb-8">
+      <button (click)="openDeleteConfirm()" class="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl text-[12px] font-medium text-[var(--text-muted)] hover:text-red-400 hover:bg-red-50/50 transition-all duration-150 active:scale-[0.98]">
+        <svg lucideTrash2 class="w-3.5 h-3.5"></svg>
+        <span>حذف الحساب</span>
+      </button>
+    </div>
+
+    <!-- Delete confirmation modal -->
+    @if (showConfirmDelete()) {
+      <div class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" (click)="cancelDelete()">
+        <div class="bg-[var(--bg-card)] rounded-3xl p-6 max-w-sm w-full flex flex-col gap-4 shadow-xl" (click)="$event.stopPropagation()">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center flex-shrink-0">
+              <svg lucideAlertCircle class="w-5 h-5 text-red-500"></svg>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-[15px] font-bold text-[var(--text-primary)]">حذف الحساب</span>
+              <span class="text-[12px] text-[var(--text-muted)]">لا يمكن التراجع عن هذا الإجراء</span>
+            </div>
+          </div>
+
+          @if (deleteError()) {
+            <p class="text-[12px] font-semibold text-red-600 bg-red-50 border border-red-200 px-3 py-2 rounded-xl">{{ deleteError() }}</p>
+          }
+
+          <div class="flex items-center gap-2">
+            <button (click)="confirmDelete()" [disabled]="isDeleting()"
+              class="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-red-500 text-white font-bold text-[14px] active:scale-[0.98] transition-all duration-150"
+              [class.opacity-60]="isDeleting()">
+              <span>{{ isDeleting() ? 'جاري الحذف...' : 'تأكيد الحذف' }}</span>
+            </button>
+            <button (click)="cancelDelete()"
+              class="flex-1 py-3 rounded-2xl border border-[var(--border)] text-[var(--text-secondary)] font-bold text-[14px] active:scale-[0.98] transition-all duration-150">
+              إلغاء
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+  } @else {
+    <div class="flex-1 flex flex-col items-center justify-center px-6 gap-5 text-center">
+      <div class="w-16 h-16 rounded-full bg-[var(--bg-card)] border-2 border-[var(--border)] flex items-center justify-center">
+        <svg lucideUser class="w-8 h-8 text-[var(--text-muted)]"></svg>
+      </div>
+      <div class="flex flex-col gap-1">
+        <span class="text-[16px] font-bold text-[var(--text-primary)]">تسجيل الدخول</span>
+        <span class="text-[13px] text-[var(--text-muted)]">سجل الدخول لمتابعة حجوزاتك</span>
+      </div>
+      <button (click)="login()" class="flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl bg-[var(--primary)] text-white font-bold text-[15px] active:scale-[0.98] transition-all duration-150 shadow-lg">
+        <svg lucideLogIn class="w-5 h-5"></svg>
+        <span>تسجيل الدخول</span>
+      </button>
+    </div>
+  }
+</div>

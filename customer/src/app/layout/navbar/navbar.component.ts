@@ -18,7 +18,7 @@ import {
   LucideMenu,
 } from '@lucide/angular';
 import { ThemeService } from '../../core/services/theme.service';
-import { AuthService } from '../../core/services/auth.service';
+import { AuthStoreService } from '../../services/auth-store/auth-store.service';
 
 @Component({
   selector: 'app-navbar',
@@ -43,18 +43,17 @@ import { AuthService } from '../../core/services/auth.service';
 })
 export class NavbarComponent {
   themeService = inject(ThemeService);
-  authService = inject(AuthService);
+  authStore = inject(AuthStoreService);
 
   showUserMenu = signal<boolean>(false);
   showMobileMenu = signal<boolean>(false);
 
   isLoggedIn = computed(() =>
-    this.authService.isLoggedIn()
+    this.authStore.isLoggedIn()
   );
 
   userName = computed(() =>
-    this.authService.currentUser()?.name
-    ?? 'المستخدم'
+    this.authStore.customerName() || 'المستخدم'
   );
 
   toggleUserMenu(): void {
@@ -68,7 +67,7 @@ export class NavbarComponent {
   logout(): void {
     this.showUserMenu.set(false);
     this.showMobileMenu.set(false);
-    this.authService.logout();
+    this.authStore.logout();
   }
 
   @HostListener('document:click', ['$event'])

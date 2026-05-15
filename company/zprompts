@@ -1,0 +1,202 @@
+════════════════════════════════════════════════════
+⛔ STRICT MODE — READ BEFORE DOING ANYTHING
+════════════════════════════════════════════════════
+
+You MUST follow ALL rules exactly.
+
+DO NOT:
+- Add PrimeNG
+- Add Angular Material
+- Write ANY plain CSS
+- Use constructor injection
+- Use *ngIf or *ngFor
+- Create Angular files manually
+
+YOU MUST:
+- Use Angular CLI to generate components
+- Use Tailwind ONLY for styling
+- Use Lucide icons ONLY
+- Use Angular 21 features (signals, inject, @if)
+- Make the signup FULLY functional
+- Ensure ng serve runs with ZERO errors
+
+════════════════════════════════════════════════════
+
+🎯 TASK: CREATE SIGNUP COMPONENT (FULLY FUNCTIONAL)
+
+Create a Signup page similar to Login but with:
+- Name
+- Email
+- Password
+- Role=default(COMPANY)
+
+Then connect it to backend API:
+POST /users/post-user
+
+════════════════════════════════════════════════════
+
+STEP 1 — GENERATE COMPONENT (MANDATORY CLI)
+
+Run:
+
+ng generate component pages/auth/signup/signup \
+  --standalone --skip-tests --flat
+
+════════════════════════════════════════════════════
+
+STEP 2 — UPDATE AUTH SERVICE
+
+Modify AuthService:
+
+ADD THIS METHOD:
+
+register(data: {
+  name: string;
+  email: string;
+  password: string;
+  role: string;
+}) {
+  return this.http.post<{
+    token: string;
+    user: AuthUser;
+    message: string;
+  }>(
+    `${environment.apiUrl}/users/post-user`,
+    data
+  );
+}
+
+DO NOT BREAK EXISTING LOGIN FUNCTION.
+
+════════════════════════════════════════════════════
+
+STEP 3 — UPDATE AUTH ROUTES
+
+File: auth.routes.ts
+
+ADD signup route:
+
+{
+  path: 'signup',
+  loadComponent: () =>
+    import('./signup/signup.component')
+      .then(m => m.SignupComponent),
+}
+
+════════════════════════════════════════════════════
+
+STEP 4 — SIGNUP COMPONENT LOGIC
+
+Replace signup.component.ts:
+
+- Use inject()
+- Use signals
+- Use reactive forms
+
+Fields:
+- name
+- email
+- password
+
+VALIDATION:
+- all required
+- email must be valid
+- password min length 6
+
+STATE:
+- isLoading (signal)
+- errorMessage (signal)
+- showPassword (signal)
+
+ON SUBMIT:
+- call authService.register()
+- on success:
+    → setSession(token, user)
+    → navigate to /login
+- on error:
+    → show Arabic error message
+
+════════════════════════════════════════════════════
+
+STEP 5 — UI DESIGN (TAILWIND ONLY)
+
+Design must match login page exactly:
+- centered card
+- same spacing
+- same colors
+- same style
+
+ADD:
+- Title: "إنشاء حساب شركة"
+- Subtitle: "ابدأ إدارة رحلاتك الآن"
+
+INPUT STYLE:
+- same as login inputs
+
+BUTTON:
+- primary brown button
+
+════════════════════════════════════════════════════
+
+STEP 6 — ADD PASSWORD MATCH VALIDATION
+
+Before submit:
+
+if passwords do NOT match:
+- DO NOT call API
+- show error: "كلمة المرور غير متطابقة"
+
+════════════════════════════════════════════════════
+
+STEP 7 — ADD NAVIGATION LINK
+
+At bottom of signup:
+
+"لديك حساب بالفعل؟ تسجيل الدخول"
+
+Click → navigate to /auth/login
+
+Also update login page to include:
+
+"ليس لديك حساب؟ إنشاء حساب"
+
+════════════════════════════════════════════════════
+
+STEP 8 — ICONS (MANDATORY)
+
+Use Lucide:
+
+- name → user
+- email → mail
+- password → lock
+
+════════════════════════════════════════════════════
+
+STEP 9 — FINAL CHECK (MANDATORY)
+
+Ensure:
+
+✅ ng serve runs WITHOUT errors
+✅ Form validation works
+✅ Password match validation works
+✅ API request is sent correctly
+✅ Successful signup logs user in
+✅ Redirects to /login
+✅ Errors displayed in Arabic
+✅ Tailwind ONLY used
+✅ NO CSS files used
+✅ Uses signals and inject()
+✅ Responsive design works
+
+════════════════════════════════════════════════════
+
+FINAL OUTPUT FORMAT:
+
+1. CLI commands used
+2. Updated files
+3. signup.component.ts
+4. signup.component.html
+5. auth.service changes
+6. auth.routes.ts changes
+
+════════════════════════════════════════════════════

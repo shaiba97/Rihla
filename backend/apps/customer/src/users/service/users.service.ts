@@ -16,16 +16,24 @@ export class UsersService {
   ) {}
 
   async validateUser(
-    email: string,
+    identifier: string,
     password: string,
   ): Promise<UserWithoutPassword | null> {
-    const user = await this.prisma.users.findUnique({
-      where: { email: email.toLowerCase().trim() },
-    });
+    const normalized = identifier.toLowerCase().trim();
+
+    const user =
+      (await this.prisma.users.findUnique({
+        where: { phone: normalized },
+      })) ||
+      (await this.prisma.users.findUnique({
+        where: { email: normalized },
+      }));
 
     if (!user) {
       return null;
     }
+
+    if (!user.password) return null;
 
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) {
@@ -41,6 +49,7 @@ export class UsersService {
     const payload = {
       id: user.id,
       email: user.email,
+      phone: (user as any).phone,
       role: user.role,
       name: user.name,
     };
@@ -67,47 +76,41 @@ export class UsersService {
     message: string;
     data?: UserWithoutPassword;
   }> {
-    if (!createUserDto || !createUserDto.email) {
+    if (!createUserDto || (!createUserDto.email && !createUserDto.phone)) {
       return {
         success: false,
-        message: 'بيانات المستخدم غير صالحة - حقل البريد الإلكتروني مفقود',
+        message: 'بيانات المستخدم غير صالحة - البريد الإلكتروني أو الهاتف مطلوب',
       };
     }
 
-    const normalizedEmail = createUserDto.email.toLowerCase().trim();
+    const normalizedEmail = createUserDto.email?.toLowerCase().trim();
+    const normalizedPhone = createUserDto.phone?.toLowerCase().trim();
 
-    const existingUser = await this.prisma.users.findUnique({
-      where: { email: normalizedEmail },
-    });
-
-    console.log(
-      'Email check result for:',
-      normalizedEmail,
-      '-> exists:',
-      existingUser !== null,
-    );
+    const existingUser =
+      (normalizedEmail
+        ? await this.prisma.users.findUnique({ where: { email: normalizedEmail } })
+        : null) ||
+      (normalizedPhone
+        ? await this.prisma.users.findUnique({ where: { phone: normalizedPhone } })
+        : null);
 
     if (existingUser) {
       return {
         success: false,
-        message: 'البريد الإلكتروني مستخدم بالفعل',
+        message: 'البريد الإلكتروني أو الهاتف مستخدم بالفعل',
       };
     }
 
     try {
       const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
-      const prismaRole =
-        createUserDto.role === ('CUSTOMER' as any)
-          ? 'USER'
-          : createUserDto.role;
-
       const user = await this.prisma.users.create({
         data: {
           name: createUserDto.name,
           email: normalizedEmail,
+          phone: normalizedPhone,
           password: hashedPassword,
-          role: prismaRole as any,
+          role: (createUserDto.role as any) ?? 'USER',
           updatedAt: new Date(),
         },
       });
@@ -124,7 +127,7 @@ export class UsersService {
       if (error.code === 'P2002') {
         return {
           success: false,
-          message: 'البريد الإلكتروني مستخدم بالفعل',
+          message: 'البريد الإلكتروني أو الهاتف مستخدم بالفعل',
         };
       }
       return {
@@ -205,6 +208,7 @@ export class UsersService {
       const updateData: {
         name?: string;
         email?: string;
+        phone?: string;
         password?: string;
         role?: string;
         updatedAt?: Date;
@@ -214,14 +218,13 @@ export class UsersService {
         updateData.name = updateUserDto.name;
       if (updateUserDto.email !== undefined)
         updateData.email = updateUserDto.email.toLowerCase().trim();
+      if (updateUserDto.phone !== undefined)
+        updateData.phone = updateUserDto.phone.toLowerCase().trim();
       if (updateUserDto.password !== undefined) {
         updateData.password = await bcrypt.hash(updateUserDto.password, 10);
       }
       if (updateUserDto.role !== undefined) {
-        updateData.role =
-          updateUserDto.role === ('CUSTOMER' as any)
-            ? 'USER'
-            : updateUserDto.role;
+        updateData.role = updateUserDto.role;
       }
       updateData.updatedAt = new Date();
 

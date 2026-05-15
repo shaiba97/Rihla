@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { LucideBus, LucidePencil, LucideTrash2 } from '@lucide/angular';
 import { BusService } from '../../../core/services/bus';
 
 interface Bus {
@@ -19,7 +20,7 @@ interface Bus {
 @Component({
   selector: 'app-buses',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, LucideBus, LucidePencil, LucideTrash2],
   templateUrl: './buses.html',
 })
 export class BusesComponent {

@@ -9,15 +9,15 @@
         routerLink="/buses"
         class="flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--primary)] transition w-fit"
       >
-        <span class="text-xl">←</span>
+        <svg lucideArrowRight class="w-5 h-5"></svg>
         العودة إلى الحافلات
       </a>
     </div>
 
     <div class="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] shadow-[0_1px_3px_var(--shadow)] p-6">
       <div class="flex flex-col md:flex-row gap-6">
-        <div class="w-40 h-40 rounded-xl bg-[var(--primary-light)] flex items-center justify-center text-6xl">
-          🚌
+        <div class="w-40 h-40 rounded-xl bg-[var(--primary-light)] flex items-center justify-center">
+          <svg lucideBus class="w-16 h-16 text-[var(--primary)]"></svg>
         </div>
         <div class="flex-1 flex flex-col gap-4">
           <div>
@@ -54,20 +54,20 @@
               <div class="grid grid-cols-3 gap-4 items-center">
                 <div class="flex flex-col gap-1">
                   <div class="flex items-center gap-2">
-                    <span class="text-[var(--primary)]">📍</span>
+                    <svg lucideMapPin class="w-4 h-4 text-[var(--primary)] flex-shrink-0"></svg>
                     <span class="font-medium text-[var(--text-primary)]">{{ trip.fromCity }}</span>
                   </div>
                   <span class="text-sm text-[var(--text-muted)]">{{ trip.fromStation }}</span>
                   <span class="text-[var(--text-muted)]">↓</span>
                   <div class="flex items-center gap-2">
-                    <span class="text-green-500">📍</span>
+                    <svg lucideMapPin class="w-4 h-4 text-green-500 flex-shrink-0"></svg>
                     <span class="font-medium text-[var(--text-primary)]">{{ trip.toCity }}</span>
                   </div>
                   <span class="text-sm text-[var(--text-muted)]">{{ trip.toStation }}</span>
                 </div>
                 <div class="flex flex-col gap-1 items-center">
                   <div class="flex items-center gap-2">
-                    <span class="text-[var(--text-muted)]">🕐</span>
+                    <svg lucideClock class="w-4 h-4 text-[var(--text-muted)] flex-shrink-0"></svg>
                     <span class="text-sm text-[var(--text-muted)]">المغادرة</span>
                   </div>
                   <span class="font-medium text-[var(--text-primary)]">{{ formatDate(trip.departureDate) }}</span>
@@ -75,7 +75,7 @@
                 </div>
                 <div class="flex flex-col gap-1 items-center">
                   <div class="flex items-center gap-2">
-                    <span class="text-[var(--text-muted)]">📅</span>
+                    <svg lucideCalendar class="w-4 h-4 text-[var(--text-muted)] flex-shrink-0"></svg>
                     <span class="text-sm text-[var(--text-muted)]">الوصول</span>
                   </div>
                   <span class="font-medium text-[var(--text-primary)]">{{ formatDate(trip.arrivalDate) }}</span>
@@ -87,7 +87,7 @@
         </div>
       } @else {
         <div class="flex flex-col items-center justify-center py-12 text-center rounded-xl border border-[var(--border)] bg-[var(--bg-card)]">
-          <div class="text-4xl mb-4">🚍</div>
+          <svg lucideBus class="w-12 h-12 mb-4 text-[var(--text-muted)]"></svg>
           <p class="text-lg font-medium text-[var(--text-muted)]">لا توجد رحلات</p>
           <p class="text-sm text-[var(--text-muted)]">لم يتم إضافة أي رحلات لهذه الحافلة بعد</p>
         </div>

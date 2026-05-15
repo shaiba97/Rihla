@@ -27,15 +27,7 @@
             ],
             "styles": [
               "src/styles.css"
-            ],
-            "server": "src/main.server.ts",
-            "outputMode": "server",
-            "security": {
-              "allowedHosts": ["*"]
-            },
-            "ssr": {
-              "entry": "src/server.ts"
-            }
+            ]
           },
           "configurations": {
             "production": {
@@ -54,6 +46,7 @@
               "outputHashing": "all"
             },
             "development": {
+              "outputMode": "static",
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
@@ -64,7 +57,8 @@
         "serve": {
           "builder": "@angular/build:dev-server",
           "options": {
-            "port": 4100
+            "port": 4100,
+            "proxyConfig": "proxy.conf.json"
           },
           "configurations": {
             "production": {

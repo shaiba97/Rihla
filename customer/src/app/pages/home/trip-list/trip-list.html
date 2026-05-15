@@ -11,7 +11,7 @@
       @if (!isLoading() && trips().length > 0) {
         <span class="text-sm
                   text-[var(--text-secondary)]">
-          {{ trips().length }} رحلة متاحة
+          {{ trips().length | arabicNumber }} رحلة متاحة
       </span>
       }
     </div>

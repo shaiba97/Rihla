@@ -1,0 +1,12 @@
+write a instruction prompt for opencode to do the following tasks:
+
+CUSTOMER MOBILE APP:
+Booking Page:
+- if the user logged in and have bookings:
+    show:
+        fromCity -> toCity
+        departureDate -> arrivalDate (must be arabic date)
+        departureTime -> arrivalTime (must be arabic time)
+        seatNumbers [ e.g. 1, 2, 3, ... and so on ] (must be arabic number)
+        status["TRIP_STATUS"] (must be arabic text)
+        

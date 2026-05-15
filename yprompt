@@ -1,0 +1,33 @@
+
+PHONE APP:
+- home page must be responsive that when the user start scrolling up the 
+App Header / logo area start to shrink and disappear and so the home the search box card will shrink and stick at the top of the screen
+gradually according to the scroll position
+
+- design the bottom navigation bar tab that will have [home, booking, profile] it must be functional.
+home: already designed
+
+booking:
+    if the has booking:
+        show the booking card with a simple decent useful details related to the booking and a button to download a ticket,
+        when the user click that card will redirect to the booking details page to see all the related details [booking details, trip details, bus details, payment details, ticket download button]
+    else:
+        show a centered button size link redirecting to home page to make the booking
+
+profile:
+if the user logged in:
+    show the user profile details [name, email, phone, profile picture, etc.]
+else:
+    show a centered button size link redirecting to login page
+
+- all the numbers that user will see must be in arabic. analyze find the numbers [price, time, date, chairs, ... and so on]
+
+- when the user selects a payment gateway method a number related to payment gateway method selected must shown
+over the transactionId input where the can just copy to tranfere the amonut on that given number
+
+
+WEB:
+- count down timer must be in payment details tab, not in select seat tab
+- all the numbers that user will see must be in arabic. analyze find the numbers [price, time, date, chairs, ... and so on]
+like any number a user will see must in arabic
+like any number a user will see must in arabic

@@ -1,0 +1,21 @@
+{
+  "/api-company": {
+    "target": "http://localhost:3001",
+    "secure": false,
+    "pathRewrite": { "^/api-company": "/api" },
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/api-customer": {
+    "target": "http://localhost:3002",
+    "secure": false,
+    "pathRewrite": { "^/api-customer": "/api" },
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/upload": {
+    "target": "http://localhost:3002",
+    "secure": false,
+    "changeOrigin": true
+  }
+}

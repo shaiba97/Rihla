@@ -8,7 +8,7 @@ import {
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export enum Role {
-  USER = 'CUSTOMER',
+  USER = 'USER',
   ADMIN = 'ADMIN',
   COMPANY = 'COMPANY',
 }
@@ -19,9 +19,15 @@ export class CreateUserDto {
   @MinLength(2)
   name: string;
 
-  @ApiProperty({ description: 'User email address' })
+  @ApiPropertyOptional({ description: 'User email address' })
+  @IsOptional()
   @IsEmail()
-  email: string;
+  email?: string;
+
+  @ApiPropertyOptional({ description: 'User phone number' })
+  @IsOptional()
+  @IsString()
+  phone?: string;
 
   @ApiProperty({ description: 'User password' })
   @IsString()
@@ -44,6 +50,11 @@ export class UpdateUserDto {
   @IsOptional()
   @IsEmail()
   email?: string;
+
+  @ApiPropertyOptional({ description: 'User phone number' })
+  @IsOptional()
+  @IsString()
+  phone?: string;
 
   @ApiPropertyOptional({ description: 'User password' })
   @IsOptional()

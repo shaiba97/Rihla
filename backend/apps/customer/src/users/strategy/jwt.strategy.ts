@@ -11,6 +11,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       secretOrKey: process.env.JWT_SECRET || 'rihla_super_secret_jwt_key_2026',
       algorithms: ['HS256'],
+      passReqToCallback: true,
     });
   }
 

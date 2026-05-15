@@ -28,6 +28,7 @@ import {
 import { Trips, Trip as TripResp } 
   from '../../core/services/trips-service/trips';
 import { Assets } from '../../core/services/assets-service/assets';
+import { ArabicNumberPipe } from '../../pipes/arabic-number/arabic-number-pipe';
 
 type SortOption = 'price-asc' | 'price-desc'
                 | 'time-asc'  | 'time-desc';
@@ -39,6 +40,7 @@ type SortOption = 'price-asc' | 'price-desc'
     FormsModule,
     // NgClass,
     TripCardComponent,
+    ArabicNumberPipe,
     LucideBus,
     LucideArrowLeftRight,
     LucideCalendar,

@@ -208,7 +208,7 @@
               <span class="text-[var(--border)]">|</span>
               <span class="font-semibold
                            text-[var(--primary)]">
-                {{ resultCount() }} رحلة متاحة
+                {{ resultCount() | arabicNumber }} رحلة متاحة
               </span>
             }
           </div>
@@ -434,7 +434,7 @@
                   justify-center">
         <p class="text-xs text-[var(--text-muted)]
                     text-center">
-          عرض جميع الرحلات المتاحة ({{ resultCount() }})
+          عرض جميع الرحلات المتاحة ({{ resultCount() | arabicNumber }})
           . الأسعار شاملة جميع الرسوم
         </p>
       </div>

@@ -5,7 +5,7 @@ import {
   BookingSessionState,
   ContactForm,
   PassengerForm,
-} from '../../../shared/booking-modal/booking-modal/booking.interfaces';
+} from '../../../services/booking/booking.interfaces';
 
 const SESSION_KEY = 'rihla_booking_session';
 const TIMEOUT_MS  = 7 * 60 * 1000; // 7 minutes

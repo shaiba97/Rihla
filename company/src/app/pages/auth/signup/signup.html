@@ -10,8 +10,8 @@
                   from-[var(--primary)]
                   to-[var(--primary-hover)]
                   flex items-center justify-center
-                  shadow-lg text-white text-2xl font-bold">
-        🚌
+                  shadow-lg text-white">
+        <svg lucideBus class="w-8 h-8"></svg>
       </div>
       <div class="text-center">
         <h1 class="text-2xl font-bold text-[var(--text-primary)]">
@@ -63,7 +63,7 @@
                      focus:ring-2
                      focus:ring-[var(--primary)]/20
                      transition-all duration-150">
-            <svg lucideIcon="user" class="absolute top-1/2 right-3 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]"></svg>
+            <svg lucideUser class="absolute top-1/2 right-3 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]"></svg>
           </div>
         </div>
 
@@ -88,7 +88,7 @@
                      focus:ring-2
                      focus:ring-[var(--primary)]/20
                      transition-all duration-150">
-            <svg lucideIcon="mail" class="absolute top-1/2 right-3 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]"></svg>
+            <svg lucideMail class="absolute top-1/2 right-3 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]"></svg>
           </div>
         </div>
 
@@ -113,7 +113,7 @@
                      focus:ring-2
                      focus:ring-[var(--primary)]/20
                      transition-all duration-150">
-            <svg lucideIcon="lock" class="absolute top-1/2 right-3 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]"></svg>
+            <svg lucideLock class="absolute top-1/2 right-3 -translate-y-1/2 w-4 h-4 text-[var(--text-muted)]"></svg>
             <button
               type="button"
               (click)="showPassword.update(v => !v)"
@@ -123,9 +123,9 @@
                      hover:text-[var(--primary)]
                      transition-colors">
               @if (showPassword()) {
-                <svg lucideIcon="eye-off" class="w-4 h-4"></svg>
+                <svg lucideEye class="w-4 h-4"></svg>
               } @else {
-                <svg lucideIcon="eye" class="w-4 h-4"></svg>
+                <svg lucideEye class="w-4 h-4"></svg>
               }
             </button>
           </div>
@@ -137,7 +137,7 @@
                       bg-red-50 dark:bg-red-950/20
                       border border-red-200
                       dark:border-red-800">
-            <svg lucideIcon="alert-circle" class="w-4 h-4 text-red-500"></svg>
+            <svg lucideAlertCircle class="w-4 h-4 text-red-500 flex-shrink-0"></svg>
             <span class="text-sm text-red-600 dark:text-red-400">
               {{ errorMessage() }}
             </span>
@@ -158,10 +158,10 @@
                  disabled:cursor-not-allowed
                  transition-all duration-150">
           @if (isLoading()) {
-            <svg lucideIcon="loader" class="w-4 h-4 animate-spin"></svg>
+            <svg lucideLoaderCircle class="w-4 h-4 animate-spin"></svg>
             <span>جاري إنشاء الحساب...</span>
           } @else {
-            <svg lucideIcon="user-plus" class="w-4 h-4"></svg>
+            <svg lucideUserPlus class="w-4 h-4"></svg>
             <span>إنشاء حساب</span>
           }
         </button>

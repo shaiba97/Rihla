@@ -18,8 +18,8 @@
                 bg-gradient-to-br
                 from-[var(--primary)]
                 to-[var(--primary-hover)]
-                shadow-md text-white font-bold">
-      🚌
+                shadow-md text-white">
+      <svg lucideBus class="w-5 h-5"></svg>
     </div>
     <div class="flex flex-col flex-1">
       <span class="text-base font-bold
@@ -40,7 +40,7 @@
              hover:text-[var(--primary)]
              transition-all duration-150"
       (click)="closeSidebar.emit()">
-      ✕
+      <svg lucideX class="w-4 h-4"></svg>
     </button>
   </div>
 
@@ -65,7 +65,11 @@
                 hover:text-[var(--primary)]
                 transition-all duration-150"
          (click)="closeSidebar.emit()">
-        <span class="w-5 text-center">{{ item.icon }}</span>
+        @if (item.path === '/dashboard') { <svg lucideLayoutDashboard class="w-5 h-5"></svg> }
+        @if (item.path === '/buses') { <svg lucideBus class="w-5 h-5"></svg> }
+        @if (item.path === '/trips') { <svg lucideRoute class="w-5 h-5"></svg> }
+        @if (item.path === '/financials') { <svg lucideWallet class="w-5 h-5"></svg> }
+        @if (item.path === '/profile') { <svg lucideUser class="w-5 h-5"></svg> }
         <span>{{ item.label }}</span>
       </a>
     }
@@ -89,10 +93,10 @@
              hover:text-[var(--primary)]
              transition-all duration-150">
       @if (themeService.isDark()) {
-        <span class="w-5">☀️</span>
+        <svg lucideSun class="w-5 h-5"></svg>
         <span>الوضع النهاري</span>
       } @else {
-        <span class="w-5">🌙</span>
+        <svg lucideMoon class="w-5 h-5"></svg>
         <span>الوضع الليلي</span>
       }
     </button>
@@ -105,7 +109,7 @@
              hover:bg-red-50 hover:text-red-500
              dark:hover:bg-red-950/20
              transition-all duration-150">
-      <span class="w-5">🚪</span>
+      <svg lucideLogOut class="w-5 h-5"></svg>
       <span>تسجيل الخروج</span>
     </button>
 

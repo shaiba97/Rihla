@@ -1,0 +1,103 @@
+<div dir="rtl" class="flex flex-col gap-4 p-4 pb-20">
+
+  <!-- Session countdown timer -->
+  <div class="flex items-center gap-2 px-4 py-2.5 rounded-xl border mb-2" [ngClass]="timerClasses()">
+    <svg lucideClock class="w-4 h-4 flex-shrink-0"></svg>
+    <span class="text-sm font-semibold">الوقت المتبقي لإتمام الحجز:</span>
+    <span class="text-sm font-extrabold tabular-nums mr-auto">{{ remainingFormatted() }}</span>
+  </div>
+
+  <!-- Booking summary -->
+  <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-4">
+    <div class="flex items-center justify-between mb-2">
+      <span class="text-[12px] text-[var(--text-muted)]">الرحلة</span>
+      <span class="text-[13px] font-bold text-[var(--text-primary)]">{{ tripDetails()?.boardingCity }} ← {{ tripDetails()?.destCity }}</span>
+    </div>
+    <div class="flex items-center justify-between mb-2">
+      <span class="text-[12px] text-[var(--text-muted)]">المقاعد</span>
+      <span class="text-[13px] font-semibold text-[var(--text-primary)]">{{ selectedSeats().join('، ') | arabicNumber }}</span>
+    </div>
+    <div class="border-t border-[var(--border)] pt-2 flex items-center justify-between">
+      <span class="text-[14px] font-bold text-[var(--text-primary)]">الإجمالي</span>
+      <span class="text-[20px] font-extrabold text-[var(--primary)]">{{ totalAmount() | arabicNumber }} <span class="text-[11px]">جنيه</span></span>
+    </div>
+  </div>
+
+  <!-- Gateway selection -->
+  <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-4">
+    <span class="text-[12px] font-bold text-[var(--text-primary)] flex items-center gap-2 mb-3">
+      <svg lucideCreditCard class="w-4 h-4 text-[var(--primary)]"></svg>
+      طريقة الدفع
+    </span>
+    <div class="grid grid-cols-2 gap-2">
+      @for (pm of paymentMethods; track pm.id) {
+        <button type="button" (click)="selectGateway(pm.id)" 
+          class="py-2.5 rounded-xl border-2 text-[12px] font-semibold transition-all duration-150 active:scale-95"
+          [class.border-[var(--primary)]]="selectedGateway() === pm.id"
+          [class.bg-[var(--primary-light)]]="selectedGateway() === pm.id"
+          [class.text-[var(--primary)]]="selectedGateway() === pm.id"
+          [class.border-[var(--border)]]="selectedGateway() !== pm.id"
+          [class.text-[var(--text-secondary)]]="selectedGateway() !== pm.id">
+          {{ pm.label }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Gateway account number -->
+  @if (gatewayAccountNumber()) {
+    <div class="flex flex-col gap-1.5 animate-in fade-in slide-in-from-top-1 duration-200">
+      <span class="text-[11px] font-bold text-[var(--text-muted)] uppercase tracking-wider">رقم التحويل</span>
+      <div class="flex items-center justify-between px-4 py-3.5 rounded-2xl bg-[var(--primary-light)] border-2 border-[var(--primary)]">
+        <div class="flex flex-col gap-0.5">
+          <span class="text-[11px] text-[var(--primary)] font-medium">حوّل المبلغ على هذا الرقم</span>
+          <span class="text-[22px] font-extrabold text-[var(--primary)] tabular-nums tracking-wider" dir="ltr">
+            {{ gatewayAccountNumber() | arabicNumber }}
+          </span>
+        </div>
+        <button (click)="copyAccountNumber()" class="px-3 py-2 rounded-xl bg-[var(--primary)] text-white text-[12px] font-bold active:scale-90 transition-all flex-shrink-0">
+          @if (copied()) {
+            <svg lucideCheck class="w-4 h-4"></svg>
+          } @else {
+            نسخ
+          }
+        </button>
+      </div>
+      <span class="text-[11px] text-[var(--text-muted)] text-center">
+        المبلغ المطلوب: <span class="font-bold text-[var(--primary)]">{{ totalAmount() | arabicNumber }} جنيه</span>
+      </span>
+    </div>
+  }
+
+  <!-- Payment form -->
+  <div [formGroup]="paymentForm" class="flex flex-col gap-4">
+    <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-4">
+      <span class="text-[12px] font-bold text-[var(--text-primary)]">بيانات الدفع</span>
+      <input type="text" formControlName="transactionId" placeholder="رقم العملية *" 
+        class="w-full mt-3 px-4 py-3 rounded-xl border bg-[var(--bg-base)] text-[14px] font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none">
+    </div>
+
+    @if (error()) {
+      <div class="flex items-center gap-2 px-4 py-3 rounded-xl bg-red-50 border border-red-200">
+        <svg lucideAlertCircle class="w-4 h-4 text-red-500 flex-shrink-0"></svg>
+        <span class="text-[12px] font-semibold text-red-600">{{ error() }}</span>
+      </div>
+    }
+  </div>
+
+  <!-- Submit button -->
+  <button (click)="onSubmit()" [disabled]="!canSubmit()" 
+    class="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-[15px] active:scale-[0.98] transition-all"
+    [class.bg-[var(--primary)]]="canSubmit()"
+    [class.text-white]="canSubmit()"
+    [class.shadow-lg]="canSubmit()"
+    [class.bg-[var(--border)]]="!canSubmit()"
+    [class.text-[var(--text-muted)]]="!canSubmit()"
+    [class.cursor-not-allowed]="!canSubmit()">
+    @if (isSubmitting()) {
+      جاري التأكيد...
+    } @else {
+      تأكيد الحجز
+    }
+  </button>
+</div>

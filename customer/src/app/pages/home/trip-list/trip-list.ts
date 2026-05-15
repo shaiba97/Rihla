@@ -13,6 +13,7 @@ import { TripCardComponent, Trip }
   from '../../home/trip-card/trip-card';
 import { Trips, Trip as TripResp } 
   from '../../../core/services/trips-service/trips';
+import { ArabicNumberPipe } from '../../../pipes/arabic-number/arabic-number-pipe';
 
 
 @Component({
@@ -23,6 +24,7 @@ import { Trips, Trip as TripResp }
     TripCardComponent,
     LucideLoaderCircle,
     LucideSearchX,
+    ArabicNumberPipe,
     // LucideSearch,
   ],
   templateUrl: './trip-list.html',

@@ -14,6 +14,19 @@
   --text-secondary: #0F766E;
   --text-muted:     #5EEAD4;
   --shadow:         rgba(13, 148, 136, 0.1);
+  --safe-top:       env(safe-area-inset-top, 0px);
+  --safe-bottom:    env(safe-area-inset-bottom, 0px);
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+html, body {
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .dark {

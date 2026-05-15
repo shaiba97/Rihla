@@ -4,16 +4,17 @@ import {
   Get,
   Body,
   Param,
-  // Req,
-  // HttpStatus,
+  Req,
+  UseGuards,
   BadRequestException,
   UseInterceptors,
   Put,
   Delete,
   UploadedFile,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Request } from 'express';
+import type { Request } from 'express';
 import * as multer from 'multer';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -85,11 +86,10 @@ export class BookingController {
     // private readonly sessionService: SessionService,
   ) {}
 
-  private customerId = '0281279d-9ccb-47a9-add4-aa41c726b548';
-
   @Post('create-booking')
-  createBooking(@Body() dto: CreateBookingDto) {
-    return this.bookingService.create(dto, this.customerId);
+  @UseGuards(AuthGuard('jwt'))
+  createBooking(@Body() dto: CreateBookingDto, @Req() req: Request) {
+    return this.bookingService.create(dto, (req as any).user.id);
   }
 
   @Get('get-booked-seats/tripId/:tripId')
@@ -171,17 +171,19 @@ export class BookingController {
 
   // Payment CRUD Endpoints
   @Post('create-payment')
+  @UseGuards(AuthGuard('jwt'))
   @UseInterceptors(uploadInterceptor)
   async createPayment(
     @Body() dto: CreatePaymentDto,
     @UploadedFile() file: Express.Multer.File,
+    @Req() req: Request,
   ) {
     if (!file) {
       throw new BadRequestException('صورة الإيصال مطلوبة');
     }
 
     const receiptFile = `/uploads/receipts/${file.filename}`;
-    const paymentData = { ...dto, receiptFile };
+    const paymentData = { ...dto, receiptFile, customerId: (req as any).user.id };
 
     return await this.paymentService.create(paymentData);
   }

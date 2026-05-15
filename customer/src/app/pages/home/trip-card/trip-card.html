@@ -125,7 +125,7 @@
           <svg lucideArmchair class="w-3 h-3">
           </svg>
           <span>
-            {{ trip().bus.chairs - (bookedSeats() === undefined ? 0 : bookedSeats().length) }} مقعد متاح
+            {{ (trip().bus.chairs - (bookedSeats() === undefined ? 0 : bookedSeats().length)) | arabicNumber }} مقعد متاح
           </span>
         </div>
       </div>
@@ -138,24 +138,17 @@
                 w-full md:w-auto
                 gap-4 flex-shrink-0">
 
-      <div class="flex flex-col items-end gap-0.5">
-        <span class="text-[9px] font-bold
-                     text-[var(--text-muted)]
-                     uppercase tracking-widest">
-          يبدأ من
+      <div class="flex items-baseline gap-1.5">
+        <span class="text-2xl md:text-3xl
+                     font-extrabold
+                     text-[var(--primary)]
+                     leading-none tabular-nums">
+          {{ trip().price | arabicNumber }}
         </span>
-        <div class="flex items-baseline gap-1">
-          <span class="text-2xl md:text-3xl
-                       font-extrabold
-                       text-[var(--primary)]
-                       leading-none tabular-nums">
-            {{ trip().price | number }}
-          </span>
-          <span class="text-xs font-semibold
-                       text-[var(--text-secondary)]">
-            {{ currency }}
-          </span>
-        </div>
+        <span class="text-xs font-bold
+                     text-[var(--text-secondary)]">
+          ج. س
+        </span>
       </div>
 
       <button
@@ -180,24 +173,6 @@
       </button>
 
     </div>
-  </div>
-
-  <div class="flex items-center gap-5
-              px-5 py-3
-              border-t border-[var(--border)]
-              bg-[var(--bg-base)]">
-    @for (info of bottomInfo; track info) {
-      <div class="flex items-center gap-1.5">
-        <div class="w-1.5 h-1.5 rounded-full
-                    bg-[var(--primary)]
-                    flex-shrink-0">
-        </div>
-        <span class="text-xs
-                     text-[var(--text-secondary)]">
-          {{ info }}
-        </span>
-      </div>
-    }
   </div>
 
 </article>

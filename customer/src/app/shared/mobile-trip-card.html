@@ -1,0 +1,37 @@
+<div dir="rtl" (click)="onSelect()" class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] shadow-[0_2px_12px_rgba(13,148,136,0.08)] active:scale-[0.98] transition-all duration-150 overflow-hidden cursor-pointer">
+  <div class="flex items-center justify-between px-4 pt-4 pb-2">
+    <div class="flex items-center gap-2">
+      <div class="w-7 h-7 rounded-lg bg-[var(--primary-light)] flex items-center justify-center flex-shrink-0"><svg lucideBus class="w-3.5 h-3.5 text-[var(--primary)]"></svg></div>
+      <span class="text-[13px] font-bold text-[var(--text-primary)] truncate max-w-[140px]">{{ trip().busName }}</span>
+    </div>
+    <div class="flex items-center gap-1">
+      <span class="text-[17px] font-extrabold text-[var(--primary)] leading-tight">{{ trip().price | arabicNumber }}</span>
+      <span class="text-[10px] font-bold text-[var(--text-secondary)]">ج. س</span>
+    </div>
+  </div>
+  <div class="flex items-center justify-between px-4 pb-1">
+    <div class="flex flex-col items-center">
+      <span class="text-[22px] font-extrabold text-[var(--text-primary)] tabular-nums leading-none">{{ trip().tripTime | timeFormat }}</span>
+      <span class="text-[11px] font-medium text-[var(--text-secondary)] mt-1">{{ trip().boardingCity }}</span>
+      <span class="text-[9px] text-[var(--text-muted)] mt-0.5 flex items-center gap-1"><svg lucideCalendar class="w-2.5 h-2.5 flex-shrink-0"></svg>{{ depDate() }}</span>
+    </div>
+    <div class="flex flex-col items-center flex-1 mx-3 gap-1">
+      <span class="text-[10px] text-[var(--text-muted)]">{{ trip().tripTime | duration : trip().arriveTime }}</span>
+      <div class="w-full flex items-center gap-1">
+        <div class="w-2 h-2 rounded-full bg-[var(--primary)] flex-shrink-0"></div>
+        <div class="flex-1 border-t-2 border-dashed border-[var(--border)]"></div>
+        <div class="w-2 h-2 rounded-full border-2 border-[var(--primary)] flex-shrink-0"></div>
+      </div>
+    </div>
+    <div class="flex flex-col items-center">
+      <span class="text-[22px] font-extrabold text-[var(--text-primary)] tabular-nums leading-none">{{ trip().arriveTime | timeFormat }}</span>
+      <span class="text-[11px] font-medium text-[var(--text-secondary)] mt-1">{{ trip().destCity }}</span>
+      @if (arrDate()) {
+        <span class="text-[9px] text-[var(--text-muted)] mt-0.5 flex items-center gap-1"><svg lucideCalendar class="w-2.5 h-2.5 flex-shrink-0"></svg>{{ arrDate() }}</span>
+      }
+    </div>
+  </div>
+  <div class="px-4 pb-4 pt-2">
+    <span class="text-[11px] text-[var(--text-muted)]">{{ trip().seatsLeft | arabicNumber }} مقعد متاح</span>
+  </div>
+</div>

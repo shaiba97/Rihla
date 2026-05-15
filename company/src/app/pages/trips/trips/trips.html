@@ -2,7 +2,7 @@
   <div class="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] shadow-[0_1px_3px_var(--shadow)] p-6 flex items-center justify-between">
     <div class="flex items-center gap-4">
       <div class="w-12 h-12 rounded-xl bg-[var(--primary-light)] flex items-center justify-center">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--primary)]"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2h2l3-1 2 1v3l3-2c.3.1.5.1.7 0l.3-.3c.5-.5.7-.5 1.3-.3L19 13"/></svg>
+        <svg lucideRoute class="w-6 h-6 text-[var(--primary)]"></svg>
       </div>
       <div>
         <h2 class="text-lg font-bold text-[var(--text-primary)] m-0">الرحلات</h2>
@@ -24,15 +24,15 @@
       @for (trip of trips(); track trip.id) {
         <div (click)="goToTripDetails(trip.id)" class="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] shadow-[0_1px_3px_var(--shadow)] overflow-hidden hover:shadow-lg transition cursor-pointer flex flex-col">
           <div class="w-full h-40 bg-[var(--primary-light)] flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--primary)]"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2h2l3-1 2 1v3l3-2c.3.1.5.1.7 0l.3-.3c.5-.5.7-.5 1.3-.3L19 13"/></svg>
+            <svg lucideRoute class="w-16 h-16 text-[var(--primary)]"></svg>
           </div>
           <div class="p-4 flex flex-col gap-3 flex-1">
             <div class="flex items-center gap-2">
               <span class="text-[var(--primary)] font-bold">{{ trip.fromCity }}</span>
-              <span class="text-[var(--text-muted)]">→</span>
+              <svg lucideArrowLeft class="w-4 h-4 text-[var(--text-muted)]"></svg>
               <span class="text-[var(--primary)] font-bold">{{ trip.toCity }}</span>
             </div>
-            <div class="text-sm text-[var(--text-muted)]">{{ trip.fromState }} → {{ trip.toState }}</div>
+            <div class="text-sm text-[var(--text-muted)] flex items-center gap-1">{{ trip.fromState }} <svg lucideArrowLeft class="w-3.5 h-3.5"></svg> {{ trip.toState }}</div>
             <div class="flex items-center gap-4 text-sm">
               <div class="flex flex-col">
                 <span class="text-[var(--text-muted)]">المغادرة</span>
@@ -45,22 +45,17 @@
                 <span class="text-green-600 font-bold">{{ trip.arrivalTime }}</span>
               </div>
             </div>
-            <!-- <div class="flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--text-muted)]"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              <span class="text-sm text-[var(--text-muted)]">المدة:</span>
-              <span class="text-sm font-bold text-[var(--primary)]">{{ trip.departureDate | duration: trip.departureTime: trip.arrivalDate: trip.arrivalTime }}</span>
-            </div> -->
             <div class="flex items-center justify-between">
               <span class="px-2 py-1 rounded-full text-xs font-bold" [style.background]="getStatusColor(trip.status) + '20'" [style.color]="getStatusColor(trip.status)">{{ getStatusLabel(trip.status) }}</span>
               <span class="font-bold text-[var(--text-primary)]">{{ trip.price | number }} ج س</span>
             </div>
             <div class="flex gap-2 mt-auto pt-2 border-t border-[var(--border)]">
               <button (click)="openUpdateModal(trip); $event.stopPropagation()" class="flex-1 flex items-center justify-center gap-1 py-2 px-3 rounded-lg bg-[var(--primary-light)] text-[var(--primary)] hover:opacity-80 transition text-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                <svg lucidePencil class="w-3.5 h-3.5"></svg>
                 تحديث
               </button>
               <button (click)="confirmDelete(trip.id); $event.stopPropagation()" class="flex-1 flex items-center justify-center gap-1 py-2 px-3 rounded-lg bg-red-50 text-red-600 hover:opacity-80 transition text-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                <svg lucideTrash2 class="w-3.5 h-3.5"></svg>
                 حذف
               </button>
             </div>
@@ -73,7 +68,7 @@
   @if (!loading() && trips().length === 0) {
     <div class="flex flex-col items-center justify-center py-12 text-center rounded-xl border border-[var(--border)] bg-[var(--bg-card)]">
       <div class="w-20 h-20 rounded-full bg-[var(--primary-light)] flex items-center justify-center mb-4">
-        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--primary)]"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2h2l3-1 2 1v3l3-2c.3.1.5.1.7 0l.3-.3c.5-.5.7-.5 1.3-.3L19 13"/></svg>
+        <svg lucideBus class="w-10 h-10 text-[var(--primary)]"></svg>
       </div>
       <p class="text-lg font-medium text-[var(--text-muted)]">لا توجد رحلات</p>
       <p class="text-sm text-[var(--text-muted)] mb-4">ابدأ بإضافة رحلتك الأولى</p>
@@ -90,7 +85,9 @@
     <div class="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl border border-[var(--border)] bg-[var(--bg-card)] shadow-[0_4px_6px_var(--shadow)] p-6" (click)="$event.stopPropagation()">
       <div class="flex items-center justify-between mb-6">
         <h3 class="text-xl font-bold text-[var(--text-primary)]">{{ showUpdateModal() ? 'تحديث الرحلة' : 'إنشاء رحلة جديدة' }}</h3>
-        <button (click)="closeModal()" class="w-10 h-10 rounded-full bg-[var(--bg-hover)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] transition">✕</button>
+        <button (click)="closeModal()" class="w-10 h-10 rounded-full bg-[var(--bg-hover)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] transition">
+          <svg lucideX class="w-5 h-5"></svg>
+        </button>
       </div>
       @if (formErrors()['general']) {
         <div class="mb-4 p-3 rounded-lg bg-red-50 text-red-600 text-sm">{{ formErrors()['general'] }}</div>
@@ -226,7 +223,7 @@
   <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
     <div class="w-full max-w-md rounded-xl border border-[var(--border)] bg-[var(--bg-card)] shadow-[0_4px_6px_var(--shadow)] p-6 text-center">
       <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-600"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+        <svg lucideTrash2 class="w-8 h-8 text-red-600"></svg>
       </div>
       <h3 class="text-xl font-bold text-[var(--text-primary)] mb-2">حذف الرحلة</h3>
       <p class="text-[var(--text-muted)] mb-6">هل أنت متأكد من حذف هذه الرحلة؟ لا يمكن التراجع عن هذا الإجراء.</p>

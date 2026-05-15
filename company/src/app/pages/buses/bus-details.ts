@@ -2,6 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { LucideBus, LucideMapPin, LucideClock, LucideCalendar, LucideArrowRight } from '@lucide/angular';
 
 interface Bus {
   id: string;
@@ -39,7 +40,7 @@ interface Trip {
 @Component({
   selector: 'app-bus-details',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, LucideBus, LucideMapPin, LucideClock, LucideCalendar, LucideArrowRight],
   templateUrl: './bus-details.html',
   styleUrl: './bus-details.css',
 })

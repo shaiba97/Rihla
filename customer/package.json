@@ -22,6 +22,7 @@
     "@angular/ssr": "^21.2.7",
     "@capacitor/android": "^8.3.3",
     "@capacitor/ios": "^8.3.3",
+    "@capacitor/status-bar": "^8.0.2",
     "@lucide/angular": "^1.11.0",
     "express": "^5.1.0",
     "rxjs": "~7.8.0",

@@ -8,7 +8,7 @@
   @if (!loading() && trip()) {
     <div class="flex flex-col gap-2">
       <button (click)="goBack()" class="flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--primary)] transition w-fit">
-        <span class="text-xl">←</span>
+        <svg lucideArrowRight class="w-5 h-5"></svg>
         العودة إلى الرحلات
       </button>
     </div>
@@ -16,15 +16,13 @@
     <div class="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] shadow-[0_1px_3px_var(--shadow)] p-6">
       <div class="flex flex-col md:flex-row gap-6">
         <div class="w-full md:w-64 h-64 rounded-xl bg-[var(--primary-light)] flex items-center justify-center">
-          <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--primary)]">
-            <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2h2l3-1 2 1v3l3-2c.3.1.5.1.7 0l.3-.3c.5-.5.7-.5 1.3-.3L19 13"/>
-          </svg>
+          <svg lucideRoute class="w-20 h-20 text-[var(--primary)]"></svg>
         </div>
 
         <div class="flex-1 flex flex-col gap-4">
           <div>
             <h1 class="text-2xl font-bold text-[var(--text-primary)]">
-              {{ trip()!.fromCity }} ({{ trip()!.fromState }}) → {{ trip()!.toCity }} ({{ trip()!.toState }})
+              {{ trip()!.fromCity }} ({{ trip()!.fromState }}) <svg lucideArrowLeft class="w-5 h-5 inline"></svg> {{ trip()!.toCity }} ({{ trip()!.toState }})
             </h1>
           </div>
 
@@ -75,15 +73,7 @@
         <h2 class="text-xl font-bold text-[var(--text-primary)] mb-4">الحافلة</h2>
         <div class="flex flex-col md:flex-row gap-6">
           <div class="w-full md:w-48 h-48 rounded-xl bg-[var(--primary-light)] flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--primary)]">
-              <path d="M8 6v6"/>
-              <path d="M15 6v6"/>
-              <path d="M2 12h19"/>
-              <path d="M18.22 16.27a1.63 1.63 0 0 1-1.36 2.27H6.14a1.63 1.63 0 0 1-1.37-2.27"/>
-              <path d="M20 12V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v5"/>
-              <path d="M4 18V14"/>
-              <path d="M20 18v-4"/>
-            </svg>
+            <svg lucideBus class="w-16 h-16 text-[var(--primary)]"></svg>
           </div>
 
           <div class="flex-1 flex flex-col gap-4">

@@ -1,8 +1,8 @@
 <div class="flex flex-col gap-6" dir="rtl">
   <div class="flex items-center justify-between">
     <div class="flex items-center gap-4">
-      <div class="w-12 h-12 rounded-xl bg-[var(--primary-light)] flex items-center justify-center text-2xl">
-        🚌
+      <div class="w-12 h-12 rounded-xl bg-[var(--primary-light)] flex items-center justify-center">
+        <svg lucideBus class="w-6 h-6 text-[var(--primary)]"></svg>
       </div>
       <div>
         <h2 class="text-lg font-bold text-[var(--text-primary)] m-0">الحافلات</h2>
@@ -24,8 +24,8 @@
         (click)="goToBusDetails(bus.id)"
         class="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] shadow-[0_1px_3px_var(--shadow)] overflow-hidden hover:shadow-lg transition cursor-pointer"
       >
-        <div class="h-40 flex items-center justify-center bg-[var(--primary-light)] text-6xl">
-          🚌
+        <div class="h-40 flex items-center justify-center bg-[var(--primary-light)]">
+          <svg lucideBus class="w-16 h-16 text-[var(--primary)]"></svg>
         </div>
         <div class="p-4">
           <h3 class="text-lg font-bold text-[var(--text-primary)] mb-1">{{ bus.name }}</h3>
@@ -48,14 +48,14 @@
               (click)="openEditForm(bus); $event.stopPropagation()"
               class="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-[var(--primary)] text-[var(--primary)] hover:bg-[var(--primary-light)] transition"
             >
-              ✏️
+              <svg lucidePencil class="w-4 h-4"></svg>
               تعديل
             </button>
             <button
               (click)="removeBusItem(bus.id); $event.stopPropagation()"
               class="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-red-500 text-red-500 hover:bg-red-50 transition"
             >
-              🗑️
+              <svg lucideTrash2 class="w-4 h-4"></svg>
               حذف
             </button>
           </div>
@@ -66,7 +66,7 @@
 
   @if (buses().length === 0) {
     <div class="flex flex-col items-center justify-center py-12 text-center">
-      <div class="text-6xl mb-4">🚌</div>
+      <svg lucideBus class="w-16 h-16 mb-4 text-[var(--text-muted)]"></svg>
       <p class="text-lg font-medium text-[var(--text-muted)]">لا توجد حافلات</p>
       <p class="text-sm text-[var(--text-muted)]">أضف حافلة جديدة للبدء</p>
     </div>

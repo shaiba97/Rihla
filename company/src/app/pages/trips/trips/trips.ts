@@ -5,11 +5,12 @@ import { FormsModule } from '@angular/forms';
 import { TripService, Trip } from '../../../core/services/trip';
 import { BusService, Bus } from '../../../core/services/bus';
 import { DurationPipe } from '../../../pipes/duration-pipe';
+import { LucideBus, LucidePencil, LucideTrash2, LucideX, LucideArrowLeft, LucideRoute } from '@lucide/angular';
 
 @Component({
   selector: 'app-trips',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, DurationPipe],
+  imports: [CommonModule, RouterModule, FormsModule, DurationPipe, LucideBus, LucidePencil, LucideTrash2, LucideX, LucideArrowLeft, LucideRoute],
   templateUrl: './trips.html',
   styleUrl: './trips.css',
 })
@@ -215,7 +216,7 @@ export class TripsComponent implements OnInit {
     });
   }
 
-  goToTripDetails(id: string) { this.router.navigate(['/trip-details', id]); }
+  goToTripDetails(id: string) { this.router.navigate(['trips/trip/trip-details', id]); }
 
   getStatusLabel(s: string): string {
     return { 'SCHEDULED': 'مجدولة', 'IN_PROGRESS': 'جارية', 'COMPLETED': 'مكتملة', 'CANCELLED': 'ملغاة' }[s] || s;

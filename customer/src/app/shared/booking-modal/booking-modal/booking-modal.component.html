@@ -1,0 +1,82 @@
+@if (submitSuccess()) {
+  <div class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+    <div class="bg-[var(--bg-card)] rounded-3xl p-8 flex flex-col items-center gap-4 max-w-sm w-full text-center">
+      <div class="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center">
+        <svg class="w-8 h-8 text-emerald-600" lucideCheckCircle></svg>
+      </div>
+      <h2 class="text-xl font-extrabold text-[var(--text-primary)]">تم تأكيد الحجز!</h2>
+      <p class="text-sm text-[var(--text-secondary)]">سيتم إرسال التذكرة على واتساب</p>
+      <button (click)="close()" class="w-full py-3.5 rounded-2xl bg-[var(--primary)] text-white font-bold">العودة</button>
+    </div>
+  </div>
+} @else {
+  <div class="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center">
+    <div class="bg-[var(--bg-base)] rounded-t-3xl sm:rounded-3xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
+      
+      <!-- Header -->
+      <div class="bg-[var(--bg-card)] px-4 py-3 border-b border-[var(--border)] flex items-center justify-between flex-shrink-0">
+        <div class="flex items-center gap-3">
+          @if (currentStep() === 'payment') {
+            <button (click)="currentStep.set('seat')" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[var(--bg-base)]">
+              <svg class="w-5 h-5 text-[var(--text-primary)]" lucideArrowRight></svg>
+            </button>
+          }
+          <span class="text-[16px] font-bold text-[var(--text-primary)]">
+            @if (currentStep() === 'seat') { اختيار المقعد }
+            @else { الدفع }
+          </span>
+        </div>
+        <button (click)="close()" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[var(--bg-base)]">
+          <svg class="w-5 h-5 text-[var(--text-muted)]" lucideX></svg>
+        </button>
+      </div>
+
+      <!-- Steps indicator -->
+      <div class="bg-[var(--bg-card)] px-4 py-2 border-b border-[var(--border)] flex items-center gap-2 flex-shrink-0">
+        <div class="flex items-center gap-1.5" [class.text-[var(--primary)]]="currentStep() === 'seat'">
+          <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold"
+            [class.bg-[var(--primary)]]="currentStep() === 'seat'"
+            [class.text-white]="currentStep() === 'seat'"
+            [class.bg-[var(--border)]]="currentStep() !== 'seat'">
+            1
+          </div>
+          <span class="text-[11px] font-medium">المقعد</span>
+        </div>
+        <div class="flex-1 h-px bg-[var(--border)]"></div>
+        <div class="flex items-center gap-1.5" [class.text-[var(--primary)]]="currentStep() === 'payment'">
+          <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold"
+            [class.bg-[var(--primary)]]="currentStep() === 'payment'"
+            [class.text-white]="currentStep() === 'payment'"
+            [class.bg-[var(--border)]]="currentStep() !== 'payment'">
+            2
+          </div>
+          <span class="text-[11px] font-medium">الدفع</span>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="flex-1 overflow-y-auto">
+        @if (currentStep() === 'seat') {
+          <app-seat-step
+            [tripDetails]="tripDetails()"
+            [bookedSeats]="bookedSeats()"
+            (selectedSeats)="onSeatsSelected($event)">
+          </app-seat-step>
+        }
+        @if (currentStep() === 'payment') {
+          <app-payment-step
+            [tripDetails]="tripDetails()"
+            [selectedSeats]="selectedSeats()"
+            [price]="price()"
+            [isSubmitting]="isSubmitting()"
+            [error]="error()"
+            [remainingMs]="remainingMs()"
+            [remainingFormatted]="remainingFormatted()"
+            (confirmed)="onPaymentConfirmed($event)">
+          </app-payment-step>
+        }
+      </div>
+
+    </div>
+  </div>
+}
