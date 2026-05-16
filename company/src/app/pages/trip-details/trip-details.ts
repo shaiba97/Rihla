@@ -1,15 +1,17 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { TripService, Trip, Booking } from '../../core/services/trip';
 import { BusService, Bus } from '../../core/services/bus';
-import { LucideBus, LucideArrowRight, LucideRoute, LucideArrowLeft, LucideDownload } from '@lucide/angular';
+import { LucideBus, LucideArrowRight, LucideRoute, LucideArrowLeft, LucideDownload, LucideEye, LucideX } from '@lucide/angular';
+import { ArabicNumberPipe } from '../../pipes/arabic-number/arabic-number-pipe';
 import { environment } from '../../../environments/environment'
 
 @Component({
   selector: 'app-trip-details',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideBus, LucideArrowRight, LucideRoute, LucideArrowLeft, LucideDownload],
+  imports: [CommonModule, RouterModule, LucideBus, LucideArrowRight, LucideRoute, LucideArrowLeft, LucideDownload, LucideEye, LucideX, ArabicNumberPipe],
   templateUrl: './trip-details.html',
   styleUrl: './trip-details.css',
 })
@@ -18,10 +20,13 @@ export class TripDetailsComponent implements OnInit {
   private router = inject(Router);
   private tripService = inject(TripService);
   private busService = inject(BusService);
+  private sanitizer = inject(DomSanitizer);
 
   trip = signal<Trip | null>(null);
   bus = signal<Bus | null>(null);
   loading = signal(true);
+  showTicketModal = signal(false);
+  ticketModalUrl = signal('');
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
@@ -71,6 +76,14 @@ export class TripDetailsComponent implements OnInit {
   }
 
   downloadTicket(url: string | undefined): void {
-    if (url) window.open(environment.apiUrl.customer+url, '_blank');
+    if (url) window.open(url, '_blank');
   }
+
+  viewTicket(url: string | undefined): void {
+    if (url) { this.ticketModalUrl.set(url); this.showTicketModal.set(true); }
+  }
+
+  closeTicketModal(): void { this.showTicketModal.set(false); this.ticketModalUrl.set(''); }
+
+  safeUrl(url: string) { return this.sanitizer.bypassSecurityTrustResourceUrl(url); }
 }

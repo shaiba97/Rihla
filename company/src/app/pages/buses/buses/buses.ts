@@ -4,6 +4,8 @@ import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { LucideBus, LucidePencil, LucideTrash2 } from '@lucide/angular';
+import { ArabicNumberPipe } from '../../../pipes/arabic-number/arabic-number-pipe';
+import { formatArabicDate } from '../../../pipes/arabic-number/arabic-number.util';
 import { BusService } from '../../../core/services/bus';
 
 interface Bus {
@@ -20,7 +22,7 @@ interface Bus {
 @Component({
   selector: 'app-buses',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, LucideBus, LucidePencil, LucideTrash2],
+  imports: [CommonModule, RouterModule, FormsModule, LucideBus, LucidePencil, LucideTrash2, ArabicNumberPipe],
   templateUrl: './buses.html',
 })
 export class BusesComponent {
@@ -63,9 +65,7 @@ export class BusesComponent {
   }
 
   formatDate(dateString: string): string {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ar-SA');
+    return formatArabicDate(dateString);
   }
 
   openCreateForm() {

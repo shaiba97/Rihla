@@ -18,7 +18,7 @@
     </button>
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
     @for (bus of buses(); track bus.id) {
       <div
         (click)="goToBusDetails(bus.id)"
@@ -32,7 +32,7 @@
           @if (bus.plate) {
             @if (typeof bus.plate === 'object') {
               <p class="text-xs text-[var(--text-muted)] mb-2">
-                {{ bus.plate.numbers }}
+                {{ bus.plate.numbers | arabicNumber }}
                 @if (bus.plate.english) { / {{ bus.plate.english }} }
                 @if (bus.plate.arabic) { / {{ bus.plate.arabic }} }
               </p>

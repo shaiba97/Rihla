@@ -26,7 +26,7 @@
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div class="flex flex-col gap-1">
               <span class="text-sm text-[var(--text-muted)]">عدد المقاعد</span>
-              <span class="text-lg font-medium text-[var(--text-primary)]">{{ bus()!.chairs }}</span>
+              <span class="text-lg font-medium text-[var(--text-primary)]">{{ bus()!.chairs | arabicNumber }}</span>
             </div>
             <div class="flex flex-col gap-1">
               <span class="text-sm text-[var(--text-muted)]">اتجاه المقاعد</span>
@@ -34,7 +34,7 @@
             </div>
             <div class="flex flex-col gap-1">
               <span class="text-sm text-[var(--text-muted)]">اللوحة</span>
-              <span class="text-lg font-medium text-[var(--text-primary)]">{{ bus()!.plate.numbers }}/{{ bus()!.plate.english }}/{{ bus()!.plate.arabic }}</span>
+              <span class="text-lg font-medium text-[var(--text-primary)]">{{ bus()!.plate.numbers | arabicNumber }}/{{ bus()!.plate.english }}/{{ bus()!.plate.arabic }}</span>
             </div>
             <div class="flex flex-col gap-1">
               <span class="text-sm text-[var(--text-muted)]">تاريخ الإضافة</span>

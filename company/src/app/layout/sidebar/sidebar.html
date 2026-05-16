@@ -4,7 +4,7 @@
          border-l border-[var(--border)]
          flex flex-col flex-shrink-0
          shadow-[-2px_0_12px_var(--shadow)]
-         transition-transform duration-300 z-50
+         transition-transform duration-300 z-30
          fixed right-0 top-0
          md:relative md:translate-x-0"
   [class.translate-x-0]="isOpen()"
@@ -55,7 +55,7 @@
   <nav class="flex flex-col gap-1 px-3">
     @for (item of navItems; track item.path) {
       <a [routerLink]="item.path"
-         routerLinkActive="bg-[var(--primary-light)] text-[var(--primary)] font-semibold border-r-[3px] border-[var(--primary)]"
+         routerLinkActive="bg-[var(--primary-light)] text-[var(--primary)] font-semibold border-l-[3px] border-[var(--primary)]"
          class="flex items-center gap-3
                 px-3 py-2.5 rounded-xl
                 text-sm font-medium

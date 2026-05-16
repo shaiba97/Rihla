@@ -2,7 +2,18 @@
             overflow-hidden bg-[var(--bg-base)]"
      dir="rtl">
 
-  <app-sidebar
+  <div class="flex-1 flex flex-col
+              overflow-hidden min-w-0 z-40">
+    <app-topbar
+      (toggleSidebar)="toggleSidebar()">
+    </app-topbar>
+    <main class="flex-1 overflow-y-auto p-6 md:p-4
+                 bg-[var(--bg-base)]">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+
+    <app-sidebar
     [isOpen]="sidebarOpen()"
     (closeSidebar)="sidebarOpen.set(false)">
   </app-sidebar>
@@ -13,16 +24,5 @@
          (click)="sidebarOpen.set(false)">
     </div>
   }
-
-  <div class="flex-1 flex flex-col
-              overflow-hidden min-w-0">
-    <app-topbar
-      (toggleSidebar)="toggleSidebar()">
-    </app-topbar>
-    <main class="flex-1 overflow-y-auto p-6 md:p-4
-                 bg-[var(--bg-base)]">
-      <router-outlet></router-outlet>
-    </main>
-  </div>
 
 </div>

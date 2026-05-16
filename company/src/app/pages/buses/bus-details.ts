@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { LucideBus, LucideMapPin, LucideClock, LucideCalendar, LucideArrowRight } from '@lucide/angular';
+import { ArabicNumberPipe } from '../../pipes/arabic-number/arabic-number-pipe';
+import { formatArabicDate, formatArabicTime } from '../../pipes/arabic-number/arabic-number.util';
 import { BusService } from '../../core/services/bus';
 import { TripService } from '../../core/services/trip';
 
@@ -42,7 +44,7 @@ interface Trip {
 @Component({
   selector: 'app-bus-details',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideBus, LucideMapPin, LucideClock, LucideCalendar, LucideArrowRight],
+  imports: [CommonModule, RouterModule, LucideBus, LucideMapPin, LucideClock, LucideCalendar, LucideArrowRight, ArabicNumberPipe],
   templateUrl: './bus-details.html',
   styleUrl: './bus-details.css',
 })
@@ -90,14 +92,11 @@ export class BusDetailsComponent implements OnInit {
   }
 
   formatDate(dateString: string): string {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('ar-SA');
+    return formatArabicDate(dateString);
   }
 
   formatTime(timeString: string): string {
-    if (!timeString) return '';
-    return timeString;
+    return formatArabicTime(timeString);
   }
 
   get seatDirection(): string {
