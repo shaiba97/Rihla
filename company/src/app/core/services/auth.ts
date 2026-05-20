@@ -1,13 +1,66 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { Observable, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
 export interface AuthUser {
-  id:           string;
-  name:         string;
-  email:        string;
-  role:         'COMPANY' | 'CUSTOMER' | 'ADMIN';
+  id:    string;
+  name:  string;
+  email: string | null;
+  phone?: string | null;
+  role:  'COMPANY' | 'CUSTOMER' | 'ADMIN';
+}
+
+export interface LoginResponse {
+  message: string;
+  token:   string;
+  user:    AuthUser;
+}
+
+export interface RegisterResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    id:        string;
+    name:      string;
+    email:     string | null;
+    phone?:    string | null;
+    role:      string;
+    createdAt: Date;
+    updatedAt: Date;
+  };
+}
+
+export interface MeResponse {
+  data: {
+    success: boolean;
+    message?: string;
+    data?: {
+      id:        string;
+      name:      string;
+      email:     string | null;
+      role:      string;
+      createdAt: Date;
+      updatedAt: Date;
+    };
+  };
+}
+
+export interface UpdateProfileResponse {
+  success: boolean;
+  message: string;
+  data?:   AuthUser;
+}
+
+export interface DeleteAccountResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface LogoutResponse {
+  message: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -17,29 +70,19 @@ export class AuthService {
 
   private _user  = signal<AuthUser | null>(null);
   private _token = signal<string | null>(null);
-  
-  private apiUrl       = environment.apiUrl.company
+
+  private apiUrl = environment.apiUrl.company
 
   isLoggedIn   = computed(() => !!this._token());
   currentUser  = computed(() => this._user());
   token        = computed(() => this._token());
-  companyName  = computed(() =>
-    this._user()?.name ?? 'اسم الشركة'
-  );
-  userName     = computed(() =>
-    this._user()?.name ?? 'المستخدم'
-  );
-  customerEmail = computed(() =>
-    this._user()?.email ?? ''
-  );
+  companyName  = computed(() => this._user()?.name ?? 'اسم الشركة');
+  userName     = computed(() => this._user()?.name ?? 'المستخدم');
+  customerEmail = computed(() => this._user()?.email ?? '');
 
   constructor() {
-    const savedToken = localStorage.getItem(
-      'company_token'
-    );
-    const savedUser  = localStorage.getItem(
-      'company_user'
-    );
+    const savedToken = localStorage.getItem('company_token');
+    const savedUser  = localStorage.getItem('company_user');
 
     if (savedToken) {
       this._token.set(savedToken);
@@ -48,30 +91,23 @@ export class AuthService {
     if (savedUser) {
       try {
         const parsedUser = JSON.parse(savedUser);
-
         if (parsedUser && typeof parsedUser === 'object') {
           this._user.set(parsedUser);
         } else {
           localStorage.removeItem('company_user');
         }
-
-      } catch (e) {
-        console.warn('Invalid user JSON in localStorage');
+      } catch {
         localStorage.removeItem('company_user');
       }
     }
   }
 
-  login(identifier: string, password: string) {
-    return this.http.post<{
-      token: string;
-      user:  AuthUser;
-      message: string;
-    }>(
+  login(identifier: string, password: string): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(
       `${this.apiUrl}/users/post-login`,
       { phone: identifier, password }
     );
-  } 
+  }
 
   register(data: {
     name: string;
@@ -79,12 +115,8 @@ export class AuthService {
     email?: string;
     password: string;
     role: string;
-  }) {
-    return this.http.post<{
-      success: boolean;
-      data: AuthUser;
-      message: string;
-    }>(
+  }): Observable<RegisterResponse> {
+    return this.http.post<RegisterResponse>(
       `${this.apiUrl}/users/post-user`,
       data
     );
@@ -94,28 +126,23 @@ export class AuthService {
     this._token.set(token);
     this._user.set(user);
     localStorage.setItem('company_token', token);
-    localStorage.setItem(
-      'company_user', JSON.stringify(user)
-    );
+    localStorage.setItem('company_user', JSON.stringify(user));
+  }
+
+  getMe(): Observable<MeResponse> {
+    return this.http.get<MeResponse>(`${this.apiUrl}/users/me`);
   }
 
   logout(): void {
     const token = this._token();
     if (token) {
-      this.http.post(
-        `${this.apiUrl}/auth/logout`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      ).subscribe({ error: () => {} });
+      this.http.post<LogoutResponse>(
+        `${this.apiUrl}/users/logout`, {}
+      ).pipe(
+        catchError(() => of(null))
+      ).subscribe();
     }
-    this._token.set(null);
-    this._user.set(null);
-    localStorage.removeItem('company_token');
-    localStorage.removeItem('company_user');
+    this.clearLocalSession();
     this.router.navigate(['/auth/login']);
   }
 
@@ -123,10 +150,12 @@ export class AuthService {
     return this._token();
   }
 
-  updateProfile(data: { name?: string; email?: string }) {
+  updateProfile(data: { name?: string; email?: string }): Observable<UpdateProfileResponse> {
     const id = this._user()?.id;
     if (!id) throw new Error('Not authenticated');
-    return this.http.put<any>(`${this.apiUrl}/users/update-user/${id}`, data);
+    return this.http.put<UpdateProfileResponse>(
+      `${this.apiUrl}/users/update-user/${id}`, data
+    );
   }
 
   updateLocalProfile(data: { name?: string; email?: string }): void {
@@ -137,9 +166,18 @@ export class AuthService {
     localStorage.setItem('company_user', JSON.stringify(updated));
   }
 
-  deleteAccount() {
+  deleteAccount(): Observable<DeleteAccountResponse> {
     const id = this._user()?.id;
     if (!id) throw new Error('Not authenticated');
-    return this.http.delete<any>(`${this.apiUrl}/users/delete-user/${id}`);
+    return this.http.delete<DeleteAccountResponse>(
+      `${this.apiUrl}/users/delete-user/${id}`
+    );
+  }
+
+  private clearLocalSession(): void {
+    this._token.set(null);
+    this._user.set(null);
+    localStorage.removeItem('company_token');
+    localStorage.removeItem('company_user');
   }
 }

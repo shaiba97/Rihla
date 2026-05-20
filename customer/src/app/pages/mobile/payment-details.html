@@ -3,7 +3,7 @@
     <div class="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center">
       <svg lucideCheckCircle class="w-8 h-8 text-emerald-600"></svg>
     </div>
-    <h1 class="text-xl font-extrabold text-[var(--text-primary)]">تم تأكيد الحجز بنجاح!</h1>
+    <h1 class="text-xl font-extrabold text-[var(--text-primary)]">سيتم تأكيد الحجز خلال {{ 5 | arabicNumber }} دقائق فقط!</h1>
     <p class="text-sm text-[var(--text-secondary)]">سيتم إرسال التذكرة على واتساب</p>
     <button (click)="goHome()" class="mt-4 px-8 py-3.5 rounded-2xl bg-[var(--primary)] text-white font-bold text-[15px] active:scale-95 transition-all">العودة للرئيسية</button>
   </div>
@@ -51,9 +51,9 @@
              <span class="text-[13px] font-semibold text-[var(--text-primary)]">{{ formattedSeats() | arabicNumber }}</span>
            </div>
            <div class="border-t border-[var(--border)] my-1 pt-2 flex items-center justify-between">
-             <span class="text-[13px] font-bold text-[var(--text-primary)]">الإجمالي</span>
-             <span class="text-[18px] font-extrabold text-[var(--primary)] tabular-nums">{{ totalAmount() | arabicNumber }} <span class="text-[11px] font-medium">جنيه</span></span>
-           </div>
+              <span class="text-[13px] font-bold text-[var(--text-primary)]">الإجمالي</span>
+              <span class="text-[18px] font-extrabold text-[var(--primary)] tabular-nums">{{ totalAmount() | arabicNumber }} <span class="text-[11px] font-medium">جنيه</span></span>
+            </div>
         </div>
 
         <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-4 flex flex-col gap-2">
@@ -138,9 +138,9 @@
 
       <div class="fixed bottom-0 right-0 left-0 bg-[var(--bg-card)] border-t border-[var(--border)] px-4 py-3 flex items-center justify-between gap-4 shadow-[0_-4px_20px_rgba(13,148,136,0.1)]">
          <div class="flex flex-col">
-           <span class="text-[11px] text-[var(--text-muted)]">{{ selectedSeats().length | arabicNumber }} مقعد</span>
-           <span class="text-[18px] font-extrabold text-[var(--primary)] leading-tight tabular-nums">{{ totalAmount() | arabicNumber }} <span class="text-[11px] font-medium">جنيه</span></span>
-         </div>
+            <span class="text-[11px] text-[var(--text-muted)]">{{ selectedSeats().length | arabicNumber }} مقعد</span>
+            <span class="text-[18px] font-extrabold text-[var(--primary)] leading-tight tabular-nums">{{ totalAmount() | arabicNumber }} <span class="text-[11px] font-medium">جنيه</span></span>
+          </div>
         <button (click)="onSubmit()" [disabled]="isSubmitting()" class="flex items-center gap-2 px-6 py-3.5 rounded-2xl font-bold text-[15px] active:scale-95 transition-all duration-150 flex-shrink-0"
           [class.bg-[var(--primary)]]="canSubmit()"
           [class.text-white]="canSubmit()"

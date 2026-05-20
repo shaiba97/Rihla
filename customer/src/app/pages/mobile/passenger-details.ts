@@ -18,6 +18,8 @@ export class PassengerDetails implements OnInit {
 
   trip = signal<any>(null);
   selectedSeats = signal<number[]>([]);
+  baseAmount = signal<number>(0);
+  platformFee = signal<number>(0);
   totalAmount = signal<number>(0);
 
   countryCodes = [{ code: '+249', label: 'SD +249' }, { code: '+20', label: 'EG +20' }, { code: '+966', label: 'SA +966' }, { code: '+971', label: 'AE +971' }];
@@ -34,6 +36,8 @@ export class PassengerDetails implements OnInit {
     const s = history.state;
     this.trip.set(s?.trip);
     this.selectedSeats.set(s?.selectedSeats ?? []);
+    this.baseAmount.set(s?.baseAmount ?? 0);
+    this.platformFee.set(s?.platformFee ?? 0);
     this.totalAmount.set(s?.totalAmount ?? 0);
     this.buildPassengerForms(this.selectedSeats());
   }
@@ -51,7 +55,7 @@ export class PassengerDetails implements OnInit {
     this.contactGroup.markAllAsTouched();
     this.passengersGroup.markAllAsTouched();
     if (!this.canProceed()) return;
-    this.router.navigate(['/m/payment'], { state: { trip: this.trip(), selectedSeats: this.selectedSeats(), totalAmount: this.totalAmount(), contact: this.contactGroup.value, passengers: this.passengersArray.value } });
+    this.router.navigate(['/m/payment'], { state: { trip: this.trip(), selectedSeats: this.selectedSeats(), baseAmount: this.baseAmount(), platformFee: this.platformFee(), totalAmount: this.totalAmount(), contact: this.contactGroup.value, passengers: this.passengersArray.value } });
   }
 
   goBack(): void { history.back(); }

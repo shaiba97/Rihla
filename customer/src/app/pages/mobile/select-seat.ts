@@ -26,7 +26,12 @@ export class SelectSeat implements OnInit {
   bookedSeats = signal<number[]>([]);
   selectedSeats = signal<number[]>([]);
   isLoading = signal<boolean>(true);
-  totalAmount = computed(() => this.selectedSeats().length * (this.trip()?.price ?? 0));
+  platformFee = signal<number>(0);
+
+  platformFeeAmount = computed(() => this.platformFee());
+  baseAmount = computed(() => this.platformFeeAmount() + (this.trip()?.price ?? 0));
+
+  totalAmount = computed(() => this.selectedSeats().length * this.baseAmount());
 
   seatMap = computed((): Seat[] => {
     const total = this.trip()?.busChairs ?? 45;
@@ -53,6 +58,9 @@ export class SelectSeat implements OnInit {
     const tripId = this.route.snapshot.paramMap.get('tripId') ?? '';
     const nav = history.state?.trip;
     if (nav) this.trip.set(nav);
+    this.bookingSvc.getActiveFee().subscribe(fee => {
+      if (fee) this.platformFee.set(Number(fee.amount));
+    });
     this.bookingSvc.getBookedSeats(tripId).subscribe({
       next: r => { this.bookedSeats.set(r.data ?? []); this.isLoading.set(false); },
       error: () => this.isLoading.set(false),
@@ -76,6 +84,17 @@ export class SelectSeat implements OnInit {
     }
   }
 
-  onNext(): void { if (!this.selectedSeats().length) return; this.router.navigate(['/m/passenger'], { state: { trip: this.trip(), selectedSeats: this.selectedSeats(), totalAmount: this.totalAmount() } }); }
+  onNext(): void {
+    if (!this.selectedSeats().length) return;
+    this.router.navigate(['/m/passenger'], {
+      state: {
+        trip: this.trip(),
+        selectedSeats: this.selectedSeats(),
+        baseAmount: this.baseAmount(),
+        platformFee: this.platformFeeAmount(),
+        totalAmount: this.totalAmount(),
+      },
+    });
+  }
   goBack(): void { history.back(); }
 }

@@ -1,7 +1,7 @@
 import { Component, signal, inject, OnInit, computed } from '@angular/core';
 import { NgClass, DatePipe } from '@angular/common';
 import { ChartComponent } from 'ng-apexcharts';
-import { LucideTrendingUp, LucideWallet, LucideBanknote, LucideTicket, LucideClock, LucideMapPin, LucideLoaderCircle, LucideAlertCircle, LucideRefreshCw, LucideCalendar } from '@lucide/angular';
+import { LucideTrendingUp, LucideWallet, LucideBanknote, LucideTicket, LucideClock, LucideMapPin, LucideLoaderCircle, LucideAlertCircle, LucideRefreshCw, LucideCalendar, LucideBarChart3 } from '@lucide/angular';
 import { FinancialsService, FinancialSummary } from '../../../core/services/financials/financials.service';
 import { ApexAxisChartSeries, ApexChart, ApexXAxis, ApexYAxis, ApexGrid, ApexTooltip, ApexDataLabels, ApexFill } from 'ng-apexcharts';
 
@@ -20,7 +20,7 @@ export type ChartOptions = {
 @Component({
   selector: 'app-financials',
   standalone: true,
-  imports: [NgClass, DatePipe, ChartComponent, LucideTrendingUp, LucideWallet, LucideTicket, LucideClock, LucideMapPin, LucideLoaderCircle, LucideAlertCircle, LucideRefreshCw, LucideCalendar],
+  imports: [NgClass, DatePipe, ChartComponent, LucideTrendingUp, LucideWallet, LucideTicket, LucideClock, LucideMapPin, LucideLoaderCircle, LucideAlertCircle, LucideRefreshCw, LucideCalendar, LucideBarChart3],
   templateUrl: './financials.html',
 })
 export class FinancialsComponent implements OnInit {
@@ -28,6 +28,17 @@ export class FinancialsComponent implements OnInit {
   summary = signal<FinancialSummary | null>(null);
   isLoading = signal(true);
   error = signal('');
+
+  perfPeriod = signal<'daily' | 'weekly' | 'monthly' | 'quarterly' | 'half-yearly' | 'yearly'>('monthly');
+  perfData = signal<any[]>([]);
+  perfPeriods = [
+    { id: 'daily' as const, label: 'يومي' },
+    { id: 'weekly' as const, label: 'أسبوعي' },
+    { id: 'monthly' as const, label: 'شهري' },
+    { id: 'quarterly' as const, label: 'ربعي' },
+    { id: 'half-yearly' as const, label: 'نصف سنوي' },
+    { id: 'yearly' as const, label: 'سنوي' },
+  ];
 
   chartOptions = computed<ChartOptions>(() => {
     const daily = this.summary()?.dailyRevenue ?? [];
@@ -66,6 +77,19 @@ export class FinancialsComponent implements OnInit {
       next: r => { this.summary.set(r.data); this.isLoading.set(false); },
       error: e => { this.error.set(e?.error?.message ?? 'حدث خطأ'); this.isLoading.set(false); },
     });
+    this.loadPerformance();
+  }
+
+  loadPerformance() {
+    this.svc.getPerformance(this.perfPeriod()).subscribe({
+      next: r => this.perfData.set(r.data ?? []),
+      error: () => {},
+    });
+  }
+
+  setPerfPeriod(p: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'half-yearly' | 'yearly') {
+    this.perfPeriod.set(p);
+    this.loadPerformance();
   }
 
   toArabic(n: number | string): string { return String(n).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[+d]); }

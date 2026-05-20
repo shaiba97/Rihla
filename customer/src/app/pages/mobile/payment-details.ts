@@ -5,7 +5,6 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { LucideArrowRight, LucideCheckCircle, LucideAlertCircle, LucideClock, LucideUpload, LucideCreditCard, LucideCopy, LucideCheck } from '@lucide/angular';
 import { BookingService } from '../../services/booking/booking.service';
 import { SessionService } from '../../services/session/session.service';
-import { AuthStoreService } from '../../services/auth-store/auth-store.service';
 import { ArabicNumberPipe } from '../../pipes/arabic-number/arabic-number-pipe';
 import { formatArabicDateTime, formatArabicTime } from '../../pipes/arabic-number/arabic-number.util';
 
@@ -19,10 +18,11 @@ export class PaymentDetails implements OnInit {
   private fb = inject(FormBuilder);
   private bookingSvc = inject(BookingService);
   private sessionSvc = inject(SessionService);
-  private authStore = inject(AuthStoreService);
 
   trip = signal<any>(null);
   selectedSeats = signal<number[]>([]);
+  baseAmount = signal<number>(0);
+  platformFee = signal<number>(0);
   totalAmount = signal<number>(0);
   contact = signal<any>(null);
   passengers = signal<any[]>([]);
@@ -78,6 +78,8 @@ export class PaymentDetails implements OnInit {
     }
     this.trip.set(s.trip);
     this.selectedSeats.set(s.selectedSeats ?? []);
+    this.baseAmount.set(s?.baseAmount ?? 0);
+    this.platformFee.set(s?.platformFee ?? 0);
     this.totalAmount.set(s.totalAmount ?? 0);
     this.contact.set(s.contact ?? null);
     this.passengers.set(s.passengers ?? []);
@@ -105,34 +107,23 @@ export class PaymentDetails implements OnInit {
     const selectedSeats = this.selectedSeats();
     const formVal = this.paymentForm.value;
 
-    this.bookingSvc.createBooking({
+    this.bookingSvc.createBookingWithPayment({
       tripId: trip.id,
       seatNumbers: selectedSeats,
       passenger: passengers.map((p: any) => ({ name: p.name, age: Number(p.age), gender: p.gender })),
       passengerContact: `${contact?.countryCode ?? '+249'}${contact?.whatsappNumber ?? ''}`,
+      paymentMethod: formVal.paymentMethod!,
+      transactionId: formVal.transactionId!,
+      receiptFile: this.receiptFile() ?? undefined,
+      totalAmount: this.totalAmount(),
+      baseAmount: this.baseAmount(),
+      platformFeeAmount: this.platformFee(),
+      currency: 'SDG',
     }).subscribe({
-      next: (bookingRes) => {
-        const booking = bookingRes.data;
-        const customerId = this.authStore.customerData()?.id ?? '';
-        this.bookingSvc.confirmPayment(
-          booking.id,
-          customerId,
-          formVal.paymentMethod!,
-          formVal.transactionId!,
-          this.receiptFile()!,
-          this.totalAmount(),
-          'SDG',
-        ).subscribe({
-          next: () => {
-            this.submitSuccess.set(true);
-            this.sessionSvc.clear();
-            this.isSubmitting.set(false);
-          },
-          error: (payErr) => {
-            this.submitError.set(payErr?.error?.message ?? 'فشل تأكيد الدفع');
-            this.isSubmitting.set(false);
-          },
-        });
+      next: () => {
+        this.submitSuccess.set(true);
+        this.sessionSvc.clear();
+        this.isSubmitting.set(false);
       },
       error: (err) => {
         this.submitError.set(err?.error?.message ?? 'فشل إنشاء الحجز');

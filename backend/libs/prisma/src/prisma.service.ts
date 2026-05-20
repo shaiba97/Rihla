@@ -9,8 +9,14 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   private prisma: PrismaClient;
 
   constructor() {
+    const url = new URL(process.env.DATABASE_URL!);
     const pool = new Pool({
-      connectionString: process.env.DATABASE_URL,
+      host: url.hostname,
+      port: parseInt(url.port || '5432'),
+      database: url.pathname.replace('/', ''),
+      user: url.username,
+      password: decodeURIComponent(url.password),
+      ssl: { rejectUnauthorized: false },
     });
     const adapter = new PrismaPg(pool);
 
@@ -40,7 +46,11 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   get booking() { return this.prisma.booking; }
   get payment() { return this.prisma.payment; }
   get ticketPDF() { return this.prisma.ticketPDF; }
+  get platformFee() { return this.prisma.platformFee; }
+  get paymentAccount() { return this.prisma.paymentAccount; }
+  get expense() { return this.prisma.expense; }
 
   async $connect() { return this.prisma.$connect(); }
   async $disconnect() { return this.prisma.$disconnect(); }
+  async $transaction<T>(fn: (tx: any) => Promise<T>): Promise<T> { return this.prisma.$transaction(fn); }
 }

@@ -1,0 +1,449 @@
+<div dir="rtl" class="flex flex-col h-full bg-[var(--bg-base)]">
+  <div class="flex-shrink-0 bg-[var(--bg-card)] border-b border-[var(--border)] px-6 py-4">
+    <div class="flex items-center justify-between flex-wrap gap-3">
+      <div class="flex flex-col gap-0.5">
+        <h1 class="text-xl font-extrabold text-[var(--text-primary)]">الإدارة المالية</h1>
+        <p class="text-xs text-[var(--text-muted)]">إدارة المدفوعات والرسوم وحسابات الدفع لمنصة رحلة</p>
+      </div>
+      <button (click)="refresh()" class="flex items-center gap-2 px-3 py-2 rounded-xl border border-[var(--border)] text-xs font-semibold text-[var(--text-secondary)] hover:border-[var(--border-strong)] hover:text-[var(--text-primary)] transition-all duration-150"><svg lucideRefreshCw class="w-3.5 h-3.5"></svg>تحديث</button>
+    </div>
+    @if (successMsg()) {
+      <div class="mt-3 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--success-light)] border border-green-200"><svg lucideCheckCircle class="w-4 h-4 flex-shrink-0 text-[var(--success)]"></svg><span class="text-sm font-medium text-[var(--success)]">{{ successMsg() }}</span></div>
+    }
+    @if (error()) {
+      <div class="mt-3 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--danger-light)] border border-red-200"><svg lucideAlertCircle class="w-4 h-4 flex-shrink-0 text-[var(--danger)]"></svg><span class="text-sm font-medium text-[var(--danger)]">{{ error() }}</span></div>
+    }
+    <div class="flex items-center gap-1 mt-4 border-b border-[var(--border)]">
+      @for (tab of tabs; track tab.id) {
+        <button (click)="switchTab(tab.id)" class="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 transition-all duration-150 relative" [class.border-[var(--primary)]]="activeTab()===tab.id" [class.text-[var(--text-primary)]]="activeTab()===tab.id" [class.border-transparent]="activeTab()!==tab.id" [class.text-[var(--text-muted)]]="activeTab()!==tab.id" [class.hover:text-[var(--text-primary)]]="activeTab()!==tab.id">
+          @switch (tab.icon) {
+            @case ('activity') { <svg lucideActivity class="w-3.5 h-3.5"></svg> }
+            @case ('clock') { <svg lucideClock class="w-3.5 h-3.5"></svg> }
+            @case ('badge-dollar-sign') { <svg lucideBadgeDollarSign class="w-3.5 h-3.5"></svg> }
+            @case ('receipt-text') { <svg lucideReceiptText class="w-3.5 h-3.5"></svg> }
+            @case ('credit-card') { <svg lucideCreditCard class="w-3.5 h-3.5"></svg> }
+            @case ('bar-chart') { <svg lucideBarChart3 class="w-3.5 h-3.5"></svg> }
+          }
+          {{ tab.label }}
+          @if (tab.id === 'pending' && pendingCount() > 0) {
+            <span class="absolute -top-1 -left-1 w-4 h-4 rounded-full bg-[var(--danger)] text-white text-[9px] font-bold flex items-center justify-center">{{ toArabic(pendingCount()) }}</span>
+          }
+        </button>
+      }
+    </div>
+  </div>
+
+  <div class="flex-1 overflow-y-auto p-6">
+    @if (activeTab() === 'overview') {
+      <div class="flex flex-col gap-5">
+        @if (!overview()) {
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">@for (i of [1,2,3,4]; track i) {<div class="h-28 rounded-2xl bg-[var(--bg-card)] border border-[var(--border)] animate-pulse"></div>}</div>
+        }
+        @if (overview()) {
+          @let ov = overview();
+          <!-- Row 1: three core financial metrics -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div class="flex flex-col gap-3 p-5 bg-[var(--primary)] rounded-2xl text-white">
+              <div class="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center"><svg lucideWallet class="w-4 h-4 text-white"></svg></div>
+              <div class="flex flex-col gap-0.5"><div class="flex items-baseline gap-1"><span class="text-2xl font-extrabold tabular-nums">{{ formatAmount(ov.totalRevenue ?? 0) }}</span><span class="text-xs text-white/70">جنيه</span></div><span class="text-xs text-white/70">إجمالي المبالغ المحصلة <span class="text-[9px] opacity-60">(totalAmount)</span></span></div>
+            </div>
+            <div class="flex flex-col gap-3 p-5 bg-[var(--bg-card)] rounded-2xl border border-[var(--border)]">
+              <div class="w-9 h-9 rounded-xl bg-[var(--primary-light)] flex items-center justify-center"><svg lucideBadgeDollarSign class="w-4 h-4 text-[var(--text-primary)]"></svg></div>
+              <div class="flex flex-col gap-0.5"><div class="flex items-baseline gap-1"><span class="text-2xl font-extrabold text-[var(--text-primary)] tabular-nums">{{ formatAmount(ov.totalPlatformEarnings ?? 0) }}</span><span class="text-xs text-[var(--text-muted)]">جنيه</span></div><span class="text-xs text-[var(--text-muted)]">أرباح المنصة <span class="text-[9px] opacity-60">(platformFee)</span></span></div>
+            </div>
+            <div class="flex flex-col gap-3 p-5 bg-[var(--bg-card)] rounded-2xl border border-[var(--border)]">
+              <div class="w-9 h-9 rounded-xl bg-[var(--primary-light)] flex items-center justify-center"><svg lucideBuilding2 class="w-4 h-4 text-[var(--text-primary)]"></svg></div>
+              <div class="flex flex-col gap-0.5"><div class="flex items-baseline gap-1"><span class="text-2xl font-extrabold text-[var(--text-primary)] tabular-nums">{{ formatAmount(ov.totalCompanyAmount ?? 0) }}</span><span class="text-xs text-[var(--text-muted)]">جنيه</span></div><span class="text-xs text-[var(--text-muted)]">أرباح الشركات <span class="text-[9px] opacity-60">(price)</span></span></div>
+            </div>
+          </div>
+          <!-- Row 2: supporting stats -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="flex flex-col gap-3 p-5 bg-[var(--bg-card)] rounded-2xl border border-[var(--border)]">
+              <div class="w-9 h-9 rounded-xl bg-[var(--warning-light)] flex items-center justify-center"><svg lucideClock class="w-4 h-4 text-[var(--warning)]"></svg></div>
+              <div class="flex flex-col gap-0.5"><span class="text-2xl font-extrabold text-[var(--text-primary)] tabular-nums">{{ toArabic(ov.pendingPayments ?? 0) }}</span><span class="text-xs text-[var(--text-muted)]">طلبات بانتظار التأكيد</span></div>
+            </div>
+            <div class="flex flex-col gap-3 p-5 bg-[var(--bg-card)] rounded-2xl border border-[var(--border)]">
+              <div class="w-9 h-9 rounded-xl bg-[var(--success-light)] flex items-center justify-center"><svg lucideCheckCircle class="w-4 h-4 text-[var(--success)]"></svg></div>
+              <div class="flex flex-col gap-0.5"><span class="text-2xl font-extrabold text-[var(--text-primary)] tabular-nums">{{ toArabic(ov.confirmedPayments ?? 0) }}</span><span class="text-xs text-[var(--text-muted)]">مدفوعات مؤكدة</span></div>
+            </div>
+            <div class="flex flex-col gap-3 p-5 bg-[var(--bg-card)] rounded-2xl border border-[var(--border)]">
+              <div class="w-9 h-9 rounded-xl bg-[var(--danger-light)] flex items-center justify-center"><svg lucideReceiptText class="w-4 h-4 text-[var(--danger)]"></svg></div>
+              <div class="flex flex-col gap-0.5"><div class="flex items-baseline gap-1"><span class="text-2xl font-extrabold text-[var(--text-primary)] tabular-nums">{{ formatAmount(ov.totalExpenses ?? 0) }}</span><span class="text-xs text-[var(--text-muted)]">جنيه</span></div><span class="text-xs text-[var(--text-muted)]">إجمالي المصروفات</span></div>
+            </div>
+            <div class="flex flex-col gap-3 p-5 bg-[var(--bg-card)] rounded-2xl border border-[var(--border)]">
+              <div class="w-9 h-9 rounded-xl bg-[var(--primary)] flex items-center justify-center"><svg lucideTrendingUp class="w-4 h-4 text-white"></svg></div>
+              <div class="flex flex-col gap-0.5"><div class="flex items-baseline gap-1"><span class="text-2xl font-extrabold text-[var(--text-primary)] tabular-nums">{{ formatAmount(ov.netRevenue ?? 0) }}</span><span class="text-xs text-[var(--text-muted)]">جنيه</span></div><span class="text-xs text-[var(--text-muted)]">صافي أرباح المنصة</span></div>
+            </div>
+          </div>
+          @if (ov.activeFee) {
+            <div class="flex items-center justify-between bg-[var(--bg-card)] border-2 border-[var(--border-strong)] rounded-2xl px-5 py-4 gap-4">
+              <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-xl bg-[var(--primary)] flex items-center justify-center"><svg lucideBadgeDollarSign class="w-5 h-5 text-white"></svg></div>
+                <div class="flex flex-col gap-0.5">
+                  <span class="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">رسوم المنصة النشطة</span>
+                  <div class="flex items-baseline gap-1.5"><span class="text-2xl font-extrabold text-[var(--text-primary)] tabular-nums">{{ toArabic(ov.activeFee.amount) }}</span><span class="text-sm text-[var(--text-secondary)]">{{ ov.activeFee.currency }}</span>@if (ov.activeFee.label) {<span class="text-xs text-[var(--text-muted)]">— {{ ov.activeFee.label }}</span>}</div>
+                  <p class="text-xs text-[var(--text-muted)]">تُضاف تلقائياً على سعر كل تذكرة يشتريها العميل</p>
+                </div>
+              </div>
+              <button (click)="switchTab('platform-fee')" class="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-[var(--border)] text-xs font-bold text-[var(--text-secondary)] hover:border-[var(--border-strong)] transition-all"><svg lucidePencil class="w-3.5 h-3.5"></svg>إدارة الرسوم</button>
+            </div>
+          }
+          <div class="grid grid-cols-3 gap-4">
+            @for (item of [{label:'حجوزات مؤكدة',value:ov.bookingStatus?.confirmed ?? 0},{label:'حجوزات معلقة',value:ov.bookingStatus?.pending ?? 0},{label:'حجوزات ملغاة',value:ov.bookingStatus?.cancelled ?? 0}]; track item.label) {
+              <div class="flex flex-col gap-2 p-4 bg-[var(--bg-card)] rounded-2xl border border-[var(--border)]"><span class="text-xs font-medium text-[var(--text-muted)]">{{ item.label }}</span><span class="text-2xl font-extrabold text-[var(--text-primary)] tabular-nums">{{ toArabic(item.value) }}</span></div>
+            }
+          </div>
+          <!-- Earnings breakdown -->
+          <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] overflow-hidden">
+            <div class="px-5 py-3.5 border-b border-[var(--border)] flex items-center justify-between flex-wrap gap-3">
+              <h3 class="text-sm font-bold text-[var(--text-primary)]">تحليل الأرباح</h3>
+              <div class="flex items-center gap-1 bg-[var(--bg-base)] rounded-xl p-0.5 border border-[var(--border)]">
+                @for (p of earningsPeriods; track p.id) {
+                  <button (click)="setPeriod(p.id)" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all" [class.bg-white]="earningsPeriod()===p.id" [class.shadow-sm]="earningsPeriod()===p.id" [class.text-[var(--text-primary)]]="earningsPeriod()===p.id" [class.text-[var(--text-muted)]]="earningsPeriod()!==p.id" [class.hover:text-[var(--text-primary)]]="earningsPeriod()!==p.id">{{ p.label }}</button>
+                }
+              </div>
+            </div>
+            @if (earningsData().length === 0) {
+              <div class="px-5 py-10 text-center text-xs text-[var(--text-muted)]">لا توجد بيانات للأرباح في هذه الفترة</div>
+            } @else {
+              <div class="overflow-x-auto">
+                <table class="w-full">
+                  <thead><tr class="bg-[var(--bg-base)] border-b border-[var(--border)]"><th class="text-right px-4 py-3 text-xs font-bold text-[var(--text-secondary)] whitespace-nowrap">الفترة</th><th class="text-right px-4 py-3 text-xs font-bold text-[var(--text-secondary)] whitespace-nowrap">المعاملات</th><th class="text-right px-4 py-3 text-xs font-bold text-[var(--text-secondary)] whitespace-nowrap">المبالغ المحصلة</th><th class="text-right px-4 py-3 text-xs font-bold text-[var(--text-secondary)] whitespace-nowrap">أرباح المنصة</th><th class="text-right px-4 py-3 text-xs font-bold text-[var(--text-secondary)] whitespace-nowrap">أرباح الشركات</th><th class="text-right px-4 py-3 text-xs font-bold text-[var(--text-secondary)] whitespace-nowrap">الشركات</th><th class="text-right px-4 py-3 text-xs font-bold text-[var(--text-secondary)] whitespace-nowrap">تفاصيل الشركات</th></tr></thead>
+                  <tbody>
+                    @for (e of earningsData(); track e.period) {
+                      <tr class="border-b border-[var(--border)] hover:bg-[var(--bg-base)] transition-colors">
+                        <td class="px-4 py-3 text-xs font-bold text-[var(--text-primary)] whitespace-nowrap">{{ e.period }}</td>
+                        <td class="px-4 py-3 text-xs tabular-nums text-[var(--text-primary)]">{{ toArabic(e.count) }}</td>
+                        <td class="px-4 py-3 text-xs font-bold tabular-nums text-[var(--text-primary)]">{{ formatAmount(e.revenue) }} <span class="text-[10px] font-normal text-[var(--text-muted)]">جنيه</span></td>
+                        <td class="px-4 py-3 text-xs font-bold tabular-nums text-[var(--primary)]">{{ formatAmount(e.platformEarnings) }} <span class="text-[10px] font-normal text-[var(--text-muted)]">جنيه</span></td>
+                        <td class="px-4 py-3 text-xs font-bold tabular-nums text-[var(--success)]">{{ formatAmount(e.companyAmount) }} <span class="text-[10px] font-normal text-[var(--text-muted)]">جنيه</span></td>
+                        <td class="px-4 py-3 text-xs tabular-nums text-[var(--text-primary)]">{{ toArabic(e.companies?.length ?? 0) }}</td>
+                        <td class="px-4 py-3">
+                          <div class="flex flex-col gap-1">
+                            @for (c of e.companies ?? []; track $index) {
+                              <div class="flex items-center gap-2 text-[10px] flex-wrap"><span class="font-bold text-[var(--text-primary)]">{{ c.name }}</span><span class="text-[var(--text-muted)]">المحصّل: {{ formatAmount(c.revenue) }} ج</span><span class="text-[var(--primary)]">المنصة: {{ formatAmount(c.platformEarnings) }} ج</span><span class="text-[var(--success)]">الشركة: {{ formatAmount(c.companyAmount) }} ج</span></div>
+                            }
+                          </div>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </div>
+
+          <!-- All transactions -->
+          <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] overflow-hidden">
+            <div class="px-5 py-3.5 border-b border-[var(--border)] flex items-center justify-between"><h3 class="text-sm font-bold text-[var(--text-primary)]">جميع المعاملات <span class="text-[var(--text-muted)] font-normal">({{ toArabic(ov.allTransactions ?? 0) }})</span></h3></div>
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead><tr class="bg-[var(--bg-base)] border-b border-[var(--border)]"><th class="text-right px-4 py-3 text-xs font-bold text-[var(--text-secondary)] whitespace-nowrap">العميل</th><th class="text-right px-4 py-3 text-xs font-bold text-[var(--text-secondary)] whitespace-nowrap">المسار</th><th class="text-right px-4 py-3 text-xs font-bold text-[var(--text-secondary)] whitespace-nowrap">المبلغ</th><th class="text-right px-4 py-3 text-xs font-bold text-[var(--text-secondary)] whitespace-nowrap">سعر التذكرة</th><th class="text-right px-4 py-3 text-xs font-bold text-[var(--text-secondary)] whitespace-nowrap">رسوم المنصة</th><th class="text-right px-4 py-3 text-xs font-bold text-[var(--text-secondary)] whitespace-nowrap">الشركة</th><th class="text-right px-4 py-3 text-xs font-bold text-[var(--text-secondary)] whitespace-nowrap">طريقة الدفع</th><th class="text-right px-4 py-3 text-xs font-bold text-[var(--text-secondary)] whitespace-nowrap">الحالة</th><th class="text-right px-4 py-3 text-xs font-bold text-[var(--text-secondary)] whitespace-nowrap">التاريخ</th></tr></thead>
+                <tbody>
+                  @for (p of ov.recentPayments ?? []; track p.id) {
+                    <tr class="border-b border-[var(--border)] hover:bg-[var(--bg-base)] transition-colors">
+                      <td class="px-4 py-3"><div class="flex flex-col"><span class="text-xs font-semibold text-[var(--text-primary)]">{{ p.customer?.name ?? '—' }}</span><span class="text-[10px] text-[var(--text-muted)]">{{ p.customer?.phone ?? '' }}</span></div></td>
+                      <td class="px-4 py-3 text-xs font-semibold text-[var(--text-primary)] whitespace-nowrap">{{ p.trip?.from ?? '—' }} ← {{ p.trip?.to ?? '—' }}</td>
+                      <td class="px-4 py-3 text-xs font-bold text-[var(--text-primary)] tabular-nums whitespace-nowrap">{{ formatAmount(p.totalAmount) }} <span class="text-[10px] font-normal text-[var(--text-muted)]">جنيه</span></td>
+                      <td class="px-4 py-3 text-xs font-bold text-[var(--success)] tabular-nums whitespace-nowrap">{{ formatAmount(p.companyAmount) }} <span class="text-[10px] font-normal text-[var(--text-muted)]">جنيه</span></td>
+                      <td class="px-4 py-3 text-xs font-bold whitespace-nowrap" [class.text-[var(--primary)]]="p.platformFeeAmount > 0" [class.text-[var(--text-muted)]]="!p.platformFeeAmount">{{ formatAmount(p.platformFeeAmount) }} <span class="text-[10px] font-normal">جنيه</span></td>
+                      <td class="px-4 py-3 text-xs text-[var(--text-primary)]"> {{p.trip?.bus?.company.name}} </td>
+                      <td class="px-4 py-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[var(--primary-light)] text-[var(--text-primary)]">{{ methodLabel(p.paymentMethod) }}</span></td>
+                      <td class="px-4 py-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold" [class]="statusClasses(p.status).join(' ')">{{ statusLabel(p.status) }}</span></td>
+                      <td class="px-4 py-3 text-[10px] text-[var(--text-muted)] whitespace-nowrap">{{ fmtDate(p.createdAt) }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    @if (activeTab() === 'pending') {
+      <div class="flex flex-col gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-xl bg-[var(--warning-light)] flex items-center justify-center"><svg lucideClock class="w-4 h-4 text-[var(--warning)]"></svg></div>
+          <div><h2 class="text-base font-bold text-[var(--text-primary)]">طلبات الدفع المعلقة</h2><p class="text-xs text-[var(--text-muted)]">راجع كل طلب وتحقق من الإيصال قبل التأكيد أو الرفض</p></div>
+        </div>
+        @if (pendingList().length === 0) {
+          <div class="flex flex-col items-center justify-center py-20 gap-4 bg-[var(--bg-card)] rounded-2xl border border-[var(--border)]">
+            <div class="w-14 h-14 rounded-full bg-[var(--success-light)] flex items-center justify-center"><svg lucideCheckCircle class="w-7 h-7 text-[var(--success)]"></svg></div>
+            <div class="text-center"><p class="text-base font-bold text-[var(--text-primary)]">لا توجد طلبات معلقة</p><p class="text-xs text-[var(--text-muted)] mt-1">جميع الطلبات تمت معالجتها ✓</p></div>
+          </div>
+        }
+        <div class="flex flex-col gap-4">
+          @for (p of pendingList(); track p.id) {
+            <div class="bg-[var(--bg-card)] rounded-2xl border-2 border-[var(--warning-light)] overflow-hidden shadow-[var(--shadow-sm)]">
+              <div class="flex items-center justify-between px-5 py-3.5 border-b border-[var(--border)] bg-[var(--warning-light)]/40">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-full bg-[var(--warning-light)] border-2 border-[var(--warning)] flex items-center justify-center"><svg lucideClock class="w-4 h-4 text-[var(--warning)]"></svg></div>
+                  <div><span class="text-sm font-bold text-[var(--text-primary)]">{{ p.customer?.name ?? '—' }}</span><span class="text-xs text-[var(--text-muted)] block">{{ p.customer?.phone }}</span></div>
+                </div>
+                <div class="flex items-center gap-1.5"><span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-[var(--warning-light)] text-[var(--warning)]">قيد الانتظار</span><span class="text-[10px] text-[var(--text-muted)]">{{ fmtDate(p.createdAt) }}</span></div>
+              </div>
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-0 divide-x divide-y divide-[var(--border)] border-b border-[var(--border)]">
+                <div class="flex flex-col gap-1 p-4"><span class="text-[10px] font-medium text-[var(--text-muted)] uppercase">المسار</span><span class="text-sm font-bold text-[var(--text-primary)]">{{ p.trip?.from ?? '—' }} ← {{ p.trip?.to ?? '—' }}</span></div>
+                <div class="flex flex-col gap-1 p-4"><span class="text-[10px] font-medium text-[var(--text-muted)] uppercase">المبلغ الكلي</span><span class="text-sm font-extrabold text-[var(--text-primary)] tabular-nums">{{ formatAmount(p.totalAmount) }} جنيه</span></div>
+                <div class="flex flex-col gap-1 p-4"><span class="text-[10px] font-medium text-[var(--text-muted)] uppercase">سعر التذكرة</span><span class="text-sm font-extrabold text-[var(--success)] tabular-nums">{{ formatAmount(p.companyAmount) }} جنيه</span></div>
+                <div class="flex flex-col gap-1 p-4"><span class="text-[10px] font-medium text-[var(--text-muted)] uppercase">رسوم المنصة</span><span class="text-sm font-extrabold text-[var(--primary)] tabular-nums">{{ formatAmount(p.platformFeeAmount ?? 0) }} جنيه</span></div>
+                <div class="flex flex-col gap-1 p-4"><span class="text-[10px] font-medium text-[var(--text-muted)] uppercase">طريقة الدفع</span><span class="text-sm font-bold text-[var(--text-primary)]">{{ methodLabel(p.paymentMethod) }}</span></div>
+              </div>
+              <div class="flex items-center justify-between px-5 py-3 border-b border-[var(--border)] gap-4 flex-wrap">
+                <div class="flex flex-col gap-0.5"><span class="text-[10px] text-[var(--text-muted)]">رقم المعاملة</span><code class="text-sm font-mono font-bold text-[var(--text-primary)] bg-[var(--bg-base)] px-2 py-0.5 rounded-lg">{{ p.transactionId }}</code></div>
+                @if (p.recieptFile) {
+                  <button (click)="viewReceipt(p.recieptFile)" class="flex items-center gap-2 px-3 py-2 rounded-xl border border-[var(--border)] text-xs font-bold text-[var(--text-secondary)] hover:border-[var(--border-strong)] hover:text-[var(--text-primary)] transition-all"><svg lucideEye class="w-3.5 h-3.5"></svg>عرض الإيصال</button>
+                }
+              </div>
+              <div class="px-5 py-4 flex items-center justify-between gap-3 flex-wrap">
+                @if (confirmingId() === p.id) {
+                  <div class="flex items-center gap-3 flex-1 p-3 rounded-xl bg-[var(--success-light)] border border-green-200">
+                    <svg lucideShield class="w-5 h-5 text-[var(--success)] flex-shrink-0"></svg>
+                    <p class="text-sm font-medium text-[var(--success)] flex-1">تأكيد الدفعة وإصدار التذكرة للعميل؟</p>
+                    <div class="flex gap-2"><button (click)="confirmPayment(p.id)" class="px-4 py-2 rounded-xl bg-[var(--success)] text-white text-xs font-bold hover:opacity-90 transition-all active:scale-95">نعم، تأكيد</button><button (click)="cancelConfirm()" class="px-3 py-2 rounded-xl border border-[var(--border)] text-xs font-bold text-[var(--text-muted)] hover:bg-[var(--bg-base)] transition-all">إلغاء</button></div>
+                  </div>
+                } @else if (rejectingId() === p.id) {
+                  <div class="flex flex-col gap-2 flex-1 p-3 rounded-xl bg-[var(--danger-light)] border border-red-200">
+                    <p class="text-xs font-bold text-[var(--danger)]">سبب الرفض (اختياري):</p>
+                    <input type="text" [ngModel]="rejectReason()" (ngModelChange)="rejectReason.set($event)" placeholder="مثال: الإيصال غير واضح" class="px-3 py-2 rounded-xl border border-red-200 text-xs text-[var(--text-primary)] bg-white outline-none focus:border-red-400">
+                    <div class="flex gap-2"><button (click)="rejectPayment(p.id)" class="px-4 py-2 rounded-xl bg-[var(--danger)] text-white text-xs font-bold hover:opacity-90 transition-all active:scale-95">تأكيد الرفض</button><button (click)="cancelReject()" class="px-3 py-2 rounded-xl border border-[var(--border)] text-xs font-bold text-[var(--text-muted)] hover:bg-white transition-all">إلغاء</button></div>
+                  </div>
+                } @else {
+                  <div class="flex items-center gap-3 flex-wrap">
+                    <button (click)="startConfirm(p.id)" class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--primary)] text-white text-sm font-bold hover:bg-[var(--primary-hover)] transition-all active:scale-95 shadow-sm"><svg lucideCheckCircle class="w-4 h-4"></svg>تأكيد الدفعة</button>
+                    <button (click)="startReject(p.id)" class="flex items-center gap-2 px-5 py-2.5 rounded-xl border-2 border-red-200 text-[var(--danger)] text-sm font-bold hover:bg-[var(--danger-light)] transition-all active:scale-95"><svg lucideXCircle class="w-4 h-4"></svg>رفض</button>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    @if (activeTab() === 'platform-fee') {
+      <div class="flex flex-col gap-5">
+        <div class="flex items-center justify-between flex-wrap gap-3">
+          <div class="flex flex-col gap-1"><h2 class="text-base font-bold text-[var(--text-primary)]">رسوم منصة رحلة</h2><p class="text-xs text-[var(--text-muted)]">الرسوم تُضاف تلقائياً على سعر التذكرة — لا تُؤخذ من الشركة</p></div>
+          <button (click)="openCreateFee()" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--primary)] text-white text-sm font-bold hover:bg-[var(--primary-hover)] transition-all active:scale-95"><svg lucidePlus class="w-4 h-4"></svg>إضافة رسوم</button>
+        </div>
+        <div class="flex items-start gap-4 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-5">
+          <div class="w-10 h-10 rounded-xl bg-[var(--primary)] flex items-center justify-center flex-shrink-0"><svg lucideShield class="w-5 h-5 text-white"></svg></div>
+          <div class="flex flex-col gap-2">
+            <h3 class="text-sm font-bold text-[var(--text-primary)]">آلية عمل رسوم المنصة</h3>
+            <div class="flex flex-wrap gap-3 text-xs text-[var(--text-secondary)]">
+              <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--bg-base)] border border-[var(--border)]"><span class="font-bold text-[var(--text-primary)]">١</span>الشركة تحدد سعر التذكرة</div>
+              <div class="text-[var(--text-muted)] self-center">+</div>
+              <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--primary)] text-white"><span class="font-bold">٢</span>رحلة تضيف الرسوم الثابتة</div>
+              <div class="text-[var(--text-muted)] self-center">=</div>
+              <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--bg-base)] border border-[var(--border)]"><span class="font-bold text-[var(--text-primary)]">٣</span>العميل يدفع المجموع</div>
+            </div>
+            <p class="text-xs text-[var(--text-muted)] mt-1">مثال: سعر التذكرة ١٠٠ جنيه + رسوم المنصة ٥ جنيه = العميل يدفع ١٠٥ جنيه. الشركة تستلم ١٠٠ جنيه كاملة. رحلة تكسب ٥ جنيه.</p>
+          </div>
+        </div>
+        @if (showFeeForm()) {
+          <div class="bg-[var(--bg-card)] rounded-2xl border-2 border-[var(--border-strong)] p-5 flex flex-col gap-4">
+            <h3 class="text-sm font-bold text-[var(--text-primary)]">{{ editingFeeId() ? 'تعديل الرسوم' : 'إضافة رسوم جديدة' }}</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-[var(--text-primary)]">المبلغ (جنيه) *</label><input type="number" [ngModel]="feeAmount()" (ngModelChange)="feeAmount.set(+$event)" placeholder="مثال: 5" min="0" step="0.5" class="px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--bg-base)] text-sm font-semibold text-[var(--text-primary)] outline-none focus:border-[var(--border-strong)] transition-all"></div>
+              <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-[var(--text-primary)]">العملة</label><select [ngModel]="feeCurrency()" (ngModelChange)="feeCurrency.set($event)" class="px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--bg-base)] text-sm font-semibold text-[var(--text-primary)] outline-none focus:border-[var(--border-strong)] transition-all"><option value="جنيه سوداني">جنيه سوداني</option><option value="دولار أمريكي">دولار أمريكي</option></select></div>
+              <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-[var(--text-primary)]">تسمية (اختياري)</label><input type="text" [ngModel]="feeLabel()" (ngModelChange)="feeLabel.set($event)" placeholder="مثال: رسوم خدمة" class="px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--bg-base)] text-sm font-semibold text-[var(--text-primary)] outline-none focus:border-[var(--border-strong)] transition-all"></div>
+            </div>
+            <div class="flex items-center gap-3">
+              <button (click)="saveFee()" [disabled]="isSavingFee()" class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--primary)] text-white text-sm font-bold disabled:opacity-50 hover:bg-[var(--primary-hover)] transition-all active:scale-95">@if (isSavingFee()) {<svg lucideLoaderCircle class="w-4 h-4 animate-spin"></svg>} @else {<svg lucideCheck class="w-4 h-4"></svg>}{{ isSavingFee() ? 'جاري الحفظ...' : 'حفظ' }}</button>
+              <button (click)="closeFeeForm()" class="px-5 py-2.5 rounded-xl border border-[var(--border)] text-sm font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-base)] transition-all">إلغاء</button>
+            </div>
+          </div>
+        }
+        <div class="flex flex-col gap-3">
+          @if (fees().length === 0) {
+            <div class="flex flex-col items-center py-14 gap-3 bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] text-[var(--text-muted)]"><svg lucideBadgeDollarSign class="w-10 h-10 opacity-30"></svg><p class="text-sm">لا توجد رسوم محددة بعد</p></div>
+          }
+          @for (fee of fees(); track fee.id) {
+            <div class="flex items-center justify-between bg-[var(--bg-card)] rounded-2xl p-5 border gap-4" [class.border-[var(--primary)]]="fee.isActive" [class.shadow-[var(--shadow-sm)]]="fee.isActive" [class.border-[var(--border)]]="!fee.isActive" [class.opacity-60]="!fee.isActive">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center" [class.bg-[var(--primary)]]="fee.isActive" [class.bg-[var(--bg-base)]]="!fee.isActive" [class.border]="!fee.isActive" [class.border-[var(--border)]]="!fee.isActive"><svg lucideBadgeDollarSign class="w-6 h-6" [class.text-white]="fee.isActive" [class.text-[var(--text-muted)]]="!fee.isActive"></svg></div>
+                <div class="flex flex-col gap-0.5">
+                  <div class="flex items-baseline gap-2 flex-wrap"><span class="text-2xl font-extrabold text-[var(--text-primary)] tabular-nums">{{ toArabic(fee.amount) }}</span><span class="text-sm text-[var(--text-muted)]">{{ fee.currency }}</span>@if (fee.label) {<span class="text-xs text-[var(--text-muted)] font-medium">— {{ fee.label }}</span>}@if (fee.isActive) {<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[var(--success-light)] text-[var(--success)]">نشط ✓</span>}</div>
+                  <span class="text-xs text-[var(--text-muted)]">أُضيف في {{ fmtDate(fee.createdAt) }}</span>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                @if (!fee.isActive) {<button (click)="activateFee(fee.id)" class="px-3 py-2 rounded-xl border border-[var(--border)] text-xs font-bold text-[var(--text-secondary)] hover:border-[var(--primary)] hover:text-[var(--primary)] transition-all">تفعيل</button>}
+                <button (click)="openEditFee(fee)" class="w-9 h-9 flex items-center justify-center rounded-xl border border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--border-strong)] hover:text-[var(--text-primary)] transition-all"><svg lucidePencil class="w-4 h-4"></svg></button>
+                <button (click)="deleteFee(fee.id)" class="w-9 h-9 flex items-center justify-center rounded-xl border border-[var(--border)] text-[var(--text-muted)] hover:border-red-200 hover:text-[var(--danger)] hover:bg-[var(--danger-light)] transition-all"><svg lucideTrash2 class="w-4 h-4"></svg></button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    @if (activeTab() === 'expenses') {
+      <div class="flex flex-col gap-5">
+        <div class="flex items-center justify-between flex-wrap gap-3">
+          <div class="flex flex-col gap-1"><h2 class="text-base font-bold text-[var(--text-primary)]">المصروفات</h2><p class="text-xs text-[var(--text-muted)]">تسجيل مصروفات المنصة (إيجار، رواتب، فواتير، ...)</p></div>
+          <button (click)="openCreateExpense()" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--primary)] text-white text-sm font-bold hover:bg-[var(--primary-hover)] transition-all active:scale-95"><svg lucidePlus class="w-4 h-4"></svg>إضافة مصروف</button>
+        </div>
+        @if (showExpenseForm()) {
+          <div class="bg-[var(--bg-card)] rounded-2xl border-2 border-[var(--border-strong)] p-5 flex flex-col gap-4">
+            <h3 class="text-sm font-bold text-[var(--text-primary)]">{{ editingExpenseId() ? 'تعديل المصروف' : 'إضافة مصروف جديد' }}</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-[var(--text-primary)]">المبلغ (جنيه) *</label><input type="number" [ngModel]="expenseAmount()" (ngModelChange)="expenseAmount.set(+$event)" placeholder="مثال: 5000" min="0" step="any" class="px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--bg-base)] text-sm font-semibold text-[var(--text-primary)] outline-none focus:border-[var(--border-strong)] transition-all"></div>
+              <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-[var(--text-primary)]">السبب *</label><input type="text" [ngModel]="expenseReason()" (ngModelChange)="expenseReason.set($event)" placeholder="مثال: إيجار المكتب" class="px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--bg-base)] text-sm font-semibold text-[var(--text-primary)] outline-none focus:border-[var(--border-strong)] transition-all"></div>
+            </div>
+            <div class="flex items-center gap-3">
+              <button (click)="saveExpense()" [disabled]="isSavingExpense()" class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--primary)] text-white text-sm font-bold disabled:opacity-50 hover:bg-[var(--primary-hover)] transition-all active:scale-95">@if (isSavingExpense()) {<svg lucideLoaderCircle class="w-4 h-4 animate-spin"></svg>} @else {<svg lucideCheck class="w-4 h-4"></svg>}{{ isSavingExpense() ? 'جاري الحفظ...' : 'حفظ' }}</button>
+              <button (click)="closeExpenseForm()" class="px-5 py-2.5 rounded-xl border border-[var(--border)] text-sm font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-base)] transition-all">إلغاء</button>
+            </div>
+          </div>
+        }
+        <div class="flex flex-col gap-3">
+          @if (expenses().length === 0) {
+            <div class="flex flex-col items-center py-14 gap-3 bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] text-[var(--text-muted)]"><svg lucideReceiptText class="w-10 h-10 opacity-30"></svg><p class="text-sm">لا توجد مصروفات مسجلة بعد</p></div>
+          }
+          @for (e of expenses(); track e.id) {
+            <div class="flex items-center justify-between bg-[var(--bg-card)] rounded-2xl p-5 border border-[var(--border)] gap-4 hover:shadow-[var(--shadow-sm)] transition-all">
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-[var(--danger-light)] flex items-center justify-center border border-red-100"><svg lucideReceiptText class="w-6 h-6 text-[var(--danger)]"></svg></div>
+                <div class="flex flex-col gap-0.5">
+                  <div class="flex items-baseline gap-2 flex-wrap"><span class="text-2xl font-extrabold text-[var(--text-primary)] tabular-nums">{{ formatAmount(e.amount) }}</span><span class="text-sm text-[var(--text-muted)]">جنيه</span></div>
+                  <span class="text-sm font-bold text-[var(--text-secondary)]">{{ e.reason }}</span>
+                  <span class="text-xs text-[var(--text-muted)]">{{ fmtDate(e.createdAt) }}</span>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <button (click)="openEditExpense(e)" class="w-9 h-9 flex items-center justify-center rounded-xl border border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--border-strong)] hover:text-[var(--text-primary)] transition-all"><svg lucidePencil class="w-4 h-4"></svg></button>
+                <button (click)="deleteExpense(e.id)" class="w-9 h-9 flex items-center justify-center rounded-xl border border-[var(--border)] text-[var(--text-muted)] hover:border-red-200 hover:text-[var(--danger)] hover:bg-[var(--danger-light)] transition-all"><svg lucideTrash2 class="w-4 h-4"></svg></button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    @if (activeTab() === 'accounts') {
+      <div class="flex flex-col gap-5">
+        <div class="flex items-center justify-between flex-wrap gap-3">
+          <div class="flex flex-col gap-1"><h2 class="text-base font-bold text-[var(--text-primary)]">حسابات استقبال الدفع</h2><p class="text-xs text-[var(--text-muted)]">الحسابات التي يحول إليها العملاء رسوم التذاكر</p></div>
+          <button (click)="openCreateAcc()" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--primary)] text-white text-sm font-bold hover:bg-[var(--primary-hover)] transition-all active:scale-95"><svg lucidePlus class="w-4 h-4"></svg>إضافة حساب</button>
+        </div>
+        @if (showAccForm()) {
+          <div class="bg-[var(--bg-card)] rounded-2xl border-2 border-[var(--border-strong)] p-5 flex flex-col gap-4">
+            <h3 class="text-sm font-bold text-[var(--text-primary)]">{{ editingAccId() ? 'تعديل الحساب' : 'إضافة حساب جديد' }}</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-[var(--text-primary)]">اسم صاحب الحساب *</label><input type="text" [ngModel]="accHolder()" (ngModelChange)="accHolder.set($event)" placeholder="الاسم الكامل" class="px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--bg-base)] text-sm font-semibold text-[var(--text-primary)] outline-none focus:border-[var(--border-strong)] transition-all"></div>
+              <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-[var(--text-primary)]">رقم الحساب *</label><input type="text" [ngModel]="accNumber()" (ngModelChange)="accNumber.set($event)" placeholder="مثال: 09XXXXXXXX" class="px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--bg-base)] text-sm font-semibold text-[var(--text-primary)] outline-none focus:border-[var(--border-strong)] transition-all direction-ltr text-left"></div>
+              <div class="flex flex-col gap-1.5"><label class="text-xs font-bold text-[var(--text-primary)]">اسم البوابة *</label><select [ngModel]="accGateway()" (ngModelChange)="accGateway.set($event)" class="px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--bg-base)] text-sm font-semibold text-[var(--text-primary)] outline-none focus:border-[var(--border-strong)] transition-all"><option value="">اختر البوابة</option>@for (g of gatewayOptions; track g) {<option [value]="g">{{ g }}</option>}</select></div>
+            </div>
+            <div class="flex items-center gap-3">
+              <button (click)="saveAcc()" [disabled]="isSavingAcc()" class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--primary)] text-white text-sm font-bold disabled:opacity-50 hover:bg-[var(--primary-hover)] transition-all active:scale-95">@if (isSavingAcc()) {<svg lucideLoaderCircle class="w-4 h-4 animate-spin"></svg>} @else {<svg lucideCheck class="w-4 h-4"></svg>}{{ isSavingAcc() ? 'جاري الحفظ...' : 'حفظ' }}</button>
+              <button (click)="closeAccForm()" class="px-5 py-2.5 rounded-xl border border-[var(--border)] text-sm font-semibold text-[var(--text-secondary)] hover:bg-[var(--bg-base)] transition-all">إلغاء</button>
+            </div>
+          </div>
+        }
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          @if (accounts().length === 0) {
+            <div class="col-span-full flex flex-col items-center py-14 gap-3 bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] text-[var(--text-muted)]"><svg lucideCreditCard class="w-10 h-10 opacity-30"></svg><p class="text-sm">لا توجد حسابات مضافة بعد</p></div>
+          }
+          @for (acc of accounts(); track acc.id) {
+            <div class="flex flex-col gap-4 bg-[var(--bg-card)] rounded-2xl p-5 border transition-all hover:shadow-[var(--shadow-md)]" [class.border-[var(--border-strong)]]="acc.isActive" [class.border-[var(--border)]]="!acc.isActive" [class.opacity-60]="!acc.isActive">
+              <div class="flex items-center justify-between">
+                <span class="px-3 py-1 rounded-full text-xs font-bold bg-[var(--primary)] text-white">{{ acc.gatewayName ?? acc.gatewayKey }}</span>
+                <div class="flex items-center gap-1">
+                  <button (click)="toggleAccount(acc.id)" class="w-8 h-8 flex items-center justify-center rounded-xl border border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--border-strong)] transition-all" title="تفعيل / تعطيل">@if (acc.isActive) {<svg lucideToggleRight class="w-4 h-4 text-[var(--success)]"></svg>} @else {<svg lucideToggleLeft class="w-4 h-4"></svg>}</button>
+                  <button (click)="openEditAcc(acc)" class="w-8 h-8 flex items-center justify-center rounded-xl border border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--border-strong)] hover:text-[var(--text-primary)] transition-all"><svg lucidePencil class="w-3.5 h-3.5"></svg></button>
+                  <button (click)="deleteAccount(acc.id)" class="w-8 h-8 flex items-center justify-center rounded-xl border border-[var(--border)] text-[var(--text-muted)] hover:border-red-200 hover:text-[var(--danger)] hover:bg-[var(--danger-light)] transition-all"><svg lucideTrash2 class="w-3.5 h-3.5"></svg></button>
+                </div>
+              </div>
+              <div class="flex flex-col gap-0.5"><span class="text-[10px] font-medium text-[var(--text-muted)] uppercase tracking-wider">صاحب الحساب</span><span class="text-base font-bold text-[var(--text-primary)]">{{ acc.accountHolder }}</span></div>
+              <div class="flex items-center gap-2 px-4 py-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border)]"><svg lucideReceiptText class="w-4 h-4 flex-shrink-0 text-[var(--text-muted)]"></svg><code class="text-sm font-mono font-bold text-[var(--text-primary)] flex-1" dir="ltr">{{ acc.accountNumber }}</code></div>
+              <div class="flex items-center gap-1.5"><div class="w-2 h-2 rounded-full" [class.bg-[var(--success)]]="acc.isActive" [class.bg-[var(--text-muted)]]="!acc.isActive"></div><span class="text-xs font-medium text-[var(--text-muted)]">{{ acc.isActive ? 'نشط — يظهر للعملاء' : 'غير نشط — مخفي' }}</span></div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    @if (activeTab() === 'performance') {
+      <div class="flex flex-col gap-5">
+        <div class="flex items-center justify-between flex-wrap gap-3">
+          <div class="flex flex-col gap-1"><h2 class="text-base font-bold text-[var(--text-primary)]">الأداء المالي للمنصة</h2><p class="text-xs text-[var(--text-muted)]">تتبع أداء إيرادات ومصروفات المنصة والشركات</p></div>
+          <div class="flex items-center gap-1 bg-[var(--bg-base)] rounded-xl p-0.5 border border-[var(--border)]">
+            @for (p of perfPeriods; track p.id) {
+              <button (click)="setPerfPeriod(p.id)" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap" [class.bg-white]="perfPeriod()===p.id" [class.shadow-sm]="perfPeriod()===p.id" [class.text-[var(--text-primary)]]="perfPeriod()===p.id" [class.text-[var(--text-muted)]]="perfPeriod()!==p.id" [class.hover:text-[var(--text-primary)]]="perfPeriod()!==p.id">{{ p.label }}</button>
+            }
+          </div>
+        </div>
+
+        @if (perfData().length === 0) {
+          <div class="flex flex-col items-center py-20 gap-4 bg-[var(--bg-card)] rounded-2xl border border-[var(--border)]">
+            <div class="w-14 h-14 rounded-full bg-[var(--primary-light)] flex items-center justify-center"><svg lucideBarChart3 class="w-7 h-7 text-[var(--text-primary)]"></svg></div>
+            <div class="text-center"><p class="text-base font-bold text-[var(--text-primary)]">لا توجد بيانات أداء</p><p class="text-xs text-[var(--text-muted)] mt-1">اختر فترة مختلفة لعرض البيانات</p></div>
+          </div>
+        }
+
+        @for (entry of perfData(); track entry.period) {
+          <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] overflow-hidden">
+            <div class="px-5 py-3.5 border-b border-[var(--border)] bg-[var(--bg-base)] flex items-center gap-3">
+              <div class="w-8 h-8 rounded-xl bg-[var(--primary)] flex items-center justify-center"><svg lucideBarChart3 class="w-4 h-4 text-white"></svg></div>
+              <div><span class="text-sm font-extrabold text-[var(--text-primary)]">{{ entry.period }}</span><span class="text-xs text-[var(--text-muted)] mr-2">{{ toArabic(entry.count) }} معاملة</span></div>
+            </div>
+
+            <!-- Platform performance row -->
+            <div class="grid grid-cols-3 gap-0 divide-x divide-[var(--border)] border-b border-[var(--border)]">
+              <div class="flex flex-col gap-1 p-4">
+                <span class="text-[10px] font-medium text-[var(--text-muted)]">إيرادات المنصة</span>
+                <span class="text-lg font-extrabold text-[var(--primary)] tabular-nums">{{ formatAmount(entry.platformRevenue) }} <span class="text-xs font-normal text-[var(--text-muted)]">ج</span></span>
+              </div>
+              <div class="flex flex-col gap-1 p-4">
+                <span class="text-[10px] font-medium text-[var(--text-muted)]">مصروفات المنصة</span>
+                <span class="text-lg font-extrabold text-[var(--danger)] tabular-nums">{{ formatAmount(entry.platformExpenses) }} <span class="text-xs font-normal text-[var(--text-muted)]">ج</span></span>
+              </div>
+              <div class="flex flex-col gap-1 p-4">
+                <span class="text-[10px] font-medium text-[var(--text-muted)]">صافي المنصة</span>
+                <span class="text-lg font-extrabold tabular-nums" [class.text-[var(--success)]]="entry.platformNet >= 0" [class.text-[var(--danger)]]="entry.platformNet < 0">{{ formatAmount(entry.platformNet) }} <span class="text-xs font-normal text-[var(--text-muted)]">ج</span></span>
+              </div>
+            </div>
+
+            <!-- Companies table -->
+            @if (entry.companies?.length > 0) {
+              <div class="overflow-x-auto">
+                <table class="w-full">
+                  <thead><tr class="bg-[var(--bg-base)] border-b border-[var(--border)]"><th class="text-right px-4 py-3 text-xs font-bold text-[var(--text-secondary)] whitespace-nowrap">الشركة</th><th class="text-right px-4 py-3 text-xs font-bold text-[var(--text-secondary)] whitespace-nowrap">المعاملات</th><th class="text-right px-4 py-3 text-xs font-bold text-[var(--text-secondary)] whitespace-nowrap">الإيرادات</th><th class="text-right px-4 py-3 text-xs font-bold text-[var(--text-secondary)] whitespace-nowrap">رسوم المنصة</th><th class="text-right px-4 py-3 text-xs font-bold text-[var(--text-secondary)] whitespace-nowrap">صافي الشركة</th></tr></thead>
+                  <tbody>
+                    @for (c of entry.companies; track c.id) {
+                      <tr class="border-b border-[var(--border)] hover:bg-[var(--bg-base)] transition-colors">
+                        <td class="px-4 py-3 text-xs font-bold text-[var(--text-primary)]">{{ c.name }}</td>
+                        <td class="px-4 py-3 text-xs tabular-nums text-[var(--text-primary)]">{{ toArabic(c.count) }}</td>
+                        <td class="px-4 py-3 text-xs font-bold tabular-nums text-[var(--text-primary)]">{{ formatAmount(c.revenue) }} <span class="text-[10px] font-normal text-[var(--text-muted)]">ج</span></td>
+                        <td class="px-4 py-3 text-xs font-bold tabular-nums text-[var(--primary)]">{{ formatAmount(c.platformFees) }} <span class="text-[10px] font-normal text-[var(--text-muted)]">ج</span></td>
+                        <td class="px-4 py-3 text-xs font-bold tabular-nums text-[var(--success)]">{{ formatAmount(c.companyIncome) }} <span class="text-[10px] font-normal text-[var(--text-muted)]">ج</span></td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            } @else {
+              <div class="px-5 py-4 text-center text-xs text-[var(--text-muted)]">لا توجد شركات في هذه الفترة</div>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>
+
+@if (viewingReceipt()) {
+  <div class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" (click)="closeReceipt()">
+    <div class="relative max-w-3xl w-full max-h-[90vh]" (click)="$event.stopPropagation()">
+      <button (click)="closeReceipt()" class="absolute -top-4 -left-4 z-10 w-9 h-9 rounded-full bg-white text-black flex items-center justify-center shadow-lg hover:bg-gray-100 transition-all"><svg lucideX class="w-5 h-5"></svg></button>
+      @if (viewingReceipt()!.endsWith('.pdf')) {
+        <iframe [src]="viewingReceipt()!" class="w-full h-[85vh] rounded-2xl shadow-2xl bg-white" frameborder="0"></iframe>
+      } @else {
+        <img [src]="viewingReceipt()!" alt="إيصال الدفع" class="w-full max-h-[85vh] object-contain rounded-2xl shadow-2xl">
+      }
+    </div>
+  </div>
+}

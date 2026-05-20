@@ -2,7 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { LucideBus, LucideMail, LucideLock, LucideUser, LucideAlertCircle, LucideLoaderCircle, LucideUserPlus } from '@lucide/angular';
-import { AuthService } from '../../../core/services/auth';
+import { AuthService, RegisterResponse } from '../../../core/services/auth';
 
 @Component({
   selector: 'app-signup',
@@ -40,7 +40,7 @@ export class SignupComponent {
       password: password!,
       role: 'COMPANY',
     }).subscribe({
-      next: () => {
+      next: (_res: RegisterResponse) => {
         this.router.navigate(['/auth/login']);
       },
       error: (err: { error?: { message?: string } }) => {

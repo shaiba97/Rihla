@@ -164,5 +164,37 @@
         <div class="flex flex-col items-center justify-center py-16 gap-3 text-[var(--text-muted)]"><svg lucideTicket class="w-10 h-10 opacity-30"></svg><p class="text-sm text-center">لا توجد مدفوعات مسجلة بعد.<br>ستظهر هنا عند بدء حجوزات العملاء.</p></div>
       }
     </div>
+
+    <!-- Performance tracking -->
+    <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] overflow-hidden">
+      <div class="px-5 py-3.5 border-b border-[var(--border)] flex items-center justify-between flex-wrap gap-3">
+        <h2 class="text-base font-bold text-[var(--text-primary)] flex items-center gap-2"><svg lucideBarChart3 class="w-4 h-4 text-[var(--primary)]"></svg>الأداء المالي</h2>
+        <div class="flex items-center gap-1 bg-[var(--bg-base)] rounded-xl p-0.5 border border-[var(--border)] overflow-x-auto">
+          @for (p of perfPeriods; track p.id) {
+            <button (click)="setPerfPeriod(p.id)" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap" [class.bg-white]="perfPeriod()===p.id" [class.shadow-sm]="perfPeriod()===p.id" [class.text-[var(--text-primary)]]="perfPeriod()===p.id" [class.text-[var(--text-muted)]]="perfPeriod()!==p.id" [class.hover:text-[var(--text-primary)]]="perfPeriod()!==p.id">{{ p.label }}</button>
+          }
+        </div>
+      </div>
+      @if (perfData().length === 0) {
+        <div class="px-5 py-10 text-center text-xs text-[var(--text-muted)]">لا توجد بيانات أداء في هذه الفترة</div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead><tr class="bg-[var(--bg-base)] border-b border-[var(--border)]"><th class="text-right px-4 py-3 text-xs font-bold text-[var(--text-secondary)] whitespace-nowrap">الفترة</th><th class="text-right px-4 py-3 text-xs font-bold text-[var(--text-secondary)] whitespace-nowrap">المعاملات</th><th class="text-right px-4 py-3 text-xs font-bold text-[var(--text-secondary)] whitespace-nowrap">الإيرادات</th><th class="text-right px-4 py-3 text-xs font-bold text-[var(--text-secondary)] whitespace-nowrap">رسوم المنصة</th><th class="text-right px-4 py-3 text-xs font-bold text-[var(--text-secondary)] whitespace-nowrap">صافي أرباحك</th></tr></thead>
+            <tbody>
+              @for (e of perfData(); track e.period) {
+                <tr class="border-b border-[var(--border)] hover:bg-[var(--bg-base)] transition-colors">
+                  <td class="px-4 py-3 text-xs font-bold text-[var(--text-primary)] whitespace-nowrap">{{ e.period }}</td>
+                  <td class="px-4 py-3 text-xs tabular-nums text-[var(--text-primary)]">{{ toArabic(e.count) }}</td>
+                  <td class="px-4 py-3 text-xs font-bold tabular-nums text-[var(--text-primary)]">{{ fmt(e.revenue) }} <span class="text-[10px] font-normal text-[var(--text-muted)]">ج</span></td>
+                  <td class="px-4 py-3 text-xs font-bold tabular-nums text-amber-500">{{ fmt(e.platformFees) }} <span class="text-[10px] font-normal text-[var(--text-muted)]">ج</span></td>
+                  <td class="px-4 py-3 text-xs font-bold tabular-nums text-[var(--success)]">{{ fmt(e.netIncome) }} <span class="text-[10px] font-normal text-[var(--text-muted)]">ج</span></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
   }
 </div>

@@ -1,6 +1,6 @@
 export type BookingStep = 'seat' | 'passenger' | 'payment';
 
-export type SeatStatus = 'available' | 'reserved' | 'held' | 'booked';
+export type SeatStatus = 'available' | 'booked' | 'selected';
 
 export interface SeatMap {
   seatNumber: number;
@@ -18,4 +18,16 @@ export interface PassengerForm {
 export interface ContactForm {
   countryCode: string;
   whatsappNumber: string;
+}
+
+export type PaymentGateway = string;
+
+export interface BookingSession {
+  tripId: string;
+  ticketId: string;
+  selectedSeats: number[];
+  contactForm: ContactForm;
+  passengers: PassengerForm[];
+  price: number;
+  currency: string;
 }

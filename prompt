@@ -1,122 +1,13 @@
-// payment.service.ts - Create single payment for the booking
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
-import { PrismaService } from '@app/prisma';
-import { PDFService } from './pdf.service';
-import { PaymentStatus, BookingStatus } from '@prisma/client';
-import { CreatePaymentDto } from '../dto/booking.dto';
+CUSTOMER WEB:
+  in the entire customer web, the ticketPrice = platform fees + original ticket price by company.
+  
+  - If the customer booked a ticket:
+      if  booked 1 ticke:
+        will pay ticketPrice
+      if booked 2 or more ticket:
+        will pay ticketPrice * number of tickets
+  - ticketPrice should be in booking's steps as welll 
 
-@Injectable()
-export class PaymentService {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly pdfService: PDFService,
-  ) {}
 
-  async create(createPaymentDto: CreatePaymentDto) {
-    // Check if booking exists
-    const booking = await this.prisma.booking.findUnique({
-      where: { id: createPaymentDto.bookingId },
-      include: { Trip: true },
-    });
-
-    if (!booking) {
-      throw new NotFoundException('الحجز غير موجود');
-    }
-
-    // Check if payment already exists for this booking
-    const existingPayment = await this.prisma.payment.findUnique({
-      where: { bookingId: createPaymentDto.bookingId },
-    });
-
-    if (existingPayment) {
-      throw new BadRequestException('الدفعة موجودة بالفعل لهذا الحجز');
-    }
-
-    // Check if transactionId is unique (if provided)
-    if (createPaymentDto.transactionId) {
-      const existingTransaction = await this.prisma.payment.findUnique({
-        where: { transactionId: createPaymentDto.transactionId },
-      });
-      
-      if (existingTransaction) {
-        throw new BadRequestException('رقم المعاملة مستخدم بالفعل');
-      }
-    }
-
-    // Create single payment for the booking
-    const payment = await this.prisma.payment.create({
-      data: {
-        bookingId: createPaymentDto.bookingId,
-        customerId: createPaymentDto.customerId,
-        price: createPaymentDto.price || createPaymentDto.totalAmount,
-        totalAmount: createPaymentDto.totalAmount,
-        companyAmount: createPaymentDto.companyAmount,
-        commissionAmount: createPaymentDto.commissionAmount,
-        currency: createPaymentDto.currency || 'SDG',
-        status: createPaymentDto.status || PaymentStatus.SUCCESS,
-        transactionId: createPaymentDto.transactionId,
-        receiptFile: createPaymentDto.receiptFile,
-      },
-      include: { Booking: { include: { Trip: true } } },
-    });
-
-    // If payment is successful, update booking status and generate ticket
-    if (payment.status === PaymentStatus.SUCCESS) {
-      await this.prisma.booking.update({
-        where: { id: booking.id },
-        data: { status: BookingStatus.CONFIRMED },
-      });
-
-      const ticket = await this.generateTicket(booking);
-      return {
-        message: 'تم إنشاء الدفعة بنجاح',
-        payment,
-        ticket,
-      };
-    }
-
-    return {
-      message: 'تم إنشاء الدفعة بنجاح',
-      payment,
-    };
-  }
-
-  private async generateTicket(booking: any) {
-    const ticketResult = await this.pdfService.generateTicket(booking.id);
-    const existingTicket = await this.prisma.ticketPDF.findUnique({
-      where: { bookingId: booking.id },
-    });
-
-    const ticketRecord = existingTicket
-      ? await this.prisma.ticketPDF.update({
-          where: { bookingId: booking.id },
-          data: { ticketUrl: ticketResult.publicUrl, generatedAt: new Date() },
-        })
-      : await this.prisma.ticketPDF.create({
-          data: {
-            bookingId: booking.id,
-            ticketUrl: ticketResult.publicUrl,
-            generatedAt: new Date(),
-          },
-        });
-
-    const passengers = Array.isArray(booking.passenger)
-      ? booking.passenger
-      : [booking.passenger];
-
-    return {
-      ticketId: ticketRecord.id,
-      bookingId: booking.id,
-      qrCode: `BOOKING:${booking.id}`,
-      passengerNames: passengers.map((p: any) => p.name),
-      ticketUrl: ticketRecord.ticketUrl,
-    };
-  }
-
-  // Rest of the service methods remain the same
-  // ... (getPayments, getPayment, update, delete)
-}
+ONLY ONLY ONLY ONLY ONLY ONLY ONLY ONLY ONLY ONLY ONLY ONLY ONLY ONLY ONLY ONLY ONLY ONLY.
+STOP.

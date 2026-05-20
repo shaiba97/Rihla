@@ -2,7 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { LucideBus, LucideMail, LucideLock, LucideEye, LucideAlertCircle, LucideLoaderCircle, LucideArrowLeft, LucideLogIn } from '@lucide/angular';
-import { AuthService } from '../../../../core/services/auth';
+import { AuthService, LoginResponse } from '../../../../core/services/auth';
 
 @Component({
   selector:    'app-login',
@@ -33,7 +33,7 @@ export class LoginComponent {
     const { email, password } = this.form.value;
 
     this.authService.login(email!, password!).subscribe({
-      next: (res: any) => {
+      next: (res: LoginResponse) => {
         if (res?.token && res?.user?.id) {
           this.authService.setSession(res.token, res.user);
           this.router.navigateByUrl('/dashboard');

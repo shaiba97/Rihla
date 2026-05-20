@@ -23,10 +23,7 @@ export class BusesController {
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.CREATED)
   async create(@Req() req: any, @Body() createBusDto: CreateBusDto) {
-    return this.busesService.create(
-      createBusDto,
-      req.user.id,
-    );
+    return this.busesService.create(createBusDto, req.user.id);
   }
 
   @Get('get-buses')

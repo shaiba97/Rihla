@@ -12,7 +12,7 @@
               px-4 md:px-6 h-16">
 
     <!-- RIGHT: Logo -->
-    <a routerLink="/"
+    <a routerLink="/home"
        class="flex items-center gap-2.5
               no-underline flex-shrink-0
               group">
@@ -87,7 +87,7 @@
                     items-center gap-2">
 
           <!-- Login -->
-          <a routerLink="/m/login"
+          <a routerLink="/login"
              class="flex items-center gap-1.5
                     px-4 py-2 rounded-xl
                     text-sm font-semibold
@@ -102,7 +102,7 @@
           </a>
 
           <!-- Signup -->
-          <a routerLink="/m/register"
+          <a routerLink="/register"
              class="flex items-center gap-1.5
                     px-4 py-2 rounded-xl
                     text-sm font-semibold
@@ -342,7 +342,7 @@
                 duration-150">
 
       <!-- Login -->
-      <a routerLink="/m/login"
+      <a routerLink="/login"
          (click)="showMobileMenu.set(false)"
          class="flex items-center justify-center
                 gap-2 px-4 py-3 rounded-xl
@@ -357,7 +357,7 @@
       </a>
 
       <!-- Signup -->
-      <a routerLink="/m/register"
+      <a routerLink="/register"
          (click)="showMobileMenu.set(false)"
          class="flex items-center justify-center
                 gap-2 px-4 py-3 rounded-xl

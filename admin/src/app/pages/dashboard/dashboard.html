@@ -1,0 +1,344 @@
+<div dir="rtl" class="min-h-screen bg-[var(--bg-base)]">
+
+  @if (isLoading()) {
+    <div class="p-6 flex flex-col gap-6">
+      <div class="h-20 rounded-2xl bg-[var(--bg-card)] border border-[var(--border)] animate-pulse"></div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        @for (i of [1,2,3,4]; track i) { <div class="h-32 rounded-2xl bg-[var(--bg-card)] border border-[var(--border)] animate-pulse"></div> }
+      </div>
+      <div class="h-64 rounded-2xl bg-[var(--bg-card)] border border-[var(--border)] animate-pulse"></div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        @for (i of [1,2]; track i) { <div class="h-80 rounded-2xl bg-[var(--bg-card)] border border-[var(--border)] animate-pulse"></div> }
+      </div>
+    </div>
+  }
+
+  @if (!isLoading() && error()) {
+    <div class="flex flex-col items-center justify-center h-screen gap-5">
+      <div class="w-16 h-16 rounded-full bg-[var(--danger-light)] flex items-center justify-center"><svg lucideAlertCircle class="w-8 h-8 text-[var(--danger)]"></svg></div>
+      <p class="text-[var(--text-primary)] font-semibold">{{ error() }}</p>
+      <button (click)="load()" class="px-5 py-2.5 rounded-xl bg-[var(--primary)] text-white font-bold text-sm hover:bg-[var(--primary-hover)] transition-all">حاول مجدداً</button>
+    </div>
+  }
+
+  @if (!isLoading() && data()) {
+    @let d = data();
+
+    <!-- HERO BANNER -->
+    <div class="bg-[var(--primary)] px-6 pt-6 pb-10 relative overflow-hidden">
+      <div class="absolute -top-12 -left-12 w-48 h-48 rounded-full bg-white/5 pointer-events-none"></div>
+      <div class="absolute -bottom-16 -right-8 w-64 h-64 rounded-full bg-white/5 pointer-events-none"></div>
+      <div class="absolute top-4 left-1/2 w-32 h-32 rounded-full bg-white/3 pointer-events-none"></div>
+      <div class="absolute inset-0 opacity-5 pointer-events-none" style="background-image:radial-gradient(circle,white 1.5px,transparent 1.5px);background-size:28px 28px"></div>
+
+      <div class="relative z-10 flex items-start justify-between gap-4 flex-wrap">
+        <div class="flex flex-col gap-2">
+          <div class="flex items-center gap-2"><svg lucideZap class="w-5 h-5 text-white/70"></svg><span class="text-white/70 text-sm font-medium">{{ greeting() }}، مدير النظام</span></div>
+          <h1 class="text-3xl font-extrabold text-white leading-tight">لوحة تحكم رحلة</h1>
+          <p class="text-white/60 text-sm">آخر تحديث: {{ fmtTime(now) }} — {{ fmtDate(now) }}</p>
+        </div>
+        <div class="flex items-center gap-2">
+          @if (d.platform?.pendingPaymentsRequiringAction > 0) {
+            <button (click)="goTo('/financial')" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--warning)] text-white text-sm font-bold animate-pulse hover:opacity-90 transition-all active:scale-95">
+              <svg lucideAlertCircle class="w-4 h-4"></svg>{{ toArabic(d.platform.pendingPaymentsRequiringAction) }} طلبات دفع معلقة
+            </button>
+          }
+          <button (click)="load()" class="w-10 h-10 flex items-center justify-center rounded-xl bg-white/10 hover:bg-white/20 text-white transition-all duration-150 active:scale-90"><svg lucideRefreshCw class="w-4 h-4"></svg></button>
+        </div>
+      </div>
+
+      <div class="relative z-10 flex flex-wrap gap-3 mt-6">
+        @for (item of [
+          { label: 'رحلة نشطة', val: toArabic(d.operations?.activeTrips ?? 0) },
+          { label: 'حجز اليوم', val: toArabic(d.bookings?.today ?? 0) },
+          { label: 'إيرادات الشهر', val: fmtAmount(d.revenue?.revenueThisMonth ?? 0) + ' جنيه' },
+          { label: 'طلبات معلقة', val: toArabic(d.platform?.pendingPaymentsRequiringAction ?? 0) },
+        ]; track item.label) {
+          <div class="flex flex-col gap-0.5 px-4 py-2.5 rounded-xl bg-white/10">
+            <span class="text-white/60 text-[10px] font-medium whitespace-nowrap">{{ item.label }}</span>
+            <span class="text-white font-extrabold text-[15px] tabular-nums whitespace-nowrap">{{ item.val }}</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- CONTENT BELOW HERO -->
+    <div class="px-6 mt-6 pb-8 flex flex-col gap-5">
+
+      <!-- ROW 1: 4 KPI CARDS -->
+      <div class="grid grid-cols-2 xl:grid-cols-4 gap-4">
+
+        <!-- Revenue Summary (totalAmount / platformFee / price) -->
+        <div class="flex flex-col gap-4 p-5 bg-[var(--bg-card)] rounded-2xl border-2 border-[var(--primary)] shadow-[var(--shadow-md)] relative overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-200 group" (click)="goTo('/financial')">
+          <div class="absolute -top-8 -left-8 w-24 h-24 rounded-full bg-[var(--primary-light)] opacity-50"></div>
+          <div class="flex items-center justify-between relative">
+            <div class="w-11 h-11 rounded-xl bg-[var(--primary)] flex items-center justify-center"><svg lucideBadgeDollarSign class="w-5 h-5 text-white"></svg></div>
+            <svg lucideArrowUpRight class="w-4 h-4 text-[var(--text-muted)] group-hover:text-[var(--primary)] transition-colors"></svg>
+          </div>
+          <div class="flex flex-col gap-3 relative">
+            <span class="text-[11px] font-medium text-[var(--text-muted)] uppercase tracking-wider">ملخص الإيرادات</span>
+            <div class="flex flex-col gap-2">
+              <div class="flex items-center justify-between"><span class="text-[11px] text-[var(--text-secondary)]">إجمالي المبالغ المحصلة</span><span class="text-sm font-extrabold text-[var(--text-primary)] tabular-nums">{{ fmtAmount(d.revenue?.totalRevenue ?? 0) }} <span class="text-[10px] font-medium text-[var(--text-muted)]">جنيه</span></span></div>
+              <div class="h-px bg-[var(--border)]"></div>
+              <div class="flex items-center justify-between"><span class="text-[11px] text-[var(--text-secondary)]">أرباح المنصة</span><span class="text-sm font-extrabold text-[var(--text-primary)] tabular-nums">{{ fmtAmount(d.revenue?.totalPlatformEarnings ?? 0) }} <span class="text-[10px] font-medium text-[var(--text-muted)]">جنيه</span></span></div>
+              <div class="h-px bg-[var(--border)]"></div>
+              <div class="flex items-center justify-between"><span class="text-[11px] text-[var(--text-secondary)]">أرباح الشركات</span><span class="text-sm font-extrabold text-[var(--text-primary)] tabular-nums">{{ fmtAmount(d.revenue?.totalCompanyAmount ?? 0) }} <span class="text-[10px] font-medium text-[var(--text-muted)]">جنيه</span></span></div>
+            </div>
+            <span class="text-[10px] text-[var(--text-muted)]">من {{ toArabic(d.revenue?.totalSuccessfulTransactions ?? 0) }} عملية ناجحة</span>
+          </div>
+        </div>
+
+        <!-- Total Users -->
+        <div class="flex flex-col gap-4 p-5 bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-sm)] cursor-pointer transition-all duration-200 group" (click)="goTo('/users')">
+          <div class="flex items-center justify-between">
+            <div class="w-11 h-11 rounded-xl bg-[var(--primary-light)] flex items-center justify-center"><svg lucideUsers class="w-5 h-5 text-[var(--text-primary)]"></svg></div>
+            <svg lucideArrowUpRight class="w-4 h-4 text-[var(--text-muted)] opacity-0 group-hover:opacity-100 transition-opacity"></svg>
+          </div>
+          <div class="flex flex-col gap-1">
+            <span class="text-[11px] font-medium text-[var(--text-muted)] uppercase tracking-wider">إجمالي المستخدمين</span>
+            <span class="text-[26px] font-extrabold text-[var(--text-primary)] tabular-nums leading-none">{{ toArabic(d.users?.total ?? 0) }}</span>
+            <div class="flex items-center gap-3 text-[10px] text-[var(--text-muted)]"><span>عميل {{ toArabic(d.users?.customers ?? 0) }}</span><span class="w-px h-3 bg-[var(--border)]"></span><span>شركة {{ toArabic(d.users?.companies ?? 0) }}</span></div>
+          </div>
+        </div>
+
+        <!-- Total Bookings -->
+        <div class="flex flex-col gap-4 p-5 bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-sm)] cursor-pointer transition-all duration-200 group" (click)="goTo('/financial')">
+          <div class="flex items-center justify-between">
+            <div class="w-11 h-11 rounded-xl bg-[var(--primary-light)] flex items-center justify-center"><svg lucideTicket class="w-5 h-5 text-[var(--text-primary)]"></svg></div>
+            <svg lucideArrowUpRight class="w-4 h-4 text-[var(--text-muted)] opacity-0 group-hover:opacity-100 transition-opacity"></svg>
+          </div>
+          <div class="flex flex-col gap-1">
+            <span class="text-[11px] font-medium text-[var(--text-muted)] uppercase tracking-wider">إجمالي الحجوزات</span>
+            <span class="text-[26px] font-extrabold text-[var(--text-primary)] tabular-nums leading-none">{{ toArabic(d.bookings?.total ?? 0) }}</span>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-[var(--success-light)] text-[var(--success)] font-medium">{{ toArabic(d.bookings?.confirmed ?? 0) }} مؤكد</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-[var(--warning-light)] text-[var(--warning)] font-medium">{{ toArabic(d.bookings?.pending ?? 0) }} معلق</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Operations -->
+        <div class="flex flex-col gap-4 p-5 bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-sm)] transition-all duration-200">
+          <div class="w-11 h-11 rounded-xl bg-[var(--primary-light)] flex items-center justify-center"><svg lucideBus class="w-5 h-5 text-[var(--text-primary)]"></svg></div>
+          <div class="flex flex-col gap-1">
+            <span class="text-[11px] font-medium text-[var(--text-muted)] uppercase tracking-wider">تشغيل المنصة</span>
+            <div class="flex flex-col gap-1.5">
+              <div class="flex items-center justify-between"><span class="text-xs text-[var(--text-secondary)]">رحلات نشطة</span><span class="text-sm font-extrabold text-[var(--text-primary)] tabular-nums">{{ toArabic(d.operations?.activeTrips ?? 0) }}</span></div>
+              <div class="flex items-center justify-between"><span class="text-xs text-[var(--text-secondary)]">إجمالي الحافلات</span><span class="text-sm font-extrabold text-[var(--text-primary)] tabular-nums">{{ toArabic(d.operations?.totalBuses ?? 0) }}</span></div>
+              <div class="flex items-center justify-between"><span class="text-xs text-[var(--text-secondary)]">إجمالي الرحلات</span><span class="text-sm font-extrabold text-[var(--text-primary)] tabular-nums">{{ toArabic(d.operations?.totalTrips ?? 0) }}</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROW 2: REVENUE CHART + RATE RING -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+        <!-- Revenue chart -->
+        <div class="lg:col-span-2 bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-5 flex flex-col gap-4">
+          <div class="flex items-center justify-between flex-wrap gap-3">
+            <div class="flex flex-col gap-0.5">
+              <h2 class="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2"><svg lucideTrendingUp class="w-4 h-4 text-[var(--primary)]"></svg>الإيرادات — آخر ١٤ يوماً</h2>
+              <p class="text-xs text-[var(--text-muted)]">مجموع ما حصله عملاء رحلة</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-[var(--primary)]"></div><span class="text-[10px] text-[var(--text-muted)]">إجمالي الإيرادات</span></div>
+              <div class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-[var(--success)]"></div><span class="text-[10px] text-[var(--text-muted)]">أرباح رحلة</span></div>
+            </div>
+          </div>
+          @if (chartData().length > 0) {
+            <div class="flex flex-col gap-2 flex-1">
+              <div class="flex items-end gap-1 h-44 w-full border-b border-[var(--border)]">
+                @for (day of chartData(); track day.date) {
+                  <div class="flex-1 flex flex-col justify-end gap-0.5 h-full group relative">
+                    <div class="absolute -top-16 left-1/2 -translate-x-1/2 bg-[var(--text-primary)] text-white text-[9px] font-bold px-2 py-1 rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20 text-right">
+                      {{ fmtDate(day.date) }}<br>إيراد: {{ fmtAmount(day.revenue) }} ج<br>ربح: {{ fmtAmount(day.earnings) }} ج
+                    </div>
+                    <div class="w-full rounded-t-lg transition-all duration-700 ease-out relative overflow-hidden" [style.height.%]="chartAnimated() ? barPct(day.revenue, chartMax()) : 0">
+                      <div class="absolute inset-0 bg-[var(--primary)] opacity-20 group-hover:opacity-30 transition-opacity"></div>
+                      <div class="absolute bottom-0 left-0 right-0 bg-[var(--primary)] transition-all duration-700" [style.height.%]="barPct(day.earnings, day.revenue || 1) * 0.3 + 70"></div>
+                    </div>
+                  </div>
+                }
+              </div>
+              <div class="flex gap-1 w-full">
+                @for (day of chartData(); track day.date; let i = $index) {
+                  <div class="flex-1 text-center">@if (i % 3 === 0) { <span class="text-[8px] text-[var(--text-muted)]">{{ fmtDate(day.date) }}</span> }</div>
+                }
+              </div>
+            </div>
+          } @else {
+            <div class="flex-1 flex items-center justify-center text-[var(--text-muted)] h-44"><p class="text-sm">لا توجد بيانات بعد</p></div>
+          }
+        </div>
+
+        <!-- Stats ring -->
+        <div class="flex flex-col gap-4 bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-5">
+          <h2 class="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2"><svg lucideActivity class="w-4 h-4 text-[var(--primary)]"></svg>إحصاءات الحجوزات</h2>
+          <div class="flex flex-col items-center gap-3">
+            <div class="relative w-28 h-28">
+              <svg class="w-28 h-28 -rotate-90" viewBox="0 0 80 80">
+                <circle cx="40" cy="40" r="36" fill="none" stroke="var(--border)" stroke-width="7"/>
+                <circle cx="40" cy="40" r="36" fill="none" stroke="var(--primary)" stroke-width="7" stroke-linecap="round" [attr.stroke-dasharray]="confirmRateDash()" class="transition-all duration-1000 ease-out"/>
+              </svg>
+              <div class="absolute inset-0 flex flex-col items-center justify-center">
+                <span class="text-2xl font-extrabold text-[var(--text-primary)] tabular-nums">{{ toArabic(d.bookings?.confirmationRate ?? 0) }}٪</span>
+                <span class="text-[9px] text-[var(--text-muted)]">نسبة التأكيد</span>
+              </div>
+            </div>
+          </div>
+          <div class="flex flex-col gap-2.5">
+            @for (item of [
+              { label: 'مؤكدة', val: d.bookings?.confirmed ?? 0, color: 'bg-[var(--success)]' },
+              { label: 'معلقة', val: d.bookings?.pending ?? 0, color: 'bg-[var(--warning)]' },
+              { label: 'ملغاة', val: d.bookings?.cancelled ?? 0, color: 'bg-[var(--danger)]' },
+            ]; track item.label) {
+              <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-2 flex-1">
+                  <div class="w-2 h-2 rounded-full flex-shrink-0" [ngClass]="[item.color]"></div>
+                  <div class="flex-1 h-1.5 rounded-full bg-[var(--bg-base)] overflow-hidden"><div class="h-full rounded-full transition-all duration-700" [ngClass]="[item.color]" [style.width.%]="d.bookings?.total ? barPct(item.val, d.bookings.total) : 0"></div></div>
+                </div>
+                <div class="flex items-center gap-1.5 flex-shrink-0"><span class="text-xs font-bold text-[var(--text-primary)] tabular-nums">{{ toArabic(item.val) }}</span><span class="text-[10px] text-[var(--text-muted)]">{{ item.label }}</span></div>
+              </div>
+            }
+          </div>
+          <div class="h-px bg-[var(--border)]"></div>
+          <div class="flex flex-col gap-1">
+            <span class="text-[10px] text-[var(--text-muted)] uppercase tracking-wider">مستخدمون جدد هذا الشهر</span>
+            <div class="flex items-baseline gap-1"><span class="text-xl font-extrabold text-[var(--text-primary)] tabular-nums">{{ toArabic(d.users?.newThisMonth ?? 0) }}</span><span class="text-xs text-[var(--text-muted)]">مستخدم جديد</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROW 3: PLATFORM STATUS + METHODS -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Platform fee -->
+        <div class="flex flex-col gap-3 p-5 bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] cursor-pointer hover:border-[var(--border-strong)] transition-all" (click)="goTo('/financial')">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2"><div class="w-8 h-8 rounded-xl bg-[var(--primary)] flex items-center justify-center"><svg lucideBadgeDollarSign class="w-4 h-4 text-white"></svg></div><span class="text-xs font-bold text-[var(--text-primary)]">رسوم المنصة</span></div>
+            @if (d.platform?.activePlatformFee) { <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[var(--success-light)] text-[var(--success)]">نشط</span> }
+            @else { <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[var(--danger-light)] text-[var(--danger)]">غير مفعل</span> }
+          </div>
+          @if (d.platform?.activePlatformFee) {
+            <div class="flex items-baseline gap-1.5"><span class="text-3xl font-extrabold text-[var(--text-primary)] tabular-nums">{{ toArabic(d.platform.activePlatformFee.amount) }}</span><span class="text-sm text-[var(--text-muted)]">{{ d.platform.activePlatformFee.currency }}</span></div>
+            <p class="text-[10px] text-[var(--text-muted)]">{{ d.platform.activePlatformFee.label ?? 'رسوم خدمة ثابتة على كل تذكرة' }}</p>
+          } @else {
+            <p class="text-sm text-[var(--text-muted)]">لم يتم تحديد رسوم المنصة بعد</p>
+            <button (click)="goTo('/financial'); $event.stopPropagation()" class="text-xs font-bold text-[var(--primary)] hover:underline self-start">إضافة رسوم الآن ←</button>
+          }
+        </div>
+        <!-- Payment accounts -->
+        <div class="flex flex-col gap-3 p-5 bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] cursor-pointer hover:border-[var(--border-strong)] transition-all" (click)="goTo('/financial')">
+          <div class="flex items-center gap-2"><div class="w-8 h-8 rounded-xl bg-[var(--primary-light)] flex items-center justify-center"><svg lucideShield class="w-4 h-4 text-[var(--text-primary)]"></svg></div><span class="text-xs font-bold text-[var(--text-primary)]">حسابات استقبال الدفع</span></div>
+          <div class="flex items-end justify-between">
+            <div class="flex flex-col gap-0.5">
+              <div class="flex items-baseline gap-1"><span class="text-3xl font-extrabold text-[var(--text-primary)] tabular-nums">{{ toArabic(d.platform?.activePaymentAccounts ?? 0) }}</span><span class="text-xs text-[var(--text-muted)]">/ {{ toArabic(d.platform?.totalPaymentAccounts ?? 0) }}</span></div>
+              <span class="text-[10px] text-[var(--text-muted)]">حساب نشط من الإجمالي</span>
+            </div>
+            @if (d.platform?.activePaymentAccounts === 0) { <span class="text-[10px] font-bold text-[var(--danger)] px-2 py-1 rounded-xl bg-[var(--danger-light)]">تنبيه: لا حسابات</span> }
+          </div>
+        </div>
+        <!-- Payment method breakdown -->
+        <div class="flex flex-col gap-3 p-5 bg-[var(--bg-card)] rounded-2xl border border-[var(--border)]">
+          <div class="flex items-center gap-2"><div class="w-8 h-8 rounded-xl bg-[var(--primary-light)] flex items-center justify-center"><svg lucideWallet class="w-4 h-4 text-[var(--text-primary)]"></svg></div><span class="text-xs font-bold text-[var(--text-primary)]">طرق الدفع</span></div>
+          <div class="flex flex-col gap-2">
+            @for (item of d.revenue?.paymentMethodBreakdown ?? []; track item.method) {
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-xs font-medium text-[var(--text-secondary)] whitespace-nowrap">{{ methodLabel(item.method) }}</span>
+                <div class="flex-1 h-1.5 rounded-full bg-[var(--bg-base)] overflow-hidden"><div class="h-full rounded-full bg-[var(--primary)] transition-all duration-700" [style.width.%]="barPct(item.amount, d.revenue?.totalRevenue || 1)"></div></div>
+                <span class="text-[10px] font-bold text-[var(--text-primary)] tabular-nums whitespace-nowrap min-w-[50px] text-left">{{ fmtAmount(item.amount) }}</span>
+              </div>
+            }
+            @if (!d.revenue?.paymentMethodBreakdown?.length) { <p class="text-xs text-[var(--text-muted)] text-center py-3">لا توجد بيانات بعد</p> }
+          </div>
+        </div>
+      </div>
+
+      <!-- ROW 4: RECENT ACTIVITY + ACTIONS -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <!-- Recent bookings -->
+        <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] overflow-hidden">
+          <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--border)]">
+            <h2 class="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2"><svg lucideActivity class="w-4 h-4 text-[var(--primary)]"></svg>آخر الحجوزات</h2>
+            <button (click)="goTo('/financial')" class="text-[10px] font-bold text-[var(--text-muted)] hover:text-[var(--primary)] flex items-center gap-1 transition-colors">عرض الكل<svg lucideArrowLeft class="w-3 h-3"></svg></button>
+          </div>
+          <div class="flex flex-col divide-y divide-[var(--border)]">
+            @if (!d.recentBookings?.length) { <div class="flex items-center justify-center py-10 text-[var(--text-muted)] text-sm">لا توجد حجوزات بعد</div> }
+            @for (b of d.recentBookings ?? []; track b.id) {
+              <div class="flex items-center justify-between px-5 py-3.5 gap-3 hover:bg-[var(--bg-base)] transition-colors">
+                <div class="flex items-center gap-3 flex-1 min-w-0">
+                  <div class="w-2 h-2 rounded-full flex-shrink-0" [ngClass]="statusDot(b.status)"></div>
+                  <div class="flex flex-col min-w-0"><span class="text-xs font-bold text-[var(--text-primary)] truncate">{{ b.customerName }}</span><span class="text-[10px] text-[var(--text-muted)] truncate">{{ b.from }} ← {{ b.to }} · مقعد {{ toArabic(b.seatNumber) }}</span></div>
+                </div>
+                <div class="flex flex-col items-end flex-shrink-0 gap-0.5">
+                  @if (b.amount > 0) { <span class="text-xs font-bold text-[var(--text-primary)] tabular-nums">{{ fmtAmount(b.amount) }} ج</span> }
+                  <span class="text-[10px] text-[var(--text-muted)]">{{ fmtDate(b.createdAt) }}</span>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+        <!-- Pending actions -->
+        <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] overflow-hidden">
+          <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--border)]">
+            <h2 class="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2">
+              <svg lucideClock class="w-4 h-4 text-[var(--warning)]"></svg>يحتاج تدخلك
+              @if (d.pendingActions?.length > 0) { <span class="px-1.5 py-0.5 rounded-full bg-[var(--warning-light)] text-[var(--warning)] text-[10px] font-bold">{{ toArabic(d.pendingActions.length) }}</span> }
+            </h2>
+            <button (click)="goTo('/financial')" class="text-[10px] font-bold text-[var(--primary)] hover:underline flex items-center gap-1">إدارة الكل<svg lucideArrowLeft class="w-3 h-3"></svg></button>
+          </div>
+          @if (!d.pendingActions?.length) {
+            <div class="flex flex-col items-center justify-center py-12 gap-3">
+              <div class="w-12 h-12 rounded-full bg-[var(--success-light)] flex items-center justify-center"><svg lucideCheckCircle class="w-6 h-6 text-[var(--success)]"></svg></div>
+              <div class="text-center"><p class="text-sm font-semibold text-[var(--text-primary)]">كل شيء على ما يرام ✓</p><p class="text-[10px] text-[var(--text-muted)] mt-1">لا توجد طلبات معلقة</p></div>
+            </div>
+          }
+          <div class="flex flex-col divide-y divide-[var(--border)]">
+            @for (p of d.pendingActions ?? []; track p.id) {
+              <div class="px-5 py-3.5 hover:bg-[var(--bg-base)] transition-colors">
+                <div class="flex items-center justify-between gap-3">
+                  <div class="flex items-start gap-3 flex-1 min-w-0">
+                    <div class="w-7 h-7 rounded-lg bg-[var(--warning-light)] flex items-center justify-center flex-shrink-0 mt-0.5"><svg lucideClock class="w-3.5 h-3.5 text-[var(--warning)]"></svg></div>
+                    <div class="flex flex-col min-w-0"><span class="text-xs font-bold text-[var(--text-primary)] truncate">{{ p.customerName }}</span><span class="text-[10px] text-[var(--text-muted)] truncate">{{ p.from }} ← {{ p.to }} · {{ methodLabel(p.paymentMethod) }}</span></div>
+                  </div>
+                  <div class="flex flex-col items-end flex-shrink-0 gap-1">
+                    <span class="text-xs font-extrabold text-[var(--text-primary)] tabular-nums">{{ fmtAmount(p.amount) }} ج</span>
+                    <button (click)="goTo('/financial')" class="text-[10px] font-bold text-[var(--primary)] px-2 py-0.5 rounded-lg bg-[var(--primary-light)] hover:bg-[var(--border)] transition-all">تأكيد ←</button>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- ROW 5: QUICK NAV -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        @for (nav of [
+          { path: '/users', icon: 'users', label: 'المستخدمون', sub: 'إدارة العملاء والشركات', count: toArabic(d.users?.total ?? 0) },
+          { path: '/companies', icon: 'building-2', label: 'الشركات', sub: 'شركات النقل المسجلة', count: toArabic(d.users?.companies ?? 0) },
+          { path: '/financial', icon: 'wallet', label: 'المالية', sub: 'مدفوعات ورسوم', count: toArabic(d.platform?.pendingPaymentsRequiringAction ?? 0) + ' معلق' },
+          { path: '/financial', icon: 'shield', label: 'حسابات الدفع', sub: 'بوابات استقبال الحجوزات', count: toArabic(d.platform?.activePaymentAccounts ?? 0) + ' نشط' },
+        ]; track nav.path + nav.label) {
+          <button (click)="goTo(nav.path)" class="flex flex-col gap-3 p-4 bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] text-right hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-sm)] transition-all duration-150 active:scale-[0.98] group">
+            <div class="flex items-center justify-between">
+              <div class="w-9 h-9 rounded-xl bg-[var(--primary-light)] flex items-center justify-center">
+                @switch (nav.icon) {
+                  @case ('users') { <svg lucideUsers class="w-4 h-4 text-[var(--text-primary)]"></svg> }
+                  @case ('building-2') { <svg lucideBuilding2 class="w-4 h-4 text-[var(--text-primary)]"></svg> }
+                  @case ('wallet') { <svg lucideWallet class="w-4 h-4 text-[var(--text-primary)]"></svg> }
+                  @case ('shield') { <svg lucideShield class="w-4 h-4 text-[var(--text-primary)]"></svg> }
+                }
+              </div>
+              <svg lucideArrowLeft class="w-3.5 h-3.5 text-[var(--text-muted)] opacity-0 group-hover:opacity-100 transition-opacity"></svg>
+            </div>
+            <div class="flex flex-col gap-0.5"><span class="text-sm font-bold text-[var(--text-primary)]">{{ nav.label }}</span><span class="text-[10px] text-[var(--text-muted)]">{{ nav.sub }}</span></div>
+            <span class="text-xs font-extrabold text-[var(--primary)] tabular-nums self-start">{{ nav.count }}</span>
+          </button>
+        }
+      </div>
+
+    </div>
+  }
+
+</div>

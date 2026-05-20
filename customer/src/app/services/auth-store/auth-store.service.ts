@@ -1,6 +1,8 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Observable, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { catchError } from 'rxjs/operators';
 
 export interface CustomerData {
   id: string;
@@ -8,6 +10,81 @@ export interface CustomerData {
   phone?: string;
   email?: string;
   role: string;
+}
+
+export interface LoginPayload {
+  phone?: string;
+  email?: string;
+  password: string;
+}
+
+export interface RegisterPayload {
+  name: string;
+  phone?: string;
+  email?: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  message: string;
+  token: string;
+  user: {
+    id: string;
+    email?: string | null;
+    phone?: string | null;
+    role: string;
+    name: string;
+  };
+}
+
+export interface CreateUserResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    id: string;
+    name: string;
+    email: string | null;
+    phone: string | null;
+    role: string;
+    createdAt: Date;
+    updatedAt: Date;
+  };
+}
+
+export interface MeResponse {
+  data: {
+    success: boolean;
+    message?: string;
+    data?: {
+      id: string;
+      name: string;
+      email: string | null;
+      role: string;
+      createdAt: Date;
+      updatedAt: Date;
+    };
+  };
+}
+
+export interface UpdateProfileResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    id: string;
+    name: string;
+    email?: string | null;
+    phone?: string | null;
+    role: string;
+  };
+}
+
+export interface DeleteAccountResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface LogoutResponse {
+  message: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -25,45 +102,57 @@ export class AuthStoreService {
   readonly token = signal<string | null>(this.loadTokenFromStorage());
   readonly isLoggedIn = computed(() => !!this.token() && !!this.customerData());
 
-  login(data: { phone?: string; email?: string; password: string }) {
-    return this.http
-      .post<any>(`${this.apiUrl}/users/post-login`, data)
-      .pipe();
+  login(data: LoginPayload): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${this.apiUrl}/users/post-login`, {
+      phone: data.phone || data.email || '',
+      email: data.email,
+      password: data.password,
+    });
   }
 
-  register(data: { name: string; phone?: string; email?: string; password: string }) {
-    return this.http
-      .post<any>(`${this.apiUrl}/users/post-user`, {
-        name: data.name,
-        phone: data.phone,
-        email: data.email,
-        password: data.password,
-        role: 'USER',
-      })
-      .pipe();
+  register(data: RegisterPayload): Observable<CreateUserResponse> {
+    return this.http.post<CreateUserResponse>(`${this.apiUrl}/users/post-user`, {
+      name: data.name,
+      phone: data.phone,
+      email: data.email,
+      password: data.password,
+      role: 'USER',
+    });
   }
 
-  setSession(token: string, user: any): void {
+  setSession(token: string, user: { id: string; name: string; phone?: string | null; email?: string | null; role: string }): void {
     localStorage.setItem(this.TOKEN_KEY, token);
     this.token.set(token);
 
     const customer: CustomerData = {
       id: user.id,
       name: user.name,
-      phone: user.phone,
-      email: user.email,
+      phone: user.phone ?? undefined,
+      email: user.email ?? undefined,
       role: user.role,
     };
     this.saveToStorage(customer);
     this.customerData.set(customer);
   }
 
-  updateProfile(data: { name?: string; phone?: string; email?: string }) {
+  getMe(): Observable<MeResponse> {
+    return this.http.get<MeResponse>(`${this.apiUrl}/users/me`);
+  }
+
+  logout(): void {
+    const currentToken = this.token();
+    if (currentToken) {
+      this.http.post<LogoutResponse>(`${this.apiUrl}/users/logout`, {}).pipe(
+        catchError(() => of(null))
+      ).subscribe();
+    }
+    this.clearLocalSession();
+  }
+
+  updateProfile(data: { name?: string; phone?: string; email?: string }): Observable<UpdateProfileResponse> {
     const id = this.customerData()?.id;
     if (!id) throw new Error('User not authenticated');
-    return this.http
-      .put<any>(`${this.apiUrl}/users/update-user/${id}`, data)
-      .pipe();
+    return this.http.put<UpdateProfileResponse>(`${this.apiUrl}/users/update-user/${id}`, data);
   }
 
   updateLocalProfile(data: { name?: string; phone?: string; email?: string }): void {
@@ -74,15 +163,13 @@ export class AuthStoreService {
     this.customerData.set(updated);
   }
 
-  deleteAccount() {
+  deleteAccount(): Observable<DeleteAccountResponse> {
     const id = this.customerData()?.id;
     if (!id) throw new Error('User not authenticated');
-    return this.http
-      .delete<any>(`${this.apiUrl}/users/delete-user/${id}`)
-      .pipe();
+    return this.http.delete<DeleteAccountResponse>(`${this.apiUrl}/users/delete-user/${id}`);
   }
 
-  logout(): void {
+  private clearLocalSession(): void {
     localStorage.removeItem(this.DATA_KEY);
     localStorage.removeItem(this.TOKEN_KEY);
     this.customerData.set(null);

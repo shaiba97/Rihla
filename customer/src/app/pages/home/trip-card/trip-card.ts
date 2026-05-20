@@ -4,7 +4,6 @@ import {
 } from '@angular/core';
 import { NgClass, DatePipe } from '@angular/common';
 import {
-  LucideBus,
   LucideClock,
   LucideArmchair,
   LucideArrowLeft,
@@ -66,7 +65,6 @@ export interface Booking {
   standalone: true,
   imports: [
     NgClass,
-    LucideBus,
     LucideClock,
     LucideArmchair,
     LucideArrowLeft,
@@ -108,9 +106,13 @@ export class TripCardComponent {
   });
 
   bookedSeats = signal<number[]>([]);
+  platformFee = signal<number>(0);
+
+  displayPrice = computed(() => Number(this.trip().price ?? 0) + this.platformFee());
 
   ngOnInit(): void {
     this.getBookedSeats();
+    this.getActiveFee();
   }
 
   openModal(): void { 
@@ -120,6 +122,16 @@ export class TripCardComponent {
 
   onSelect(): void {
     this.selected.emit(this.trip());
+  }
+
+  getActiveFee(){
+    this.bookingService.getActiveFee().subscribe({
+      next: (res: any) => {
+        const amount = Number(res?.amount ?? 0);
+        this.platformFee.set(amount);
+      },
+      error: () => {},
+    });
   }
 
   getBookedSeats(){

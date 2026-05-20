@@ -1,5 +1,5 @@
 import {
-  Component, signal, inject, OnInit,
+  Component, signal, inject, OnInit, computed,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -13,6 +13,11 @@ import {
 } from '@lucide/angular';
 import { Trips, TripSearchParams } from '../../../core/services/trips-service/trips';
 import { Assets } from '../../../core/services/assets-service/assets';
+
+interface DatePill {
+  label: string;
+  date: string;
+}
 
 @Component({
   selector:   'app-search-hero',
@@ -42,6 +47,21 @@ export class SearchHeroComponent implements OnInit {
 
   today = new Date().toISOString().split('T')[0];
 
+  datePills = computed((): DatePill[] => {
+    const d = new Date();
+    const fmt = (offset: number): string => {
+      const dt = new Date(d);
+      dt.setDate(dt.getDate() + offset);
+      return dt.toISOString().split('T')[0];
+    };
+    const weekdays = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+    return [
+      { label: 'اليوم', date: fmt(0) },
+      { label: 'غداً', date: fmt(1) },
+      { label: weekdays[new Date(fmt(2)).getDay()], date: fmt(2) },
+    ];
+  });
+
   popularRoutes = [
     { from: 'الخرطوم', to: 'بورتسودان' },
     { from: 'الخرطوم', to: 'كسلا'      },
@@ -53,6 +73,10 @@ export class SearchHeroComponent implements OnInit {
     this.assetsService.getAllCities().forEach(city => {
       this.cities.update(cities => [...cities, city.city]);
     });
+  }
+
+  selectDatePill(pill: DatePill): void {
+    this.date.set(pill.date);
   }
 
   swap(): void {

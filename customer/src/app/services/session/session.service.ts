@@ -1,51 +1,77 @@
-import { Injectable, signal, computed, effect } from '@angular/core';
+import { Injectable, signal, computed } from '@angular/core';
+import { BookingSession, ContactForm, PassengerForm } from '../../shared/booking-modal/booking-modal/booking.interfaces';
+
+const SESSION_KEY = 'rihla_booking_session';
+const TIMEOUT_MS = 7 * 60 * 1000;
 
 @Injectable({ providedIn: 'root' })
 export class SessionService {
-  private readonly TIMEOUT_MS = 7 * 60 * 1000;
-  private timerId: ReturnType<typeof setInterval> | null = null;
+  private _session = signal<BookingSession | null>(null);
+  private _remainingMs = signal<number>(TIMEOUT_MS);
+  private _timerInterval: ReturnType<typeof setInterval> | null = null;
 
-  readonly expiryTime = signal<number | null>(null);
-  readonly remainingMs = signal<number>(7 * 60 * 1000);
-  readonly selectedSeats = signal<number[]>([]);
+  session = this._session.asReadonly();
+  remainingMs = this._remainingMs.asReadonly();
 
-  readonly remainingFormatted = computed(() => {
-    const ms = this.remainingMs();
-    if (ms <= 0) return '00:00';
-    const m = Math.floor(ms / 60000);
-    const s = Math.floor((ms % 60000) / 1000);
-    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  remainingFormatted = computed(() => {
+    const ms = Math.max(0, Math.ceil(this._remainingMs() / 1000));
+    const minutes = Math.floor(ms / 60);
+    const seconds = ms % 60;
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   });
 
-  readonly isExpired = computed(() => this.remainingMs() <= 0);
+  isExpired = computed(() => this._remainingMs() <= 0);
+
+  init(tripId: string, ticketId: string, price: number, currency: string): void {
+    this._session.set({
+      tripId, ticketId,
+      selectedSeats: [],
+      contactForm: { countryCode: '+249', whatsappNumber: '' },
+      passengers: [],
+      price, currency,
+    });
+  }
 
   startCountdown(): void {
-    this.stopTimer();
-    const expiry = Date.now() + this.TIMEOUT_MS;
-    this.expiryTime.set(expiry);
-    this.remainingMs.set(this.TIMEOUT_MS);
-    this.timerId = setInterval(() => {
-      const left = Math.max(0, expiry - Date.now());
-      this.remainingMs.set(left);
-      if (left <= 0) this.stopTimer();
-    }, 1000);
+    if (this._timerInterval !== null) return;
+    const expiresAt = Date.now() + TIMEOUT_MS;
+    const tick = () => {
+      const remaining = expiresAt - Date.now();
+      this._remainingMs.set(Math.max(0, remaining));
+      if (remaining <= 0) this.clear();
+    };
+    tick();
+    this._timerInterval = setInterval(tick, 1000);
   }
 
   updateSeats(seats: number[]): void {
-    this.selectedSeats.set(seats);
+    const s = this._session();
+    if (!s) return;
+    if (seats.length > 0 && this._timerInterval === null) {
+      this.startCountdown();
+    }
+    this._session.set({ ...s, selectedSeats: seats });
+  }
+
+  updateContact(contact: ContactForm): void {
+    const s = this._session();
+    if (!s) return;
+    this._session.set({ ...s, contactForm: contact });
+  }
+
+  updatePassengers(passengers: PassengerForm[]): void {
+    const s = this._session();
+    if (!s) return;
+    this._session.set({ ...s, passengers });
   }
 
   clear(): void {
-    this.stopTimer();
-    this.expiryTime.set(null);
-    this.remainingMs.set(this.TIMEOUT_MS);
-    this.selectedSeats.set([]);
-  }
-
-  private stopTimer(): void {
-    if (this.timerId) {
-      clearInterval(this.timerId);
-      this.timerId = null;
+    if (this._timerInterval !== null) {
+      clearInterval(this._timerInterval);
+      this._timerInterval = null;
     }
+    this._session.set(null);
+    this._remainingMs.set(TIMEOUT_MS);
+    try { localStorage.removeItem(SESSION_KEY); } catch { /* ignore */ }
   }
 }

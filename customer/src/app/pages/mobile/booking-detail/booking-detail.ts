@@ -3,11 +3,11 @@ import { Router } from '@angular/router';
 import { LucideArrowRight, LucideBus, LucideCalendar, LucideUser, LucideCreditCard, LucideDownload, LucideMapPin } from '@lucide/angular';
 import { ArabicNumberPipe } from '../../../pipes/arabic-number/arabic-number-pipe';
 import { TimeFormatPipe } from '../../../pipes/time-format/time-format-pipe';
-import { DatePipe, JsonPipe } from '@angular/common';
+import { DatePipe, JsonPipe, NgClass } from '@angular/common';
 
 @Component({
   selector: 'app-booking-detail',
-  imports: [LucideArrowRight, LucideBus, LucideCalendar, LucideUser, LucideCreditCard, LucideDownload, LucideMapPin, ArabicNumberPipe, TimeFormatPipe, DatePipe],
+  imports: [LucideArrowRight, LucideBus, LucideCalendar, LucideUser, LucideCreditCard, LucideDownload, LucideMapPin, ArabicNumberPipe, TimeFormatPipe, DatePipe, NgClass],
   templateUrl: './booking-detail.html',
 })
 export class BookingDetail {
@@ -17,16 +17,38 @@ export class BookingDetail {
   booking = signal<any>(history.state?.booking ?? null);
 
   statusClass(status: string): Record<string, boolean> {
+    const s = status?.toLowerCase();
     return {
-      'bg-emerald-100 text-emerald-700': status === 'confirmed' || status === 'completed' || status === 'Confirmed' || status === 'Completed',
-      'bg-amber-100 text-amber-700': status === 'pending' || status === 'Pending',
-      'bg-red-100 text-red-700': status === 'cancelled' || status === 'Cancelled',
+      'bg-emerald-100 text-emerald-700': s === 'confirmed' || s === 'completed' || s === 'success',
+      'bg-amber-100 text-amber-700': s === 'pending',
+      'bg-red-100 text-red-700': s === 'cancelled' || s === 'failed' || s === 'refunded',
     };
   }
 
   statusLabel(status: string): string {
-    const map: Record<string, string> = { confirmed: 'مؤكد', pending: 'قيد الانتظار', cancelled: 'ملغي', completed: 'مكتمل', Pending: 'قيد الانتظار', Completed: 'مكتمل', Confirmed: 'مؤكد', Cancelled: 'ملغي' };
-    return map[status] ?? status;
+    const map: Record<string, string> = {
+      confirmed: 'مؤكد', pending: 'قيد الانتظار', cancelled: 'ملغي',
+      completed: 'مكتمل', success: 'مدفوع', failed: 'مرفوض', refunded: 'مسترد',
+    };
+    return map[status?.toLowerCase()] ?? status;
+  }
+
+  tripStatusClass(status: string): Record<string, boolean> {
+    const s = status?.toLowerCase();
+    return {
+      'bg-emerald-100 text-emerald-700': s === 'scheduled',
+      'bg-amber-100 text-amber-700': s === 'pending' || s === 'delayed',
+      'bg-red-100 text-red-700': s === 'cancelled',
+      'bg-blue-100 text-blue-700': s === 'completed' || s === 'arrived',
+    };
+  }
+
+  tripStatusLabel(status: string): string {
+    const map: Record<string, string> = {
+      scheduled: 'مجدولة', pending: 'قيد الانتظار', delayed: 'متأخرة',
+      cancelled: 'ملغاة', completed: 'مكتملة', arrived: 'وصلت',
+    };
+    return map[status?.toLowerCase()] ?? status;
   }
 
   genderLabel(g: string): string {

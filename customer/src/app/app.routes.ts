@@ -76,7 +76,37 @@ export const routes: Routes = [
         loadComponent: () =>
         import('./pages/search-results/search-results')
         .then(m => m.SearchResultsComponent),
-      }
+      },
+      {
+        path: 'login',
+        loadComponent: () =>
+        import('./pages/auth/login/login')
+        .then(m => m.Login),
+      },
+      {
+        path: 'register',
+        loadComponent: () =>
+        import('./pages/auth/register/register')
+        .then(m => m.Register),
+      },
+      {
+        path: 'bookings',
+        loadComponent: () =>
+        import('./pages/bookings/bookings')
+        .then(m => m.BookingsComponent),
+      },
+      {
+        path: 'booking/:id',
+        loadComponent: () =>
+        import('./pages/booking-detail/booking-detail')
+        .then(m => m.BookingDetailComponent),
+      },
+      {
+        path: 'profile',
+        loadComponent: () =>
+        import('./pages/profile/profile')
+        .then(m => m.ProfileComponent),
+      },
     ]
   },
 ];

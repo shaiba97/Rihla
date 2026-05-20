@@ -7,8 +7,8 @@ import {
   // HttpStatus,
 } from '@nestjs/common';
 import { PrismaService } from '@app/prisma';
-import { PDFService } from './pdf.service';
-import { PaymentStatus, BookingStatus } from '@prisma/client';
+import { PDFService } from '@app/pdf';
+import { PaymentStatus } from '@prisma/client';
 import { CreatePaymentDto, UpdatePaymentDto } from '../dto/booking.dto';
 
 export interface CreatePaymentInput {
@@ -68,7 +68,6 @@ export class PaymentService {
       }
     }
 
-    // Create payment
     const payment = await this.prisma.payment.create({
       data: {
         bookingId: createPaymentDto.bookingId,
@@ -77,8 +76,9 @@ export class PaymentService {
         totalAmount: createPaymentDto.totalAmount,
         companyAmount: createPaymentDto.companyAmount,
         commissionAmount: createPaymentDto.commissionAmount,
+        platformFeeAmount: createPaymentDto.platformFeeAmount ?? null,
         currency: createPaymentDto.currency || 'SDG',
-        status: createPaymentDto.status || PaymentStatus.SUCCESS,
+        status: createPaymentDto.status || PaymentStatus.PENDING,
         transactionId: createPaymentDto.transactionId,
         receiptFile: createPaymentDto.receiptFile,
         paymentMethod: createPaymentDto.paymentMethod,
@@ -86,24 +86,11 @@ export class PaymentService {
       include: { Booking: { include: { Trip: true } } },
     });
 
-    // If payment is successful, update booking status and generate ticket
-    if (payment.status === PaymentStatus.SUCCESS) {
-      await this.prisma.booking.update({
-        where: { id: booking.id },
-        data: { status: BookingStatus.CONFIRMED },
-      });
-
-      const ticket = await this.generateTicket(booking);
-      return {
-        message: 'تم إنشاء الدفعة بنجاح',
-        payment,
-        ticket,
-      };
-    }
-
+    const ticket = await this.generateTicket(booking, payment);
     return {
       message: 'تم إنشاء الدفعة بنجاح',
       payment,
+      ticket,
     };
   }
 
@@ -219,25 +206,6 @@ export class PaymentService {
       include: { Booking: { include: { Trip: { include: { Bus: true } } } } },
     });
 
-    // If payment status changed to SUCCESS, update booking and generate ticket
-    if (
-      updatePaymentDto.status === PaymentStatus.SUCCESS &&
-      existingPayment.status !== PaymentStatus.SUCCESS &&
-      updatedPayment.Booking
-    ) {
-      await this.prisma.booking.update({
-        where: { id: updatedPayment.bookingId },
-        data: { status: BookingStatus.CONFIRMED },
-      });
-
-      const ticket = await this.generateTicket(updatedPayment.Booking);
-      return {
-        message: 'تم تحديث الدفعة بنجاح',
-        payment: updatedPayment,
-        ticket,
-      };
-    }
-
     return {
       message: 'تم تحديث الدفعة بنجاح',
       payment: updatedPayment,
@@ -261,8 +229,11 @@ export class PaymentService {
     return { message: 'تم حذف الدفعة بنجاح' };
   }
 
-  private async generateTicket(booking: any) {
-    const ticketResult = await this.pdfService.generateTicket(booking.id);
+  async generateTicket(booking: any, paymentData?: any) {
+    const ticketResult = await this.pdfService.generateTicket(
+      booking.id as string,
+      paymentData,
+    );
     const existingTicket = await this.prisma.ticketPDF.findUnique({
       where: { bookingId: booking.id },
     });

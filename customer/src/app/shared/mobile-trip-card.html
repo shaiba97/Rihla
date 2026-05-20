@@ -5,7 +5,7 @@
       <span class="text-[13px] font-bold text-[var(--text-primary)] truncate max-w-[140px]">{{ trip().busName }}</span>
     </div>
     <div class="flex items-center gap-1">
-      <span class="text-[17px] font-extrabold text-[var(--primary)] leading-tight">{{ trip().price | arabicNumber }}</span>
+      <span class="text-[17px] font-extrabold text-[var(--primary)] leading-tight">{{ displayPrice() | arabicNumber }}</span>
       <span class="text-[10px] font-bold text-[var(--text-secondary)]">ج. س</span>
     </div>
   </div>

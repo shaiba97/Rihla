@@ -22,4 +22,8 @@ export class FinancialsService {
   getSummary() {
     return this.http.get<{ data: FinancialSummary }>(`${this.api}/payment/summary`);
   }
+
+  getPerformance(period: string) {
+    return this.http.get<{ data: any[] }>(`${this.api}/payment/performance?period=${period}`);
+  }
 }

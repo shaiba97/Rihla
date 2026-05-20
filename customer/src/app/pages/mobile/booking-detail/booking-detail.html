@@ -6,7 +6,7 @@
     <span class="text-[16px] font-bold text-[var(--text-primary)]">تفاصيل الحجز</span>
   </div>
 
-  <div class="flex-1 overflow-y-auto px-4 py-5 flex flex-col gap-4">
+  <div class="flex-1 overflow-y-auto px-4 py-5 flex flex-col gap-4 pb-36">
     @if (!booking()) {
       <div class="flex-1 flex items-center justify-center text-sm text-[var(--text-muted)]">لم يتم العثور على الحجز</div>
     } @else {
@@ -48,6 +48,10 @@
             <span class="text-[15px] font-extrabold text-[var(--text-primary)]">{{ b.Trip?.toCity }}</span>
             <span class="text-[10px] text-[var(--text-muted)]">الوصول</span>
           </div>
+        </div>
+        <div class="flex items-center justify-between pt-2 border-t border-[var(--border)]">
+          <span class="text-[11px] text-[var(--text-muted)]">حالة الرحلة</span>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-bold" [ngClass]="tripStatusClass(b.Trip?.status)">{{ tripStatusLabel(b.Trip?.status) }}</span>
         </div>
       </div>
 
@@ -98,11 +102,15 @@
           <span class="text-[18px] font-extrabold text-[var(--primary)] tabular-nums">{{ (b.Payment?.totalAmount || 0) | arabicNumber }} <span class="text-[11px] font-medium"> جنيه سوداني </span></span>
         </div>
       </div>
+    }
+  </div>
 
-      <button (click)="downloadTicket()" class="flex items-center justify-center gap-2 w-full py-4 rounded-2xl bg-[var(--primary)] text-white font-bold text-[15px] active:scale-[0.98] transition-all duration-150 shadow-lg">
+  @if (booking()?.status === 'CONFIRMED') {
+    <div class="flex-shrink-0 bg-[var(--bg-card)] border-t border-[var(--border)] px-4 py-3 shadow-[0_-4px_20px_rgba(13,148,136,0.1)]">
+      <button (click)="downloadTicket()" class="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl bg-[var(--primary)] text-white font-bold text-[15px] active:scale-[0.98] transition-all duration-150 shadow-lg">
         <svg lucideDownload class="w-5 h-5"></svg>
         <span>تحميل التذكرة</span>
       </button>
-    }
-  </div>
+    </div>
+  }
 </div>

@@ -25,6 +25,7 @@ import {
   UpdateBookingDto,
   CreatePaymentDto,
   UpdatePaymentDto,
+  CreateBookingWithPaymentDto,
 } from '../dto/booking.dto';
 
 const receiptsDir = path.resolve('./uploads/receipts');
@@ -86,10 +87,20 @@ export class BookingController {
     // private readonly sessionService: SessionService,
   ) {}
 
+  @Get('active-fee')
+  getActiveFee() {
+    return this.bookingService.getActivePlatformFee();
+  }
+
   @Post('create-booking')
   @UseGuards(AuthGuard('jwt'))
   createBooking(@Body() dto: CreateBookingDto, @Req() req: Request) {
     return this.bookingService.create(dto, (req as any).user.id);
+  }
+
+  @Get('payment-accounts')
+  getActivePaymentAccounts() {
+    return this.bookingService.getActivePaymentAccounts();
   }
 
   @Get('get-booked-seats/tripId/:tripId')
@@ -186,6 +197,26 @@ export class BookingController {
     const paymentData = { ...dto, receiptFile, customerId: (req as any).user.id };
 
     return await this.paymentService.create(paymentData);
+  }
+
+  @Post('create-booking-with-payment')
+  @UseGuards(AuthGuard('jwt'))
+  @UseInterceptors(uploadInterceptor)
+  async createBookingWithPayment(
+    @Body() dto: CreateBookingWithPaymentDto,
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req: Request,
+  ) {
+    if (!file) {
+      throw new BadRequestException('صورة الإيصال مطلوبة');
+    }
+
+    const receiptFile = `/uploads/receipts/${file.filename}`;
+    return await this.bookingService.createBookingWithPayment(
+      dto,
+      (req as any).user.id,
+      receiptFile,
+    );
   }
 
   @Get('get-payments')

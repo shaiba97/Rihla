@@ -365,6 +365,10 @@ export class BookingService {
     );
   }
 
+  getActiveFee(): Observable<{ amount: number; currency: string } | null> {
+    return this.http.get<any>(`${this.baseUrl}/active-fee`);
+  }
+
   // Get Booked Seats for a Trip (if needed)
   getBookedSeats(
     tripId: string

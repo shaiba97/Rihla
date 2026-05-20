@@ -2,7 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { LucideUser, LucidePencil, LucideCheck, LucideX, LucideAlertCircle, LucideTrash2, LucideMail } from '@lucide/angular';
-import { AuthService } from '../../../core/services/auth';
+import { AuthService, UpdateProfileResponse, DeleteAccountResponse } from '../../../core/services/auth';
 
 @Component({
   selector: 'app-profile',
@@ -45,7 +45,7 @@ export class ProfileComponent {
     this.saveSuccess.set('');
     const email = this.editEmail().trim() || undefined;
     this.authService.updateProfile({ name, email }).subscribe({
-      next: () => {
+      next: (_res: UpdateProfileResponse) => {
         this.authService.updateLocalProfile({ name, email });
         this.isSaving.set(false);
         this.editMode.set(false);
@@ -66,7 +66,7 @@ export class ProfileComponent {
     this.isDeleting.set(true);
     this.deleteError.set('');
     this.authService.deleteAccount().subscribe({
-      next: () => { this.authService.logout(); },
+      next: (_res: DeleteAccountResponse) => { this.authService.logout(); },
       error: (err: any) => {
         this.isDeleting.set(false);
         this.deleteError.set(err?.error?.message ?? 'فشل حذف الحساب');

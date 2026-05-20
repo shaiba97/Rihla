@@ -14,13 +14,11 @@ export class PaymentService {
       include: { Booking: { include: { Trip: true } } },
     });
 
-    const totalRevenue = payments.reduce((s, p) => s + Number(p.totalAmount ?? 0), 0);
-    const totalCommission = payments.reduce((s, p) => s + Number(p.commissionAmount ?? 0), 0);
-    const netEarnings = payments.reduce((s, p) => s + Number(p.companyAmount ?? 0), 0);
+    const totalRevenue = payments.reduce((s, p) => s + Number(p.companyAmount ?? 0), 0);
 
     const startOfMonth = new Date(); startOfMonth.setDate(1); startOfMonth.setHours(0, 0, 0, 0);
     const thisMonthPayments = payments.filter(p => new Date(p.createdAt) >= startOfMonth);
-    const thisMonthRevenue = thisMonthPayments.reduce((s, p) => s + Number(p.totalAmount ?? 0), 0);
+    const thisMonthRevenue = thisMonthPayments.reduce((s, p) => s + Number(p.companyAmount ?? 0), 0);
 
     const totalBookings = await this.prisma.booking.count({ where: { Trip: { Bus: { companyId } }, status: 'CONFIRMED' } });
     const pendingBookings = await this.prisma.booking.count({ where: { Trip: { Bus: { companyId } }, status: 'PENDING' } });
@@ -50,6 +48,48 @@ export class PaymentService {
       from: p.Booking?.Trip?.fromCity, to: p.Booking?.Trip?.toCity,
     }));
 
-    return { totalRevenue, totalCommission, netEarnings, thisMonthRevenue, totalBookings, pendingBookings, dailyRevenue, topTrips, recentPayments: recentPaymentsList };
+    const totalCompanyIncome = payments.reduce((s, p) => s + Number(p.companyAmount ?? 0), 0);
+    return { totalRevenue, totalCommission: 0, netEarnings: totalCompanyIncome, thisMonthRevenue, totalBookings, pendingBookings, dailyRevenue, topTrips, recentPayments: recentPaymentsList };
+  }
+
+  async getPerformance(companyId: string, period: 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'half-yearly' | 'yearly' = 'monthly') {
+    const payments = await this.prisma.payment.findMany({
+      where: {
+        Booking: { Trip: { Bus: { companyId } } },
+        status: 'SUCCESS',
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    function getKey(d: Date): string {
+      const y = d.getFullYear();
+      const monthNum = d.getMonth() + 1;
+      const m = String(monthNum).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      if (period === 'daily') return `${y}-${m}-${day}`;
+      if (period === 'weekly') return `${y}-W${String(Math.ceil(((+d - +new Date(y,0,1))/86400000 + new Date(y,0,1).getDay() + 1) / 7)).padStart(2,'0')}`;
+      if (period === 'quarterly') return `${y}-Q${Math.ceil(monthNum / 3)}`;
+      if (period === 'half-yearly') return `${y}-H${monthNum <= 6 ? 1 : 2}`;
+      if (period === 'yearly') return `${y}`;
+      return `${y}-${m}`;
+    }
+
+    const groups: Record<string, { revenue: number; platformFees: number; netIncome: number; count: number }> = {};
+
+    payments.forEach(p => {
+      const key = getKey(new Date(p.createdAt));
+      if (!groups[key]) groups[key] = { revenue: 0, platformFees: 0, netIncome: 0, count: 0 };
+      groups[key].revenue += Number(p.totalAmount ?? 0);
+      groups[key].netIncome += Number(p.companyAmount ?? 0);
+      groups[key].count += 1;
+    });
+
+    return Object.entries(groups).map(([period, g]) => ({
+      period,
+      revenue: Math.round(g.revenue),
+      platformFees: Math.round(g.platformFees),
+      netIncome: Math.round(g.netIncome),
+      count: g.count,
+    })).sort((a, b) => a.period.localeCompare(b.period));
   }
 }

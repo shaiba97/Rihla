@@ -1,3 +1,8 @@
+interface DatePill {
+  label: string;
+  date: string;
+}
+
 import {
   Component, signal, inject,
   OnInit, computed,
@@ -80,6 +85,21 @@ export class SearchResultsComponent implements OnInit {
   ];
 
   today = new Date().toISOString().split('T')[0];
+
+  datePills = computed((): DatePill[] => {
+    const d = new Date();
+    const fmt = (offset: number): string => {
+      const dt = new Date(d);
+      dt.setDate(dt.getDate() + offset);
+      return dt.toISOString().split('T')[0];
+    };
+    const weekdays = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+    return [
+      { label: 'اليوم', date: fmt(0) },
+      { label: 'غداً', date: fmt(1) },
+      { label: weekdays[new Date(fmt(2)).getDay()], date: fmt(2) },
+    ];
+  });
 
   sortedTrips = computed(() => {
     const trips = [...this.allTrips()];
@@ -198,6 +218,10 @@ export class SearchResultsComponent implements OnInit {
         this.isLoading.set(false);
       },
     });
+  }
+
+  selectDatePill(pill: DatePill): void {
+    this.date.set(pill.date);
   }
 
   swap(): void {

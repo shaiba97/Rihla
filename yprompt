@@ -1,33 +1,1930 @@
+════════════════════════════════════════════════════
+⛔ STRICT MODE — READ THIS BEFORE DOING ANYTHING
+════════════════════════════════════════════════════
 
-PHONE APP:
-- home page must be responsive that when the user start scrolling up the 
-App Header / logo area start to shrink and disappear and so the home the search box card will shrink and stick at the top of the screen
-gradually according to the scroll position
+Build ONLY what is described in this prompt.
+Do NOT touch any file not explicitly listed.
+Do NOT use plain CSS — Tailwind utility classes ONLY.
+Do NOT use hardcoded hex colors or color names.
+Do NOT use mock data — real backend data only.
+ALWAYS use Angular CLI commands to generate files.
+All text must be in Arabic.
+Layout must be RTL (right to left).
+Do NOT stop until ng serve runs with zero errors.
 
-- design the bottom navigation bar tab that will have [home, booking, profile] it must be functional.
-home: already designed
+VIOLATION = plain CSS or hardcoded colors = failure.
+════════════════════════════════════════════════════
 
-booking:
-    if the has booking:
-        show the booking card with a simple decent useful details related to the booking and a button to download a ticket,
-        when the user click that card will redirect to the booking details page to see all the related details [booking details, trip details, bus details, payment details, ticket download button]
-    else:
-        show a centered button size link redirecting to home page to make the booking
+─── BACKEND ─────────────────────────────────────────────────────────────────────
 
-profile:
-if the user logged in:
-    show the user profile details [name, email, phone, profile picture, etc.]
-else:
-    show a centered button size link redirecting to login page
+Customer API: http://localhost:3001/api
+Use environment.apiUrl — never hardcode URLs.
 
-- all the numbers that user will see must be in arabic. analyze find the numbers [price, time, date, chairs, ... and so on]
+─── FOLDER STRUCTURE ────────────────────────────────────────────────────────────
 
-- when the user selects a payment gateway method a number related to payment gateway method selected must shown
-over the transactionId input where the can just copy to tranfere the amonut on that given number
+Components → src/app/pages/ or src/app/shared/
+             Each in its OWN subfolder
+Services   → src/app/services/
+             Each in its OWN subfolder
 
+─── COLOR SYSTEM — CSS VARIABLES ONLY ───────────────────────────────────────────
 
-WEB:
-- count down timer must be in payment details tab, not in select seat tab
-- all the numbers that user will see must be in arabic. analyze find the numbers [price, time, date, chairs, ... and so on]
-like any number a user will see must in arabic
-like any number a user will see must in arabic
+NEVER use hex or color names directly.
+Use ONLY CSS variables via Tailwind arbitrary values:
+
+   bg-[var(--primary)]
+   bg-[var(--primary-light)]
+   bg-[var(--primary-hover)]
+   text-[var(--text-primary)]
+   text-[var(--text-secondary)]
+   text-[var(--text-muted)]
+   border-[var(--border)]
+   bg-[var(--bg-card)]
+   bg-[var(--bg-base)]
+
+─── STEP 1: READ EXISTING FILES FIRST ───────────────────────────────────────────
+
+Read ALL these files before touching anything:
+
+   src/app/pages/trips/trip-card/trip-card.component.ts
+   src/app/pages/trips/trip-card/trip-card.component.html
+   src/app/services/trip-search/trip-search.service.ts
+   src/environments/environment.ts
+   src/app/app.routes.ts
+
+Report what you find before proceeding.
+
+─── STEP 2: GENERATE FILES VIA CLI ──────────────────────────────────────────────
+
+Run these commands:
+
+   ng g c shared/booking-modal/booking-modal \
+     --skip-tests
+
+   ng g s services/booking/booking --skip-tests
+
+   ng g s services/session/session --skip-tests
+
+─── STEP 3: DATA INTERFACES ─────────────────────────────────────────────────────
+
+Create src/app/shared/booking-modal/booking.interfaces.ts
+
+   export type BookingStep =
+     'seat' | 'passenger' | 'payment';
+
+   export type SeatStatus =
+     'available' | 'booked' | 'selected';
+
+   export interface SeatMap {
+     seatNumber: number;
+     status:     SeatStatus;
+     gender?:    'MALE' | 'FEMALE' | null;
+   }
+
+   export interface PassengerForm {
+     seatNumber:  number;
+     name:        string;
+     age:         number | null;
+     gender:      'MALE' | 'FEMALE' | null;
+   }
+
+   export interface ContactForm {
+     countryCode:    string;
+     whatsappNumber: string;
+   }
+
+   export type PaymentGateway =
+     'bankak' | 'fawry' | 'mashriq' | 'bravo';
+
+   export interface BookingSession {
+     tripId:        string;
+     ticketId:      string;
+     selectedSeats: number[];
+     contactForm:   ContactForm;
+     passengers:    PassengerForm[];
+     price:         number;
+     currency:      string;
+   }
+
+─── STEP 4: BOOKING SERVICE ─────────────────────────────────────────────────────
+
+FILE: src/app/services/booking/booking.service.ts
+
+   import { Injectable, inject } from '@angular/core';
+   import { HttpClient } from '@angular/common/http';
+   import { Observable } from 'rxjs';
+   import { environment }
+     from '../../../environments/environment';
+
+   export interface TripDetails {
+     id:             string;
+     busName:        string;
+     busChairs:      number;
+     leftSideChairs: number;
+     rightSideChairs:number;
+     boardingCity:   string;
+     boardingStation:string;
+     boardingState:  string;
+     destCity:       string;
+     destStation:    string;
+     destState:      string;
+     tripDate:       string;
+     tripTime:       string;
+     arriveDate:     string;
+     arriveTime:     string;
+     price:          number;
+     currency:       string;
+     seatsLeft:      number;
+     status:         string;
+     bookedSeats:    number[];
+   }
+
+   export interface CreateBookingDto {
+     tripId:        string;
+     ticketId:      string;
+     seatNumber:    number;
+     passengerName: string;
+     passengerAge:  number;
+     passengerGender: 'MALE' | 'FEMALE';
+     passengerContact: string;
+   }
+
+   @Injectable({ providedIn: 'root' })
+   export class BookingService {
+     private http    = inject(HttpClient);
+     private baseUrl = environment.apiUrl;
+
+     getTripDetails(
+       tripId: string
+     ): Observable<{ data: TripDetails }> {
+       return this.http.get<{ data: TripDetails }>(
+         `${this.baseUrl}/trips/get-trip/id/${tripId}`
+       );
+     }
+
+     getBookedSeats(
+       tripId: string
+     ): Observable<{ data: number[] }> {
+       return this.http.get<{ data: number[] }>(
+         `${this.baseUrl}/bookings/booked-seats/${tripId}`
+       );
+     }
+
+     createBooking(
+       dto: CreateBookingDto
+     ): Observable<any> {
+       return this.http.post(
+         `${this.baseUrl}/booking/session/confirm`,
+         dto
+       );
+     }
+   }
+
+─── STEP 5: SESSION SERVICE ─────────────────────────────────────────────────────
+
+FILE: src/app/services/session/session.service.ts
+
+   import { Injectable, signal } from '@angular/core';
+   import {
+     BookingSession,
+     ContactForm,
+     PassengerForm,
+   } from '../../shared/booking-modal/booking.interfaces';
+
+   @Injectable({ providedIn: 'root' })
+   export class SessionService {
+     private _session = signal<BookingSession | null>(null);
+
+     session = this._session.asReadonly();
+
+     init(tripId: string, ticketId: string,
+          price: number, currency: string): void {
+       this._session.set({
+         tripId, ticketId,
+         selectedSeats: [],
+         contactForm: { countryCode: '+249', whatsappNumber: '' },
+         passengers:  [],
+         price, currency,
+       });
+     }
+
+     updateSeats(seats: number[]): void {
+       const s = this._session();
+       if (!s) return;
+       this._session.set({ ...s, selectedSeats: seats });
+     }
+
+     updateContact(contact: ContactForm): void {
+       const s = this._session();
+       if (!s) return;
+       this._session.set({ ...s, contactForm: contact });
+     }
+
+     updatePassengers(passengers: PassengerForm[]): void {
+       const s = this._session();
+       if (!s) return;
+       this._session.set({ ...s, passengers });
+     }
+
+     clear(): void { this._session.set(null); }
+   }
+
+─── STEP 6: BUILD BOOKING MODAL COMPONENT ───────────────────────────────────────
+
+FILE: src/app/shared/booking-modal/
+      booking-modal.component.ts
+
+   import {
+     Component, input, output, signal,
+     computed, inject, OnInit, OnChanges,
+   } from '@angular/core';
+   import { FormsModule, ReactiveFormsModule,
+            FormBuilder, FormArray, Validators }
+     from '@angular/forms';
+   import { NgClass, DatePipe } from '@angular/common';
+   import {
+     LucideX,
+     LucideArrowLeft,
+     LucideArmchair,
+     LucideUser,
+     LucideCreditCard,
+     LucideCheckCircle,
+     LucideBus,
+     LucideMapPin,
+     LucideClock,
+     LucideCalendar,
+     LucideChevronLeft,
+     LucideChevronRight,
+     LucideAlertCircle,
+     LucideSmartphone,
+     LucideLoader,
+     LucideWallet,
+   } from '@lucide/angular';
+   import {
+     BookingStep,
+     SeatMap,
+     PassengerForm,
+     ContactForm,
+     PaymentGateway,
+   } from './booking.interfaces';
+   import { BookingService, TripDetails }
+     from '../../services/booking/booking.service';
+   import { SessionService }
+     from '../../services/session/session.service';
+   import { TimeFormatPipe }
+     from '../../pipes/time-format/time-format.pipe';
+
+   @Component({
+     selector:   'app-booking-modal',
+     standalone: true,
+     imports: [
+       FormsModule,
+       ReactiveFormsModule,
+       NgClass,
+       DatePipe,
+       TimeFormatPipe,
+       LucideX,
+       LucideArrowLeft,
+       LucideArmchair,
+       LucideUser,
+       LucideCreditCard,
+       LucideCheckCircle,
+       LucideBus,
+       LucideMapPin,
+       LucideClock,
+       LucideCalendar,
+       LucideChevronLeft,
+       LucideChevronRight,
+       LucideAlertCircle,
+       LucideSmartphone,
+       LucideLoader,
+       LucideWallet,
+     ],
+     templateUrl: './booking-modal.component.html',
+   })
+   export class BookingModalComponent
+     implements OnInit, OnChanges {
+
+     tripId  = input.required<string>();
+     ticketId = input.required<string>();
+     price   = input.required<number>();
+     currency = input<string>('جنيه');
+     closed  = output<void>();
+
+     private bookingService = inject(BookingService);
+     private sessionService = inject(SessionService);
+     private fb             = inject(FormBuilder);
+
+     // ── State ──────────────────────────────────────
+     currentStep    = signal<BookingStep>('seat');
+     tripDetails    = signal<TripDetails | null>(null);
+     bookedSeats    = signal<number[]>([]);
+     selectedSeats  = signal<number[]>([]);
+     isLoading      = signal<boolean>(false);
+     isSubmitting   = signal<boolean>(false);
+     error          = signal<string>('');
+     selectedGateway = signal<PaymentGateway | null>(null);
+
+     // ── Computed ───────────────────────────────────
+     seatMap = computed((): SeatMap[] => {
+       const trip  = this.tripDetails();
+       const booked = this.bookedSeats();
+       const sel   = this.selectedSeats();
+       if (!trip) return [];
+       const total = trip.busChairs || 45;
+       return Array.from({ length: total }, (_, i) => {
+         const n = i + 1;
+         return {
+           seatNumber: n,
+           status: sel.includes(n)
+             ? 'selected'
+             : booked.includes(n)
+               ? 'booked'
+               : 'available',
+         };
+       });
+     });
+
+     // Bus rows: rows of [left2, right2] + back 5
+     busRows = computed(() => {
+       const seats = this.seatMap();
+       const trip  = this.tripDetails();
+       if (!seats.length || !trip) return [];
+       const total    = trip.busChairs || 45;
+       const backCount = 5;
+       const mainSeats = seats.slice(0, total - backCount);
+       const backSeats = seats.slice(total - backCount);
+       const left  = trip.leftSideChairs  || 2;
+       const right = trip.rightSideChairs || 2;
+       const perRow = left + right;
+       const rows: SeatMap[][] = [];
+       for (let i = 0; i < mainSeats.length; i += perRow) {
+         rows.push(mainSeats.slice(i, i + perRow));
+       }
+       return { rows, backSeats, left, right };
+     });
+
+     canGoToPassenger = computed(
+       () => this.selectedSeats().length > 0
+     );
+
+     canGoToPayment = computed(() => {
+       const f = this.passengerForm;
+       return f.valid &&
+              this.contactForm.valid &&
+              this.selectedSeats().length > 0;
+     });
+
+     totalPrice = computed(() =>
+       this.selectedSeats().length * this.price()
+     );
+
+     // ── Forms ──────────────────────────────────────
+     contactForm = this.fb.group({
+       countryCode:    ['+249', Validators.required],
+       whatsappNumber: ['', [
+         Validators.required,
+         Validators.pattern(/^\d{9}$/),
+       ]],
+     });
+
+     passengerForm = this.fb.group({
+       passengers: this.fb.array([]),
+     });
+
+     get passengersArray(): FormArray {
+       return this.passengerForm.get(
+         'passengers'
+       ) as FormArray;
+     }
+
+     // ── Payment gateways ───────────────────────────
+     paymentGateways: {
+       id: PaymentGateway;
+       name: string;
+       icon: string;
+       hasLogo: boolean;
+     }[] = [
+       { id: 'bankak',  name: 'بنكك',    icon: 'wallet',      hasLogo: false },
+       { id: 'fawry',   name: 'فوري',    icon: 'credit-card', hasLogo: false },
+       { id: 'mashriq', name: 'المشرق',  icon: 'landmark',    hasLogo: false },
+       { id: 'bravo',   name: 'برافو',   icon: 'smartphone',  hasLogo: false },
+     ];
+
+     countryCodes = [
+       { code: '+249', label: 'SD +249' },
+       { code: '+20',  label: 'EG +20'  },
+       { code: '+966', label: 'SA +966' },
+       { code: '+971', label: 'AE +971' },
+       { code: '+1',   label: 'US +1'   },
+     ];
+
+     // ── Lifecycle ──────────────────────────────────
+     ngOnInit(): void { this.loadTrip(); }
+
+     ngOnChanges(): void {
+       if (this.tripId()) this.loadTrip();
+     }
+
+     // ── Methods ────────────────────────────────────
+     loadTrip(): void {
+       if (!this.tripId()) return;
+       this.isLoading.set(true);
+       this.bookingService
+         .getTripDetails(this.tripId())
+         .subscribe({
+           next: (res) => {
+             this.tripDetails.set(res.data);
+             this.loadBookedSeats();
+             this.sessionService.init(
+               this.tripId(),
+               this.ticketId(),
+               this.price(),
+               this.currency(),
+             );
+             this.isLoading.set(false);
+           },
+           error: () => {
+             this.error.set(
+               'خطأ في تحميل بيانات الرحلة'
+             );
+             this.isLoading.set(false);
+           },
+         });
+     }
+
+     loadBookedSeats(): void {
+       this.bookingService
+         .getBookedSeats(this.tripId())
+         .subscribe({
+           next: (res) =>
+             this.bookedSeats.set(res.data ?? []),
+           error: () => {},
+         });
+     }
+
+     toggleSeat(seat: SeatMap): void {
+       if (seat.status === 'booked') return;
+       const current = this.selectedSeats();
+       const exists  = current.includes(seat.seatNumber);
+       const updated = exists
+         ? current.filter(s => s !== seat.seatNumber)
+         : [...current, seat.seatNumber];
+       this.selectedSeats.set(updated);
+       this.sessionService.updateSeats(updated);
+       this.syncPassengerForms(updated);
+     }
+
+     syncPassengerForms(seats: number[]): void {
+       const arr = this.passengersArray;
+       while (arr.length > seats.length) {
+         arr.removeAt(arr.length - 1);
+       }
+       while (arr.length < seats.length) {
+         arr.push(this.fb.group({
+           seatNumber: [seats[arr.length]],
+           name:   ['', Validators.required],
+           age:    [null, [
+             Validators.required,
+             Validators.min(1),
+             Validators.max(120),
+           ]],
+           gender: [null, Validators.required],
+         }));
+       }
+       seats.forEach((s, i) => {
+         arr.at(i).patchValue({ seatNumber: s });
+       });
+     }
+
+     goToStep(step: BookingStep): void {
+       if (step === 'passenger' &&
+           !this.canGoToPassenger()) return;
+       if (step === 'payment' &&
+           !this.canGoToPayment()) return;
+       this.currentStep.set(step);
+     }
+
+     seatClasses(seat: SeatMap): string[] {
+       if (seat.status === 'selected')
+         return ['bg-[var(--primary)]',
+                 'text-white',
+                 'border-[var(--primary)]',
+                 'shadow-md'];
+       if (seat.status === 'booked')
+         return ['bg-[var(--border)]',
+                 'text-[var(--text-muted)]',
+                 'cursor-not-allowed',
+                 'opacity-60'];
+       return ['bg-[var(--bg-card)]',
+               'text-[var(--text-primary)]',
+               'border-[var(--border)]',
+               'hover:border-[var(--primary)]',
+               'hover:bg-[var(--primary-light)]',
+               'cursor-pointer'];
+     }
+
+     selectGateway(gw: PaymentGateway): void {
+       this.selectedGateway.set(gw);
+     }
+
+     onClose(): void { this.closed.emit(); }
+
+     onSubmit(): void {
+       if (!this.canGoToPayment() ||
+           !this.selectedGateway()) return;
+       this.isSubmitting.set(true);
+       const contact = this.contactForm.value;
+       const phone   = `${contact.countryCode}${contact.whatsappNumber}`;
+       const passengers =
+         this.passengersArray.value as PassengerForm[];
+
+       const requests = passengers.map(p => ({
+         tripId:           this.tripId(),
+         ticketId:         this.ticketId(),
+         seatNumber:       p.seatNumber,
+         passengerName:    p.name,
+         passengerAge:     p.age!,
+         passengerGender:  p.gender!,
+         passengerContact: phone,
+       }));
+
+       Promise.all(
+         requests.map(r =>
+           this.bookingService.createBooking(r)
+             .toPromise()
+         )
+       ).then(() => {
+         this.isSubmitting.set(false);
+         this.sessionService.clear();
+         this.onClose();
+       }).catch(() => {
+         this.error.set('حدث خطأ أثناء الحجز');
+         this.isSubmitting.set(false);
+       });
+     }
+   }
+
+─── STEP 7: BOOKING MODAL TEMPLATE ──────────────────────────────────────────────
+
+FILE: src/app/shared/booking-modal/
+      booking-modal.component.html
+
+Build using ONLY Tailwind classes.
+NO plain CSS. NO hex values. RTL layout.
+
+   <!-- ══ BACKDROP ══ -->
+   <div class="fixed inset-0 z-50
+               bg-black/60 backdrop-blur-sm
+               flex items-start justify-center
+               overflow-y-auto py-4 px-2"
+        dir="rtl">
+
+     <!-- ══ MODAL SHELL ══ -->
+     <div class="relative w-full max-w-6xl
+                 bg-[var(--bg-base)]
+                 rounded-3xl shadow-2xl
+                 overflow-hidden
+                 min-h-[600px]">
+
+       <!-- ── MODAL HEADER ── -->
+       <div class="flex items-center justify-between
+                   px-6 py-4
+                   bg-[var(--bg-card)]
+                   border-b border-[var(--border)]
+                   sticky top-0 z-10">
+
+         <!-- Route title -->
+         <div class="flex items-center gap-2">
+           @if (tripDetails()) {
+             <span class="text-base font-bold
+                          text-[var(--text-primary)]">
+               {{ tripDetails()!.boardingCity }}
+             </span>
+             <svg lucideArrowLeft
+                  class="w-4 h-4
+                         text-[var(--primary)]">
+             </svg>
+             <span class="text-base font-bold
+                          text-[var(--text-primary)]">
+               {{ tripDetails()!.destCity }}
+             </span>
+           }
+         </div>
+
+         <!-- Close button -->
+         <button
+           (click)="onClose()"
+           class="w-9 h-9 rounded-full
+                  flex items-center justify-center
+                  text-[var(--text-muted)]
+                  hover:bg-[var(--primary-light)]
+                  hover:text-[var(--primary)]
+                  transition-all duration-150">
+           <svg lucideX class="w-5 h-5"></svg>
+         </button>
+
+       </div>
+
+       <!-- ── TAB HEADERS ── -->
+       <div class="flex items-center
+                   bg-[var(--bg-card)]
+                   border-b border-[var(--border)]
+                   px-6 gap-0">
+
+         <!-- Tab 1: اختيار المقعد -->
+         <button
+           (click)="goToStep('seat')"
+           class="flex items-center gap-2
+                  px-5 py-4 text-sm font-semibold
+                  border-b-2 transition-all duration-150"
+           [ngClass]="currentStep() === 'seat'
+             ? ['border-[var(--primary)]',
+                'text-[var(--primary)]']
+             : ['border-transparent',
+                'text-[var(--text-muted)]',
+                'hover:text-[var(--text-secondary)]']">
+           <svg lucideArmchair class="w-4 h-4">
+           </svg>
+           <span>١. اختيار المقعد</span>
+         </button>
+
+         <!-- Tab connector -->
+         <div class="w-8 h-px
+                     bg-[var(--border)]
+                     flex-shrink-0">
+         </div>
+
+         <!-- Tab 2: بيانات الراكب -->
+         <button
+           (click)="goToStep('passenger')"
+           [disabled]="!canGoToPassenger()"
+           class="flex items-center gap-2
+                  px-5 py-4 text-sm font-semibold
+                  border-b-2 transition-all duration-150
+                  disabled:cursor-not-allowed"
+           [ngClass]="currentStep() === 'passenger'
+             ? ['border-[var(--primary)]',
+                'text-[var(--primary)]']
+             : canGoToPassenger()
+               ? ['border-transparent',
+                  'text-[var(--text-muted)]',
+                  'hover:text-[var(--text-secondary)]']
+               : ['border-transparent',
+                  'text-[var(--text-muted)]',
+                  'opacity-40']">
+           <svg lucideUser class="w-4 h-4"></svg>
+           <span>٢. بيانات الراكب</span>
+         </button>
+
+         <!-- Tab connector -->
+         <div class="w-8 h-px
+                     bg-[var(--border)]
+                     flex-shrink-0">
+         </div>
+
+         <!-- Tab 3: الدفع -->
+         <button
+           (click)="goToStep('payment')"
+           [disabled]="!canGoToPayment()"
+           class="flex items-center gap-2
+                  px-5 py-4 text-sm font-semibold
+                  border-b-2 transition-all duration-150
+                  disabled:cursor-not-allowed"
+           [ngClass]="currentStep() === 'payment'
+             ? ['border-[var(--primary)]',
+                'text-[var(--primary)]']
+             : canGoToPayment()
+               ? ['border-transparent',
+                  'text-[var(--text-muted)]',
+                  'hover:text-[var(--text-secondary)]']
+               : ['border-transparent',
+                  'text-[var(--text-muted)]',
+                  'opacity-40']">
+           <svg lucideCreditCard class="w-4 h-4">
+           </svg>
+           <span>٣. الدفع</span>
+         </button>
+
+       </div>
+
+       <!-- ── LOADING STATE ── -->
+       @if (isLoading()) {
+         <div class="flex items-center justify-center
+                     py-24 gap-3
+                     text-[var(--text-muted)]">
+           <svg lucideLoader
+                class="w-8 h-8 animate-spin
+                       text-[var(--primary)]">
+           </svg>
+           <span class="text-sm font-medium">
+             جاري تحميل بيانات الرحلة...
+           </span>
+         </div>
+       }
+
+       <!-- ── TAB BODY ── -->
+       @if (!isLoading() && tripDetails()) {
+
+         <!-- ════════════════════════════════════ -->
+         <!-- TAB 1: SELECT SEAT                  -->
+         <!-- ════════════════════════════════════ -->
+         @if (currentStep() === 'seat') {
+           <div class="flex flex-col lg:flex-row
+                       gap-0 min-h-[500px]">
+
+             <!-- RIGHT: Seat map -->
+             <div class="flex-1 p-6
+                         border-l border-[var(--border)]
+                         flex flex-col gap-6">
+
+               <!-- Seat map heading -->
+               <h3 class="text-sm font-bold
+                          text-[var(--text-primary)]">
+                 اختر مقعدك
+               </h3>
+
+               <!-- Bus shell -->
+               <div class="inline-flex flex-col
+                           items-center
+                           bg-[var(--bg-card)]
+                           border-2 border-[var(--border)]
+                           rounded-3xl p-5
+                           shadow-sm mx-auto
+                           w-full max-w-xs">
+
+                 <!-- Steering wheel -->
+                 <div class="flex justify-start
+                             w-full mb-4 pr-2">
+                   <div class="w-10 h-10 rounded-full
+                               border-4
+                               border-[var(--border)]
+                               flex items-center
+                               justify-center
+                               text-[var(--text-muted)]">
+                     <svg lucideBus
+                          class="w-4 h-4">
+                     </svg>
+                   </div>
+                 </div>
+
+                 <!-- Main rows: 2 | aisle | 2 -->
+                 @if (busRows() && busRows().rows) {
+                   <div class="flex flex-col gap-2
+                               w-full">
+                     @for (row of busRows().rows;
+                           track $index) {
+                       <div class="flex items-center
+                                   justify-center gap-1">
+
+                         <!-- Left 2 seats -->
+                         @for (seat of row.slice(
+                                 0, busRows().left);
+                               track seat.seatNumber) {
+                           <button
+                             (click)="toggleSeat(seat)"
+                             [disabled]="seat.status==='booked'"
+                             class="w-9 h-10 rounded-lg
+                                    border-2 text-[10px]
+                                    font-bold
+                                    flex items-center
+                                    justify-center
+                                    transition-all
+                                    duration-150
+                                    flex-shrink-0"
+                             [ngClass]="seatClasses(seat)">
+                             {{ seat.seatNumber }}
+                           </button>
+                         }
+
+                         <!-- Aisle -->
+                         <div class="w-5 flex-shrink-0">
+                         </div>
+
+                         <!-- Right 2 seats -->
+                         @for (seat of row.slice(
+                                 busRows().left);
+                               track seat.seatNumber) {
+                           <button
+                             (click)="toggleSeat(seat)"
+                             [disabled]="seat.status==='booked'"
+                             class="w-9 h-10 rounded-lg
+                                    border-2 text-[10px]
+                                    font-bold
+                                    flex items-center
+                                    justify-center
+                                    transition-all
+                                    duration-150
+                                    flex-shrink-0"
+                             [ngClass]="seatClasses(seat)">
+                             {{ seat.seatNumber }}
+                           </button>
+                         }
+
+                       </div>
+                     }
+                   </div>
+                 }
+
+                 <!-- Back row divider -->
+                 <div class="w-full h-px
+                             bg-[var(--border)]
+                             my-4 border-t-2
+                             border-dashed
+                             border-[var(--border)]">
+                 </div>
+
+                 <!-- Back 5 seats row -->
+                 @if (busRows() && busRows().backSeats) {
+                   <div class="flex items-center
+                               justify-center gap-1.5">
+                     @for (seat of busRows().backSeats;
+                           track seat.seatNumber) {
+                       <button
+                         (click)="toggleSeat(seat)"
+                         [disabled]="seat.status==='booked'"
+                         class="w-9 h-10 rounded-lg
+                                border-2 text-[10px]
+                                font-bold
+                                flex items-center
+                                justify-center
+                                transition-all
+                                duration-150
+                                flex-shrink-0"
+                         [ngClass]="seatClasses(seat)">
+                         {{ seat.seatNumber }}
+                       </button>
+                     }
+                   </div>
+                 }
+
+               </div>
+
+               <!-- Seat legend -->
+               <div class="flex flex-wrap
+                           items-center gap-4
+                           justify-center">
+
+                 <div class="flex items-center gap-2">
+                   <div class="w-7 h-8 rounded-lg
+                               border-2
+                               border-[var(--border)]
+                               bg-[var(--bg-card)]">
+                   </div>
+                   <span class="text-xs
+                                text-[var(--text-secondary)]">
+                     متاح
+                   </span>
+                 </div>
+
+                 <div class="flex items-center gap-2">
+                   <div class="w-7 h-8 rounded-lg
+                               border-2
+                               border-[var(--primary)]
+                               bg-[var(--primary)]">
+                   </div>
+                   <span class="text-xs
+                                text-[var(--text-secondary)]">
+                     محجوز منك
+                   </span>
+                 </div>
+
+                 <div class="flex items-center gap-2">
+                   <div class="w-7 h-8 rounded-lg
+                               border-2
+                               border-[var(--border)]
+                               bg-[var(--border)]
+                               opacity-60">
+                   </div>
+                   <span class="text-xs
+                                text-[var(--text-secondary)]">
+                     محجوز
+                   </span>
+                 </div>
+
+               </div>
+
+             </div>
+
+             <!-- LEFT: Trip details -->
+             <div class="w-full lg:w-[360px]
+                         flex-shrink-0 p-6
+                         bg-[var(--bg-card)]
+                         flex flex-col gap-5">
+
+               <!-- Bus name -->
+               <div class="flex items-center gap-3">
+                 <div class="w-10 h-10 rounded-xl
+                             bg-[var(--primary-light)]
+                             flex items-center
+                             justify-center flex-shrink-0">
+                   <svg lucideBus
+                        class="w-5 h-5
+                               text-[var(--primary)]">
+                   </svg>
+                 </div>
+                 <div>
+                   <p class="text-base font-bold
+                              text-[var(--text-primary)]">
+                     {{ tripDetails()!.busName }}
+                   </p>
+                   <p class="text-xs
+                              text-[var(--text-muted)]">
+                     {{ tripDetails()!.busChairs }} مقعد
+                   </p>
+                 </div>
+               </div>
+
+               <!-- Divider -->
+               <div class="h-px bg-[var(--border)]">
+               </div>
+
+               <!-- Journey timeline -->
+               <div class="flex flex-col gap-4">
+
+                 <!-- Departure -->
+                 <div class="flex items-start gap-3">
+                   <div class="flex flex-col
+                               items-center gap-1
+                               flex-shrink-0 mt-1">
+                     <div class="w-3 h-3 rounded-full
+                                 bg-[var(--primary)]
+                                 ring-4
+                                 ring-[var(--primary-light)]">
+                     </div>
+                     <div class="w-0.5 h-12
+                                 bg-[var(--border)]">
+                     </div>
+                   </div>
+                   <div class="flex flex-col gap-0.5">
+                     <span class="text-xl font-extrabold
+                                  text-[var(--text-primary)]
+                                  tabular-nums leading-none">
+                       {{ tripDetails()!.tripTime
+                          | timeFormat }}
+                     </span>
+                     <span class="text-xs font-medium
+                                  text-[var(--text-secondary)]">
+                       {{ tripDetails()!.boardingCity }}
+                     </span>
+                     <span class="text-[10px]
+                                  text-[var(--text-muted)]">
+                       {{ tripDetails()!.boardingStation }}
+                     </span>
+                   </div>
+                 </div>
+
+                 <!-- Arrival -->
+                 <div class="flex items-start gap-3">
+                   <div class="flex-shrink-0 mt-1">
+                     <div class="w-3 h-3 rounded-full
+                                 border-3
+                                 border-[var(--primary)]
+                                 bg-[var(--bg-card)]">
+                     </div>
+                   </div>
+                   <div class="flex flex-col gap-0.5">
+                     <span class="text-xl font-extrabold
+                                  text-[var(--text-primary)]
+                                  tabular-nums leading-none">
+                       {{ tripDetails()!.arriveTime
+                          | timeFormat }}
+                     </span>
+                     <span class="text-xs font-medium
+                                  text-[var(--text-secondary)]">
+                       {{ tripDetails()!.destCity }}
+                     </span>
+                     <span class="text-[10px]
+                                  text-[var(--text-muted)]">
+                       {{ tripDetails()!.destStation }}
+                     </span>
+                   </div>
+                 </div>
+
+               </div>
+
+               <!-- Trip date -->
+               <div class="flex items-center gap-2
+                           px-3 py-2.5 rounded-xl
+                           bg-[var(--bg-base)]
+                           border border-[var(--border)]">
+                 <svg lucideCalendar
+                      class="w-4 h-4
+                             text-[var(--primary)]
+                             flex-shrink-0">
+                 </svg>
+                 <span class="text-xs font-semibold
+                              text-[var(--text-primary)]">
+                   {{ tripDetails()!.tripDate
+                      | date: 'EEEE، d MMMM y' : '' : 'ar' }}
+                 </span>
+               </div>
+
+               <!-- Selected seats summary -->
+               @if (selectedSeats().length > 0) {
+                 <div class="flex flex-col gap-2
+                             px-3 py-3 rounded-xl
+                             bg-[var(--primary-light)]
+                             border border-[var(--border)]">
+                   <div class="flex items-center
+                               justify-between">
+                     <span class="text-xs font-bold
+                                  text-[var(--primary)]">
+                       المقاعد المختارة
+                     </span>
+                     <span class="text-xs font-bold
+                                  text-[var(--primary)]">
+                       {{ selectedSeats().length }} مقعد
+                     </span>
+                   </div>
+                   <div class="flex flex-wrap gap-1.5">
+                     @for (s of selectedSeats(); track s) {
+                       <span class="px-2.5 py-1
+                                    rounded-full
+                                    text-xs font-bold
+                                    bg-[var(--primary)]
+                                    text-white">
+                         {{ s }}
+                       </span>
+                     }
+                   </div>
+                   <div class="flex items-center
+                               justify-between mt-1
+                               pt-2 border-t
+                               border-[var(--border)]">
+                     <span class="text-xs
+                                  text-[var(--text-secondary)]">
+                       الإجمالي
+                     </span>
+                     <span class="text-sm font-extrabold
+                                  text-[var(--primary)]">
+                       {{ totalPrice() }}
+                       {{ currency() }}
+                     </span>
+                   </div>
+                 </div>
+               }
+
+               <!-- CTA -->
+               <button
+                 (click)="goToStep('passenger')"
+                 [disabled]="!canGoToPassenger()"
+                 class="w-full flex items-center
+                        justify-center gap-2
+                        py-3 px-6 rounded-xl
+                        text-sm font-bold text-white
+                        bg-[var(--primary)]
+                        hover:bg-[var(--primary-hover)]
+                        disabled:opacity-40
+                        disabled:cursor-not-allowed
+                        transition-all duration-150
+                        active:scale-95 mt-auto">
+                 <span>تعبئة بيانات الراكب</span>
+                 <svg lucideChevronLeft
+                      class="w-4 h-4">
+                 </svg>
+               </button>
+
+             </div>
+
+           </div>
+         }
+
+         <!-- ════════════════════════════════════ -->
+         <!-- TAB 2: PASSENGER INFO               -->
+         <!-- ════════════════════════════════════ -->
+         @if (currentStep() === 'passenger') {
+           <div class="flex flex-col lg:flex-row
+                       gap-0 min-h-[500px]">
+
+             <!-- RIGHT: Forms -->
+             <div class="flex-1 p-6 overflow-y-auto
+                         border-l border-[var(--border)]
+                         flex flex-col gap-6">
+
+               <!-- Contact details -->
+               <div class="flex flex-col gap-4">
+                 <h3 class="text-sm font-bold
+                            text-[var(--text-primary)]
+                            flex items-center gap-2">
+                   <svg lucideSmartphone
+                        class="w-4 h-4
+                               text-[var(--primary)]">
+                   </svg>
+                   بيانات التواصل
+                 </h3>
+                 <p class="text-xs
+                           text-[var(--text-muted)] -mt-2">
+                   سيتم إرسال التذكرة على هذا الرقم
+                 </p>
+
+                 <!-- WhatsApp field -->
+                 <div class="flex gap-0 overflow-hidden
+                             rounded-xl border
+                             border-[var(--border)]
+                             focus-within:border-[var(--primary)]
+                             focus-within:ring-2
+                             focus-within:ring-[var(--primary-light)]
+                             transition-all duration-150
+                             bg-[var(--bg-card)]">
+
+                   <!-- Country code select -->
+                   <div class="flex-shrink-0
+                               border-l
+                               border-[var(--border)]">
+                     <select
+                       [ngModel]="contactForm
+                                  .get('countryCode')!
+                                  .value"
+                       (ngModelChange)="contactForm
+                         .get('countryCode')!
+                         .setValue($event)"
+                       class="h-full px-3 py-3
+                              bg-[var(--bg-base)]
+                              text-xs font-semibold
+                              text-[var(--text-primary)]
+                              outline-none
+                              cursor-pointer">
+                       @for (c of countryCodes; track c.code) {
+                         <option [value]="c.code">
+                           {{ c.label }}
+                         </option>
+                       }
+                     </select>
+                   </div>
+
+                   <!-- Phone number input -->
+                   <input
+                     type="tel"
+                     [ngModel]="contactForm
+                                .get('whatsappNumber')!
+                                .value"
+                     (ngModelChange)="contactForm
+                       .get('whatsappNumber')!
+                       .setValue($event)"
+                     placeholder="9xxxxxxxxx"
+                     maxlength="9"
+                     class="flex-1 px-4 py-3
+                            bg-transparent
+                            text-sm font-semibold
+                            text-[var(--text-primary)]
+                            placeholder:text-[var(--text-muted)]
+                            outline-none">
+                 </div>
+
+                 @if (contactForm.get('whatsappNumber')!
+                      .invalid &&
+                      contactForm.get('whatsappNumber')!
+                      .touched) {
+                   <p class="text-xs text-red-500
+                              flex items-center gap-1">
+                     <svg lucideAlertCircle
+                          class="w-3 h-3">
+                     </svg>
+                     يرجى إدخال رقم صحيح (9 أرقام)
+                   </p>
+                 }
+
+               </div>
+
+               <!-- Divider -->
+               <div class="h-px bg-[var(--border)]">
+               </div>
+
+               <!-- Passenger details — one per seat -->
+               <div class="flex flex-col gap-5"
+                    [formGroup]="passengerForm">
+                 <h3 class="text-sm font-bold
+                            text-[var(--text-primary)]
+                            flex items-center gap-2">
+                   <svg lucideUser
+                        class="w-4 h-4
+                               text-[var(--primary)]">
+                   </svg>
+                   بيانات الركاب
+                 </h3>
+
+                 <div formArrayName="passengers"
+                      class="flex flex-col gap-4">
+                   @for (p of passengersArray.controls;
+                         track $index) {
+                     <div [formGroupName]="$index"
+                          class="flex flex-col gap-4
+                                 p-4 rounded-2xl
+                                 border border-[var(--border)]
+                                 bg-[var(--bg-base)]">
+
+                       <!-- Passenger header -->
+                       <div class="flex items-center
+                                   gap-2">
+                         <div class="w-7 h-7 rounded-full
+                                     bg-[var(--primary-light)]
+                                     flex items-center
+                                     justify-center
+                                     flex-shrink-0">
+                           <svg lucideUser
+                                class="w-3.5 h-3.5
+                                       text-[var(--primary)]">
+                           </svg>
+                         </div>
+                         <span class="text-sm font-bold
+                                      text-[var(--text-primary)]">
+                           راكب {{ $index + 1 }}
+                         </span>
+                         <span class="text-xs
+                                      text-[var(--text-muted)]
+                                      mr-auto">
+                           مقعد رقم
+                           {{ selectedSeats()[$index] }}
+                         </span>
+                       </div>
+
+                       <!-- Name -->
+                       <input
+                         type="text"
+                         formControlName="name"
+                         placeholder="الاسم الكامل"
+                         class="w-full px-4 py-3
+                                rounded-xl border
+                                border-[var(--border)]
+                                bg-[var(--bg-card)]
+                                text-sm font-semibold
+                                text-[var(--text-primary)]
+                                placeholder:text-[var(--text-muted)]
+                                placeholder:font-normal
+                                outline-none
+                                focus:border-[var(--primary)]
+                                focus:ring-2
+                                focus:ring-[var(--primary-light)]
+                                transition-all duration-150">
+
+                       <!-- Age -->
+                       <input
+                         type="number"
+                         formControlName="age"
+                         placeholder="العمر"
+                         min="1"
+                         max="120"
+                         class="w-full px-4 py-3
+                                rounded-xl border
+                                border-[var(--border)]
+                                bg-[var(--bg-card)]
+                                text-sm font-semibold
+                                text-[var(--text-primary)]
+                                placeholder:text-[var(--text-muted)]
+                                placeholder:font-normal
+                                outline-none
+                                focus:border-[var(--primary)]
+                                focus:ring-2
+                                focus:ring-[var(--primary-light)]
+                                transition-all duration-150">
+
+                       <!-- Gender -->
+                       <div class="flex gap-3">
+                         <label class="flex-1 flex
+                                       items-center
+                                       justify-center
+                                       gap-2 py-3
+                                       rounded-xl
+                                       border-2
+                                       cursor-pointer
+                                       transition-all
+                                       duration-150
+                                       text-sm
+                                       font-semibold"
+                                [ngClass]="p.get('gender')!
+                                  .value === 'MALE'
+                                  ? ['border-[var(--primary)]',
+                                     'bg-[var(--primary-light)]',
+                                     'text-[var(--primary)]']
+                                  : ['border-[var(--border)]',
+                                     'bg-[var(--bg-card)]',
+                                     'text-[var(--text-secondary)]']">
+                           <input type="radio"
+                                  formControlName="gender"
+                                  value="MALE"
+                                  class="hidden">
+                           ذكر
+                         </label>
+                         <label class="flex-1 flex
+                                       items-center
+                                       justify-center
+                                       gap-2 py-3
+                                       rounded-xl
+                                       border-2
+                                       cursor-pointer
+                                       transition-all
+                                       duration-150
+                                       text-sm
+                                       font-semibold"
+                                [ngClass]="p.get('gender')!
+                                  .value === 'FEMALE'
+                                  ? ['border-[var(--primary)]',
+                                     'bg-[var(--primary-light)]',
+                                     'text-[var(--primary)]']
+                                  : ['border-[var(--border)]',
+                                     'bg-[var(--bg-card)]',
+                                     'text-[var(--text-secondary)]']">
+                           <input type="radio"
+                                  formControlName="gender"
+                                  value="FEMALE"
+                                  class="hidden">
+                           أنثى
+                         </label>
+                       </div>
+
+                     </div>
+                   }
+                 </div>
+               </div>
+
+               <!-- Continue button -->
+               <button
+                 (click)="goToStep('payment')"
+                 [disabled]="!canGoToPayment()"
+                 class="w-full flex items-center
+                        justify-center gap-2
+                        py-3 px-6 rounded-xl
+                        text-sm font-bold text-white
+                        bg-[var(--primary)]
+                        hover:bg-[var(--primary-hover)]
+                        disabled:opacity-40
+                        disabled:cursor-not-allowed
+                        transition-all duration-150
+                        active:scale-95">
+                 <span>المتابعة للدفع</span>
+                 <svg lucideChevronLeft
+                      class="w-4 h-4">
+                 </svg>
+               </button>
+
+             </div>
+
+             <!-- LEFT: Trip summary -->
+             <div class="w-full lg:w-[320px]
+                         flex-shrink-0 p-6
+                         bg-[var(--bg-card)]
+                         flex flex-col gap-5">
+
+               <!-- Bus name -->
+               <div class="flex items-center gap-3">
+                 <div class="w-10 h-10 rounded-xl
+                             bg-[var(--primary-light)]
+                             flex items-center
+                             justify-center">
+                   <svg lucideBus
+                        class="w-5 h-5
+                               text-[var(--primary)]">
+                   </svg>
+                 </div>
+                 <div>
+                   <p class="text-sm font-bold
+                              text-[var(--text-primary)]">
+                     {{ tripDetails()!.busName }}
+                   </p>
+                 </div>
+               </div>
+
+               <div class="h-px bg-[var(--border)]">
+               </div>
+
+               <!-- Journey -->
+               <div class="flex flex-col gap-3">
+                 <div class="flex items-center gap-3">
+                   <div class="w-2.5 h-2.5 rounded-full
+                               bg-[var(--primary)]
+                               flex-shrink-0">
+                   </div>
+                   <div>
+                     <p class="text-xs font-bold
+                                text-[var(--text-primary)]">
+                       {{ tripDetails()!.tripTime
+                          | timeFormat }}
+                       — {{ tripDetails()!.boardingCity }}
+                     </p>
+                     <p class="text-[10px]
+                                text-[var(--text-muted)]">
+                       {{ tripDetails()!.boardingStation }}
+                     </p>
+                   </div>
+                 </div>
+                 <div class="flex items-center gap-3">
+                   <div class="w-2.5 h-2.5 rounded-full
+                               border-2
+                               border-[var(--primary)]
+                               flex-shrink-0">
+                   </div>
+                   <div>
+                     <p class="text-xs font-bold
+                                text-[var(--text-primary)]">
+                       {{ tripDetails()!.arriveTime
+                          | timeFormat }}
+                       — {{ tripDetails()!.destCity }}
+                     </p>
+                     <p class="text-[10px]
+                                text-[var(--text-muted)]">
+                       {{ tripDetails()!.destStation }}
+                     </p>
+                   </div>
+                 </div>
+               </div>
+
+               <!-- Seat details -->
+               <div class="flex flex-col gap-2
+                           p-3 rounded-xl
+                           bg-[var(--bg-base)]
+                           border border-[var(--border)]">
+                 <p class="text-xs font-bold
+                            text-[var(--text-primary)]">
+                   تفاصيل المقاعد
+                 </p>
+                 <div class="flex flex-wrap gap-1.5">
+                   @for (s of selectedSeats(); track s) {
+                     <span class="px-2.5 py-1
+                                  rounded-full text-xs
+                                  font-bold
+                                  bg-[var(--primary)]
+                                  text-white">
+                       {{ s }}
+                     </span>
+                   }
+                 </div>
+               </div>
+
+               <!-- Total -->
+               <div class="flex items-center
+                           justify-between px-3 py-3
+                           rounded-xl
+                           bg-[var(--primary-light)]
+                           border border-[var(--border)]">
+                 <span class="text-sm font-bold
+                              text-[var(--primary)]">
+                   الإجمالي
+                 </span>
+                 <span class="text-lg font-extrabold
+                              text-[var(--primary)]">
+                   {{ totalPrice() }}
+                   {{ currency() }}
+                 </span>
+               </div>
+
+             </div>
+
+           </div>
+         }
+
+         <!-- ════════════════════════════════════ -->
+         <!-- TAB 3: PAYMENT                      -->
+         <!-- ════════════════════════════════════ -->
+         @if (currentStep() === 'payment') {
+           <div class="flex flex-col lg:flex-row
+                       gap-0 min-h-[500px]">
+
+             <!-- RIGHT: Payment options -->
+             <div class="flex-1 p-6
+                         border-l border-[var(--border)]
+                         flex flex-col gap-6">
+
+               <h3 class="text-sm font-bold
+                          text-[var(--text-primary)]
+                          flex items-center gap-2">
+                 <svg lucideCreditCard
+                      class="w-4 h-4
+                             text-[var(--primary)]">
+                 </svg>
+                 اختر طريقة الدفع
+               </h3>
+
+               <!-- Payment gateways grid -->
+               <div class="grid grid-cols-2
+                           sm:grid-cols-4 gap-3">
+                 @for (gw of paymentGateways; track gw.id) {
+                   <button
+                     (click)="selectGateway(gw.id)"
+                     class="flex flex-col items-center
+                            justify-center gap-2
+                            p-4 rounded-2xl border-2
+                            transition-all duration-150
+                            cursor-pointer
+                            min-h-[100px]"
+                     [ngClass]="selectedGateway() === gw.id
+                       ? ['border-[var(--primary)]',
+                          'bg-[var(--primary-light)]',
+                          'shadow-md']
+                       : ['border-[var(--border)]',
+                          'bg-[var(--bg-card)]',
+                          'hover:border-[var(--primary)]',
+                          'hover:bg-[var(--primary-light)]']">
+
+                     <!-- Gateway icon -->
+                     <div class="w-12 h-12 rounded-xl
+                                 flex items-center
+                                 justify-center
+                                 flex-shrink-0"
+                          [ngClass]="selectedGateway()===gw.id
+                            ? ['bg-[var(--primary)]']
+                            : ['bg-[var(--bg-base)]']">
+                       <svg [lucideIcon]="gw.icon"
+                            class="w-6 h-6"
+                            [ngClass]="selectedGateway()===gw.id
+                              ? ['text-white']
+                              : ['text-[var(--primary)]']">
+                       </svg>
+                     </div>
+
+                     <!-- Gateway name -->
+                     <span class="text-sm font-bold"
+                           [ngClass]="selectedGateway()===gw.id
+                             ? ['text-[var(--primary)]']
+                             : ['text-[var(--text-primary)]']">
+                       {{ gw.name }}
+                     </span>
+
+                     <!-- Selected indicator -->
+                     @if (selectedGateway() === gw.id) {
+                       <div class="w-5 h-5 rounded-full
+                                   bg-[var(--primary)]
+                                   flex items-center
+                                   justify-center">
+                         <svg lucideCheckCircle
+                              class="w-3.5 h-3.5 text-white">
+                         </svg>
+                       </div>
+                     }
+
+                   </button>
+                 }
+               </div>
+
+               <!-- Gateway instruction -->
+               @if (selectedGateway()) {
+                 <div class="p-4 rounded-2xl
+                             bg-[var(--primary-light)]
+                             border border-[var(--border)]
+                             flex flex-col gap-2">
+                   <p class="text-sm font-bold
+                              text-[var(--primary)]">
+                     تعليمات الدفع عبر
+                     @switch (selectedGateway()) {
+                       @case ('bankak') { بنكك }
+                       @case ('fawry')  { فوري }
+                       @case ('mashriq'){ المشرق }
+                       @case ('bravo')  { برافو }
+                     }
+                   </p>
+                   <p class="text-xs
+                              text-[var(--text-secondary)]
+                              leading-relaxed">
+                     سيتم توجيهك لإتمام الدفع عبر
+                     بوابة الدفع المختارة.
+                     بعد التأكيد سيتم إنشاء تذكرتك
+                     وإرسالها على رقم واتساب المسجل.
+                   </p>
+                 </div>
+               }
+
+               <!-- Error -->
+               @if (error()) {
+                 <div class="flex items-center gap-2
+                             px-4 py-3 rounded-xl
+                             bg-red-50
+                             dark:bg-red-950/20
+                             border border-red-200
+                             text-red-600">
+                   <svg lucideAlertCircle
+                        class="w-4 h-4 flex-shrink-0">
+                   </svg>
+                   <span class="text-sm">
+                     {{ error() }}
+                   </span>
+                 </div>
+               }
+
+               <!-- Submit button -->
+               <button
+                 (click)="onSubmit()"
+                 [disabled]="!selectedGateway()
+                             || isSubmitting()"
+                 class="w-full flex items-center
+                        justify-center gap-2
+                        py-4 px-6 rounded-xl
+                        text-sm font-bold text-white
+                        bg-[var(--primary)]
+                        hover:bg-[var(--primary-hover)]
+                        disabled:opacity-40
+                        disabled:cursor-not-allowed
+                        transition-all duration-150
+                        active:scale-95 mt-auto
+                        shadow-lg">
+                 @if (isSubmitting()) {
+                   <svg lucideLoader
+                        class="w-5 h-5 animate-spin">
+                   </svg>
+                   <span>جاري تأكيد الحجز...</span>
+                 } @else {
+                   <svg lucideCheckCircle
+                        class="w-5 h-5">
+                   </svg>
+                   <span>تأكيد الحجز والدفع</span>
+                 }
+               </button>
+
+             </div>
+
+             <!-- LEFT: Booking summary -->
+             <div class="w-full lg:w-[320px]
+                         flex-shrink-0 p-6
+                         bg-[var(--bg-card)]
+                         flex flex-col gap-5">
+
+               <!-- Trip info -->
+               <p class="text-sm font-bold
+                          text-[var(--text-primary)]">
+                 {{ tripDetails()!.busName }}
+               </p>
+
+               <div class="h-px bg-[var(--border)]">
+               </div>
+
+               <!-- Journey -->
+               <div class="flex flex-col gap-3">
+                 <div class="flex items-start gap-3">
+                   <div class="w-2.5 h-2.5 rounded-full
+                               bg-[var(--primary)]
+                               mt-1 flex-shrink-0">
+                   </div>
+                   <div>
+                     <p class="text-xs font-bold
+                                text-[var(--text-primary)]">
+                       {{ tripDetails()!.tripTime
+                          | timeFormat }}
+                     </p>
+                     <p class="text-[10px]
+                                text-[var(--text-muted)]">
+                       {{ tripDetails()!.boardingCity }}
+                       — {{ tripDetails()!.boardingStation }}
+                     </p>
+                   </div>
+                 </div>
+                 <div class="flex items-start gap-3">
+                   <div class="w-2.5 h-2.5 rounded-full
+                               border-2
+                               border-[var(--primary)]
+                               mt-1 flex-shrink-0">
+                   </div>
+                   <div>
+                     <p class="text-xs font-bold
+                                text-[var(--text-primary)]">
+                       {{ tripDetails()!.arriveTime
+                          | timeFormat }}
+                     </p>
+                     <p class="text-[10px]
+                                text-[var(--text-muted)]">
+                       {{ tripDetails()!.destCity }}
+                       — {{ tripDetails()!.destStation }}
+                     </p>
+                   </div>
+                 </div>
+               </div>
+
+               <!-- Passengers summary -->
+               <div class="flex flex-col gap-2">
+                 <p class="text-xs font-bold
+                            text-[var(--text-primary)]">
+                   الركاب
+                 </p>
+                 @for (p of passengersArray.controls;
+                       track $index) {
+                   <div class="flex items-center
+                               justify-between text-xs
+                               text-[var(--text-secondary)]">
+                     <span>
+                       {{ p.get('name')!.value
+                          || 'راكب ' + ($index + 1) }}
+                     </span>
+                     <span class="text-[var(--text-muted)]">
+                       مقعد {{ selectedSeats()[$index] }}
+                     </span>
+                   </div>
+                 }
+               </div>
+
+               <!-- Ticket to -->
+               <div class="flex items-center gap-2
+                           text-xs
+                           text-[var(--text-secondary)]
+                           p-3 rounded-xl
+                           bg-[var(--bg-base)]
+                           border border-[var(--border)]">
+                 <svg lucideSmartphone
+                      class="w-4 h-4
+                             text-[var(--primary)]
+                             flex-shrink-0">
+                 </svg>
+                 <span>
+                   سيتم إرسال التذكرة على:
+                   {{ contactForm.get('countryCode')!.value }}
+                   {{ contactForm.get('whatsappNumber')!.value }}
+                 </span>
+               </div>
+
+               <div class="h-px bg-[var(--border)]">
+               </div>
+
+               <!-- Price breakdown -->
+               <div class="flex flex-col gap-2">
+                 <div class="flex justify-between
+                             text-xs
+                             text-[var(--text-secondary)]">
+                   <span>
+                     سعر المقعد ×
+                     {{ selectedSeats().length }}
+                   </span>
+                   <span>
+                     {{ totalPrice() }} {{ currency() }}
+                   </span>
+                 </div>
+                 <div class="flex justify-between
+                             text-sm font-extrabold
+                             text-[var(--primary)]
+                             pt-2 border-t
+                             border-[var(--border)]">
+                   <span>الإجمالي</span>
+                   <span>
+                     {{ totalPrice() }} {{ currency() }}
+                   </span>
+                 </div>
+               </div>
+
+             </div>
+
+           </div>
+         }
+
+       }
+
+     </div>
+   </div>
+
+─── STEP 8: UPDATE TRIP CARD TO OPEN MODAL ──────────────────────────────────────
+
+READ trip-card.component.ts carefully first.
+
+ADD these to TripCardComponent:
+
+   import { BookingModalComponent }
+     from '../../../shared/booking-modal/booking-modal.component';
+
+   // Add to imports array:
+   BookingModalComponent
+
+   // Add to class:
+   showModal = signal<boolean>(false);
+
+   openModal(): void { this.showModal.set(true); }
+   closeModal(): void { this.showModal.set(false); }
+
+In trip-card.component.html:
+Find the "اختر مقعدك" button.
+Change (click) to call openModal():
+
+   (click)="openModal()"
+
+Add modal at the BOTTOM of the template
+(outside the article tag):
+
+   @if (showModal()) {
+     <app-booking-modal
+       [tripId]="trip().id"
+       [ticketId]="trip().ticketId ?? trip().id"
+       [price]="trip().price"
+       [currency]="trip().currency ?? 'جنيه'"
+       (closed)="closeModal()">
+     </app-booking-modal>
+   }
+
+─── STEP 9: ADD LUCIDE ICON DIRECTIVE ───────────────────────────────────────────
+
+The booking modal uses [lucideIcon]="gw.icon" for
+dynamic icons in the payment gateway grid.
+
+Make sure LucideIcon (the dynamic directive) is
+imported in booking-modal.component.ts imports:
+
+   import { LucideIcon } from '@lucide/angular';
+
+Add LucideIcon to the component imports array.
+
+Also add these icons for payment gateways:
+   LucideWallet      (بنكك)
+   LucideCreditCard  (فوري)
+   LucideLandmark    (المشرق)
+   LucideSmartphone  (برافو)
+
+─── STEP 10: VERIFY IMPORTS ─────────────────────────────────────────────────────
+
+After building confirm:
+
+1. All Lucide icons used in templates are imported
+   in the component's imports array AND in the
+   @lucide/angular import statement.
+
+2. NgClass imported from @angular/common — NOT
+   from any other source.
+
+3. FormsModule AND ReactiveFormsModule both imported
+   for ngModel + formGroup to work together.
+
+4. TimeFormatPipe imported and in imports array.
+
+5. DatePipe imported from @angular/common.
+
+6. TripDetails interface exported from booking.service.ts
+   so it can be imported in booking-modal.component.ts.
+
+─── STEP 11: CLEAR CACHE AND RUN ────────────────────────────────────────────────
+
+   rm -rf .angular/cache
+   ng serve --port 4100
+
+─── VERIFICATION ────────────────────────────────────────────────────────────────
+
+Test this full flow:
+
+   1. Go to search results page
+   2. Click "اختر مقعدك" on any trip card
+   3. Modal opens with route title (from ← to)
+   4. Tab 1 "اختيار المقعد" is active
+   5. Seat map renders with correct number of seats
+   6. Bus layout: 2 | aisle | 2 rows + 5 back seats
+   7. Clicking available seat highlights it in teal
+   8. Clicking again deselects it
+   9. Booked seats are greyed and unclickable
+   10. Selected seats show in summary on left panel
+   11. Total price updates as seats are selected
+   12. Tab 2 and "تعبئة بيانات الراكب" disabled
+       until at least 1 seat selected
+   13. Click "تعبئة بيانات الراكب" → goes to Tab 2
+   14. Tab 2: country code + 9-digit WhatsApp input
+   15. Tab 2: passenger form repeats per seat
+   16. Name, Age, Gender (ذكر/أنثى) per passenger
+   17. Gender pills highlight when selected
+   18. Tab 3 disabled until form is valid
+   19. Tab 3: 4 payment gateway cards show
+   20. Clicking gateway highlights it
+   21. Payment instruction shows for selected gateway
+   22. "تأكيد الحجز والدفع" submits booking
+   23. Left panel shows correct trip data on all tabs
+   24. Modal closes with X button
+   25. All text in Arabic, layout RTL
+
+Confirm ALL:
+   ✅ ng g c used — no manual file creation
+   ✅ Modal opens on button click
+   ✅ 3-tab structure works correctly
+   ✅ Seat map renders correctly
+   ✅ Seat selection/deselection works
+   ✅ Booked seats locked correctly
+   ✅ Tab 2 disabled until seat selected
+   ✅ Passenger forms repeat per seat
+   ✅ Gender selection works visually
+   ✅ Tab 3 disabled until form valid
+   ✅ 4 payment gateways selectable
+   ✅ Booking submits to backend
+   ✅ Left panels show real trip data
+   ✅ No plain CSS anywhere
+   ✅ No hardcoded hex colors
+   ✅ All text Arabic
+   ✅ RTL throughout
+   ✅ Mobile responsive
+   ✅ Zero console errors
+   ✅ Zero TypeScript errors
+
+─── FINAL REPORT ────────────────────────────────────────────────────────────────
+
+   ══════════════════════════════════════════
+   BUILD REPORT
+   ══════════════════════════════════════════
+   CLI Commands Used          : list all
+   Files Generated            : list all
+   Files Modified             : list all
+   Files NOT Touched          : confirm
+   Modal Opens                : Yes ✓
+   Seat Map Renders           : Yes ✓
+   Tab Navigation Works       : Yes ✓
+   Passenger Forms Dynamic    : Yes ✓
+   Payment Gateways           : Yes ✓
+   Backend Connected          : Yes ✓
+   ng serve                   : Running ✓
+   Console Errors             : None ✓
+
+════════════════════════════════════════════════════
+⛔ FINAL REMINDER
+════════════════════════════════════════════════════
+Used Angular CLI for all generation.
+No plain CSS. No hex colors. Tailwind only.
+All text Arabic. RTL layout throughout.
+Real backend data only.
+Only listed files were touched.
+Do not stop until full booking flow works.
+════════════════════════════════════════════════════

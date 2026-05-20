@@ -33,7 +33,8 @@ export class CreateBookingDto {
   @IsNotEmpty()
   tripId: string;
 
-  @IsNumber()
+  @IsNumber({}, { each: true })
+  @Type(() => Number)
   @Min(1)
   seatNumbers: number[];
 
@@ -127,6 +128,64 @@ export class CreatePaymentDto {
   @IsString()
   @IsOptional()
   paymentMethod?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  platformFeeAmount?: number;
+}
+
+export class CreateBookingWithPaymentDto {
+  @IsString()
+  @IsNotEmpty()
+  tripId: string;
+
+  @IsNumber({}, { each: true })
+  @Type(() => Number)
+  @Min(1)
+  seatNumbers: number[];
+
+  @IsString()
+  @IsNotEmpty()
+  passengerContact: string;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => PassengerItemDto)
+  passenger: PassengerItemDto[];
+
+  @IsNumber()
+  @Min(0)
+  totalAmount: number;
+
+  @IsNumber()
+  @Min(0)
+  companyAmount: number;
+
+  @IsNumber()
+  @Min(0)
+  commissionAmount: number;
+
+  @IsString()
+  @IsOptional()
+  currency?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  paymentMethod: string;
+
+  @IsString()
+  @IsNotEmpty()
+  transactionId: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  platformFeeAmount?: number;
+
+  @IsOptional()
+  @IsString()
+  receiptFile?: string;
 }
 
 export class UpdatePaymentDto {
@@ -179,4 +238,9 @@ export class UpdatePaymentDto {
   @IsOptional()
   @IsString()
   paymentMethod?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  platformFeeAmount?: number;
 }

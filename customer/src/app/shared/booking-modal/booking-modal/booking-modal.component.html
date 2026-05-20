@@ -1,82 +1,516 @@
+<!-- Success screen -->
 @if (submitSuccess()) {
-  <div class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-    <div class="bg-[var(--bg-card)] rounded-3xl p-8 flex flex-col items-center gap-4 max-w-sm w-full text-center">
-      <div class="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center">
-        <svg class="w-8 h-8 text-emerald-600" lucideCheckCircle></svg>
+  <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" dir="rtl">
+    <div class="bg-[var(--bg-card)] rounded-3xl w-full max-w-md mx-4 overflow-hidden shadow-2xl">
+      <div class="p-6 md:p-8 flex flex-col items-center gap-4 text-center">
+        <div class="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center">
+          <svg class="w-8 h-8 text-emerald-600" lucideCheckCircle></svg>
+        </div>
+        <div>
+          <h2 class="text-xl font-extrabold text-[var(--text-primary)]">تم تأكيد الحجز!</h2>
+          <p class="text-sm text-[var(--text-muted)] mt-1">سيتم إرسال التذكرة على واتساب</p>
+        </div>
       </div>
-      <h2 class="text-xl font-extrabold text-[var(--text-primary)]">تم تأكيد الحجز!</h2>
-      <p class="text-sm text-[var(--text-secondary)]">سيتم إرسال التذكرة على واتساب</p>
-      <button (click)="close()" class="w-full py-3.5 rounded-2xl bg-[var(--primary)] text-white font-bold">العودة</button>
+      <div class="px-6 md:px-8 pb-2 flex flex-col gap-3">
+        <div class="bg-[var(--bg-base)] rounded-2xl p-4 flex flex-col gap-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <svg lucideMapPin class="w-4 h-4 text-[var(--primary)] flex-shrink-0"></svg>
+              <span class="text-sm font-bold text-[var(--text-primary)]">{{ (trip()?.fromCity ?? '') }} ← {{ (trip()?.toCity ?? '') }}</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-4 text-xs text-[var(--text-secondary)]">
+            <div class="flex items-center gap-1">
+              <svg lucideCalendar class="w-3.5 h-3.5"></svg>
+              <span>{{ (trip()?.departureDate ?? '') | date:'EEE d MMM yyyy':'':'ar' | arabicNumber }}</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <svg lucideClock class="w-3.5 h-3.5"></svg>
+              <span>{{ (trip()?.departureTime ?? '') | timeFormat | arabicNumber }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="bg-[var(--bg-base)] rounded-2xl p-4 flex flex-col gap-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-[var(--text-muted)]">المقاعد</span>
+            <span class="text-sm font-bold text-[var(--text-primary)]">{{ selectedSeats().join('، ') | arabicNumber }}</span>
+          </div>
+          <div class="border-t border-[var(--border)] pt-2 flex items-center justify-between">
+            <span class="text-xs font-bold text-[var(--text-primary)]">الإجمالي</span>
+            <span class="text-lg font-extrabold text-[var(--primary)]">{{ totalPayment() | arabicNumber }} <span class="text-xs">{{ currency() }}</span></span>
+          </div>
+        </div>
+        <a [href]="whatsappShare()" target="_blank" rel="noopener noreferrer"
+          class="flex items-center justify-center gap-2 w-full py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-bold transition-all active:scale-95">
+          <svg lucideShare2 class="w-4 h-4"></svg>
+          مشاركة عبر واتساب
+        </a>
+      </div>
+      <div class="p-6 md:p-8 pt-4">
+        <button (click)="onClose()"
+          class="w-full py-3.5 rounded-2xl bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-bold text-sm transition-all active:scale-95">
+          احجز رحلة أخرى
+        </button>
+      </div>
     </div>
   </div>
 } @else {
-  <div class="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center">
-    <div class="bg-[var(--bg-base)] rounded-t-3xl sm:rounded-3xl w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
-      
-      <!-- Header -->
-      <div class="bg-[var(--bg-card)] px-4 py-3 border-b border-[var(--border)] flex items-center justify-between flex-shrink-0">
-        <div class="flex items-center gap-3">
-          @if (currentStep() === 'payment') {
-            <button (click)="currentStep.set('seat')" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[var(--bg-base)]">
-              <svg class="w-5 h-5 text-[var(--text-primary)]" lucideArrowRight></svg>
-            </button>
+  <!-- ══ BACKDROP ══ -->
+  <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-start justify-center overflow-y-auto py-4 px-2" dir="rtl">
+    <!-- ══ MODAL SHELL ══ -->
+    <div class="relative w-full max-w-6xl bg-[var(--bg-base)] rounded-3xl shadow-2xl overflow-hidden min-h-[600px]">
+
+      <!-- ── MODAL HEADER ── -->
+      <div class="flex items-center justify-between px-6 py-4 bg-[var(--bg-card)] border-b border-[var(--border)] sticky top-0 z-10">
+        <div class="flex items-center gap-2">
+          @if (trip()) {
+            <span class="text-base font-bold text-[var(--text-primary)]">{{ trip()!.fromCity }}</span>
+            <svg lucideArrowLeft class="w-4 h-4 text-[var(--primary)]"></svg>
+            <span class="text-base font-bold text-[var(--text-primary)]">{{ trip()!.toCity }}</span>
           }
-          <span class="text-[16px] font-bold text-[var(--text-primary)]">
-            @if (currentStep() === 'seat') { اختيار المقعد }
-            @else { الدفع }
-          </span>
         </div>
-        <button (click)="close()" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[var(--bg-base)]">
-          <svg class="w-5 h-5 text-[var(--text-muted)]" lucideX></svg>
+        <button (click)="onClose()"
+          class="w-9 h-9 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:bg-[var(--primary-light)] hover:text-[var(--primary)] transition-all duration-150">
+          <svg lucideX class="w-5 h-5"></svg>
         </button>
       </div>
 
-      <!-- Steps indicator -->
-      <div class="bg-[var(--bg-card)] px-4 py-2 border-b border-[var(--border)] flex items-center gap-2 flex-shrink-0">
-        <div class="flex items-center gap-1.5" [class.text-[var(--primary)]]="currentStep() === 'seat'">
-          <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold"
-            [class.bg-[var(--primary)]]="currentStep() === 'seat'"
-            [class.text-white]="currentStep() === 'seat'"
-            [class.bg-[var(--border)]]="currentStep() !== 'seat'">
-            1
-          </div>
-          <span class="text-[11px] font-medium">المقعد</span>
-        </div>
-        <div class="flex-1 h-px bg-[var(--border)]"></div>
-        <div class="flex items-center gap-1.5" [class.text-[var(--primary)]]="currentStep() === 'payment'">
-          <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold"
-            [class.bg-[var(--primary)]]="currentStep() === 'payment'"
-            [class.text-white]="currentStep() === 'payment'"
-            [class.bg-[var(--border)]]="currentStep() !== 'payment'">
-            2
-          </div>
-          <span class="text-[11px] font-medium">الدفع</span>
-        </div>
+      <!-- ── TAB HEADERS ── -->
+      <div class="flex items-center bg-[var(--bg-card)] border-b border-[var(--border)] px-6 gap-0">
+        <button (click)="goToStep('seat')"
+          class="flex items-center gap-2 px-5 py-4 text-sm font-semibold border-b-2 transition-all duration-150"
+          [ngClass]="currentStep() === 'seat'
+            ? ['border-[var(--primary)]', 'text-[var(--primary)]']
+            : ['border-transparent', 'text-[var(--text-muted)]', 'hover:text-[var(--text-secondary)]']">
+          <svg lucideArmchair class="w-4 h-4"></svg>
+          <span>١. اختيار المقعد</span>
+        </button>
+        <div class="w-8 h-px bg-[var(--border)] flex-shrink-0"></div>
+        <button (click)="goToStep('passenger')" [disabled]="!canGoToPassenger()"
+          class="flex items-center gap-2 px-5 py-4 text-sm font-semibold border-b-2 transition-all duration-150 disabled:cursor-not-allowed"
+          [ngClass]="currentStep() === 'passenger'
+            ? ['border-[var(--primary)]', 'text-[var(--primary)]']
+            : canGoToPassenger()
+              ? ['border-transparent', 'text-[var(--text-muted)]', 'hover:text-[var(--text-secondary)]']
+              : ['border-transparent', 'text-[var(--text-muted)]', 'opacity-40']">
+          <svg lucideUser class="w-4 h-4"></svg>
+          <span>٢. بيانات الراكب</span>
+        </button>
+        <div class="w-8 h-px bg-[var(--border)] flex-shrink-0"></div>
+        <button (click)="goToStep('payment')" [disabled]="!canGoToPayment()"
+          class="flex items-center gap-2 px-5 py-4 text-sm font-semibold border-b-2 transition-all duration-150 disabled:cursor-not-allowed"
+          [ngClass]="currentStep() === 'payment'
+            ? ['border-[var(--primary)]', 'text-[var(--primary)]']
+            : canGoToPayment()
+              ? ['border-transparent', 'text-[var(--text-muted)]', 'hover:text-[var(--text-secondary)]']
+              : ['border-transparent', 'text-[var(--text-muted)]', 'opacity-40']">
+          <svg lucideCreditCard class="w-4 h-4"></svg>
+          <span>٣. الدفع</span>
+        </button>
       </div>
 
-      <!-- Content -->
-      <div class="flex-1 overflow-y-auto">
+      <!-- ── LOADING ── -->
+      @if (isLoading()) {
+        <div class="flex items-center justify-center py-24 gap-3 text-[var(--text-muted)]">
+          <svg lucideLoader class="w-8 h-8 animate-spin text-[var(--primary)]"></svg>
+          <span class="text-sm font-medium">جاري تحميل بيانات الرحلة...</span>
+        </div>
+      }
+
+      <!-- ── TAB BODY ── -->
+      @if (!isLoading() && trip()) {
+
+        <!-- ══ TAB 1: SEAT ══ -->
         @if (currentStep() === 'seat') {
-          <app-seat-step
-            [tripDetails]="tripDetails()"
-            [bookedSeats]="bookedSeats()"
-            (selectedSeats)="onSeatsSelected($event)">
-          </app-seat-step>
-        }
-        @if (currentStep() === 'payment') {
-          <app-payment-step
-            [tripDetails]="tripDetails()"
-            [selectedSeats]="selectedSeats()"
-            [price]="price()"
-            [isSubmitting]="isSubmitting()"
-            [error]="error()"
-            [remainingMs]="remainingMs()"
-            [remainingFormatted]="remainingFormatted()"
-            (confirmed)="onPaymentConfirmed($event)">
-          </app-payment-step>
-        }
-      </div>
+          <div class="flex flex-col lg:flex-row gap-0 min-h-[500px]">
 
+            <!-- RIGHT: Seat map -->
+            <div class="flex-1 p-6 border-l border-[var(--border)] flex flex-col gap-6">
+              <h3 class="text-sm font-bold text-[var(--text-primary)]">اختر مقعدك</h3>
+              <div class="inline-flex flex-col items-center bg-[var(--bg-card)] border-2 border-[var(--border)] rounded-3xl p-5 shadow-sm mx-auto w-full max-w-xs">
+                <div class="flex justify-start w-full mb-4 pr-2">
+                  <div class="w-10 h-10 rounded-full border-4 border-[var(--border)] flex items-center justify-center text-[var(--text-muted)]">
+                    <svg lucideBus class="w-4 h-4"></svg>
+                  </div>
+                </div>
+                @if (busRows().rows.length) {
+                  <div class="flex flex-col gap-2 w-full">
+                    @for (row of busRows().rows; track $index) {
+                      <div class="flex items-center justify-center gap-1">
+                        @for (seat of row.slice(0, busRows().left); track seat.seatNumber) {
+                          <button (click)="toggleSeat(seat)" [disabled]="seat.status==='booked'"
+                            class="w-9 h-10 rounded-lg border-2 text-[10px] font-bold flex items-center justify-center transition-all duration-150 flex-shrink-0"
+                            [ngClass]="seatClasses(seat)">
+                            {{ seat.seatNumber | arabicNumber }}
+                          </button>
+                        }
+                        <div class="w-5 flex-shrink-0"></div>
+                        @for (seat of row.slice(busRows().left); track seat.seatNumber) {
+                          <button (click)="toggleSeat(seat)" [disabled]="seat.status==='booked'"
+                            class="w-9 h-10 rounded-lg border-2 text-[10px] font-bold flex items-center justify-center transition-all duration-150 flex-shrink-0"
+                            [ngClass]="seatClasses(seat)">
+                            {{ seat.seatNumber | arabicNumber }}
+                          </button>
+                        }
+                      </div>
+                    }
+                  </div>
+                }
+                <div class="w-full h-px bg-[var(--border)] my-4 border-t-2 border-dashed border-[var(--border)]"></div>
+                @if (busRows().backSeats.length) {
+                  <div class="flex items-center justify-center gap-1.5">
+                    @for (seat of busRows().backSeats; track seat.seatNumber) {
+                      <button (click)="toggleSeat(seat)" [disabled]="seat.status==='booked'"
+                        class="w-9 h-10 rounded-lg border-2 text-[10px] font-bold flex items-center justify-center transition-all duration-150 flex-shrink-0"
+                        [ngClass]="seatClasses(seat)">
+                        {{ seat.seatNumber | arabicNumber }}
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+              <div class="flex flex-wrap items-center gap-4 justify-center">
+                <div class="flex items-center gap-2">
+                  <div class="w-7 h-8 rounded-lg border-2 border-[var(--border)] bg-[var(--bg-card)]"></div>
+                  <span class="text-xs text-[var(--text-secondary)]">متاح</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <div class="w-7 h-8 rounded-lg border-2 border-[var(--primary)] bg-[var(--primary)]"></div>
+                  <span class="text-xs text-[var(--text-secondary)]">محجوز منك</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <div class="w-7 h-8 rounded-lg border-2 border-[var(--border)] bg-[var(--border)] opacity-60"></div>
+                  <span class="text-xs text-[var(--text-secondary)]">محجوز</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- LEFT: Trip details -->
+            <div class="w-full lg:w-[360px] flex-shrink-0 p-6 bg-[var(--bg-card)] flex flex-col gap-5">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-[var(--primary-light)] flex items-center justify-center flex-shrink-0">
+                  <svg lucideBus class="w-5 h-5 text-[var(--primary)]"></svg>
+                </div>
+                <div>
+                  <p class="text-base font-bold text-[var(--text-primary)]">{{ trip()!.Bus?.name }}</p>
+                  <p class="text-xs text-[var(--text-muted)]">{{ trip()!.Bus?.chairs }} مقعد</p>
+                </div>
+              </div>
+              <div class="h-px bg-[var(--border)]"></div>
+              <div class="flex flex-col gap-4">
+                <div class="flex items-start gap-3">
+                  <div class="flex flex-col items-center gap-1 flex-shrink-0 mt-1">
+                    <div class="w-3 h-3 rounded-full bg-[var(--primary)] ring-4 ring-[var(--primary-light)]"></div>
+                    <div class="w-0.5 h-12 bg-[var(--border)]"></div>
+                  </div>
+                  <div class="flex flex-col gap-0.5">
+                    <span class="text-xl font-extrabold text-[var(--text-primary)] tabular-nums leading-none">{{ trip()!.departureTime | timeFormat }}</span>
+                    <span class="text-xs font-medium text-[var(--text-secondary)]">{{ trip()!.fromCity }}</span>
+                    <span class="text-[10px] text-[var(--text-muted)]">{{ trip()!.fromStation }}</span>
+                  </div>
+                </div>
+                <div class="flex items-start gap-3">
+                  <div class="flex-shrink-0 mt-1">
+                    <div class="w-3 h-3 rounded-full border-3 border-[var(--primary)] bg-[var(--bg-card)]"></div>
+                  </div>
+                  <div class="flex flex-col gap-0.5">
+                    <span class="text-xl font-extrabold text-[var(--text-primary)] tabular-nums leading-none">{{ trip()!.arrivalTime | timeFormat }}</span>
+                    <span class="text-xs font-medium text-[var(--text-secondary)]">{{ trip()!.toCity }}</span>
+                    <span class="text-[10px] text-[var(--text-muted)]">{{ trip()!.toStation }}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-[var(--bg-base)] border border-[var(--border)]">
+                <svg lucideCalendar class="w-4 h-4 text-[var(--primary)] flex-shrink-0"></svg>
+                <span class="text-xs font-semibold text-[var(--text-primary)]">{{ trip()!.departureDate | date:'EEEE، d MMMM y':'' :'ar' }}</span>
+              </div>
+              @if (selectedSeats().length > 0) {
+                <div class="flex flex-col gap-2 px-3 py-3 rounded-xl bg-[var(--primary-light)] border border-[var(--border)]">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-[var(--primary)]">المقاعد المختارة</span>
+                    <span class="text-xs font-bold text-[var(--primary)]">{{ selectedSeats().length }} مقعد</span>
+                  </div>
+                  <div class="flex flex-wrap gap-1.5">
+                    @for (s of selectedSeats(); track s) {
+                      <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-[var(--primary)] text-white">{{ s | arabicNumber }}</span>
+                    }
+                  </div>
+                  <div class="flex items-center justify-between mt-1 pt-2 border-t border-[var(--border)]">
+                    <span class="text-xs text-[var(--text-secondary)]">الإجمالي</span>
+                    <span class="text-sm font-extrabold text-[var(--primary)]">{{ totalPayment() | arabicNumber }} {{ currency() }}</span>
+                  </div>
+                </div>
+              }
+              <button (click)="goToStep('passenger')" [disabled]="!canGoToPassenger()"
+                class="w-full flex items-center justify-center gap-2 py-3 px-6 rounded-xl text-sm font-bold text-white bg-[var(--primary)] hover:bg-[var(--primary-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150 active:scale-95 mt-auto">
+                <span>تعبئة بيانات الراكب</span>
+                <svg lucideChevronLeft class="w-4 h-4"></svg>
+              </button>
+            </div>
+          </div>
+        }
+
+        <!-- ══ TAB 2: PASSENGER ══ -->
+        @if (currentStep() === 'passenger') {
+          <div class="flex flex-col lg:flex-row gap-0 min-h-[500px]">
+
+            <!-- RIGHT: Forms -->
+            <div class="flex-1 p-6 overflow-y-auto border-l border-[var(--border)] flex flex-col gap-6">
+              <div class="flex flex-col gap-4">
+                <h3 class="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2">
+                  <svg lucideSmartphone class="w-4 h-4 text-[var(--primary)]"></svg>
+                  بيانات التواصل
+                </h3>
+                <p class="text-xs text-[var(--text-muted)] -mt-2">سيتم إرسال التذكرة على هذا الرقم</p>
+                <div class="flex gap-0 overflow-hidden rounded-xl border border-[var(--border)] focus-within:border-[var(--primary)] focus-within:ring-2 focus-within:ring-[var(--primary-light)] transition-all duration-150 bg-[var(--bg-card)]" [formGroup]="contactForm">
+                  <div class="flex-shrink-0 border-l border-[var(--border)]">
+                    <select formControlName="countryCode"
+                      class="h-full px-3 py-3 bg-[var(--bg-base)] text-xs font-semibold text-[var(--text-primary)] outline-none cursor-pointer">
+                      @for (c of countryCodes; track c.code) {
+                        <option [value]="c.code">{{ c.label }}</option>
+                      }
+                    </select>
+                  </div>
+                  <input type="tel" formControlName="whatsappNumber" placeholder="9xxxxxxxxx" maxlength="9"
+                    class="flex-1 px-4 py-3 bg-transparent text-sm font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none">
+                </div>
+                @if (contactForm.get('whatsappNumber')?.invalid && contactForm.get('whatsappNumber')?.touched) {
+                  <p class="text-xs text-red-500 flex items-center gap-1">
+                    <svg lucideAlertCircle class="w-3 h-3"></svg>
+                    يرجى إدخال رقم صحيح (9 أرقام)
+                  </p>
+                }
+              </div>
+              <div class="h-px bg-[var(--border)]"></div>
+              <div class="flex flex-col gap-5" [formGroup]="passengerForm">
+                <h3 class="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2">
+                  <svg lucideUser class="w-4 h-4 text-[var(--primary)]"></svg>
+                  بيانات الركاب
+                </h3>
+                <div formArrayName="passengers" class="flex flex-col gap-4">
+                  @for (p of passengersArray.controls; track $index) {
+                    <div [formGroupName]="$index" class="flex flex-col gap-4 p-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-base)]">
+                      <div class="flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-full bg-[var(--primary-light)] flex items-center justify-center flex-shrink-0">
+                          <svg lucideUser class="w-3.5 h-3.5 text-[var(--primary)]"></svg>
+                        </div>
+                        <span class="text-sm font-bold text-[var(--text-primary)]">راكب {{ $index + 1 | arabicNumber }}</span>
+                        <span class="text-xs text-[var(--text-muted)] mr-auto">مقعد رقم {{ selectedSeats()[$index] | arabicNumber }}</span>
+                      </div>
+                      <input type="text" formControlName="name" placeholder="الاسم الكامل"
+                        class="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--bg-card)] text-sm font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:font-normal outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary-light)] transition-all duration-150">
+                      @if (invalid(p.get('name'))) {
+                        <p class="text-xs text-red-500">يرجى إدخال الاسم</p>
+                      }
+                      <input type="number" formControlName="age" placeholder="العمر" min="1" max="120"
+                        class="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--bg-card)] text-sm font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:font-normal outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary-light)] transition-all duration-150">
+                      @if (invalid(p.get('age'))) {
+                        <p class="text-xs text-red-500">يرجى إدخال عمر صحيح</p>
+                      }
+                      <div class="flex gap-3">
+                        <label (click)="setGender($index, 'MALE')"
+                          class="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border-2 cursor-pointer transition-all duration-150 text-sm font-semibold"
+                          [ngClass]="p.get('gender')?.value === 'MALE'
+                            ? ['border-[var(--primary)]', 'bg-[var(--primary-light)]', 'text-[var(--primary)]']
+                            : ['border-[var(--border)]', 'bg-[var(--bg-card)]', 'text-[var(--text-secondary)]']">
+                          ذكر
+                        </label>
+                        <label (click)="setGender($index, 'FEMALE')"
+                          class="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border-2 cursor-pointer transition-all duration-150 text-sm font-semibold"
+                          [ngClass]="p.get('gender')?.value === 'FEMALE'
+                            ? ['border-[var(--primary)]', 'bg-[var(--primary-light)]', 'text-[var(--primary)]']
+                            : ['border-[var(--border)]', 'bg-[var(--bg-card)]', 'text-[var(--text-secondary)]']">
+                          أنثى
+                        </label>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+              <button (click)="goToStep('payment')" [disabled]="!canGoToPayment()"
+                class="w-full flex items-center justify-center gap-2 py-3 px-6 rounded-xl text-sm font-bold text-white bg-[var(--primary)] hover:bg-[var(--primary-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150 active:scale-95">
+                <span>المتابعة للدفع</span>
+                <svg lucideChevronLeft class="w-4 h-4"></svg>
+              </button>
+            </div>
+
+            <!-- LEFT: Trip summary -->
+            <div class="w-full lg:w-[320px] flex-shrink-0 p-6 bg-[var(--bg-card)] flex flex-col gap-5">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-[var(--primary-light)] flex items-center justify-center">
+                  <svg lucideBus class="w-5 h-5 text-[var(--primary)]"></svg>
+                </div>
+                <div>
+                  <p class="text-sm font-bold text-[var(--text-primary)]">{{ trip()!.Bus?.name }}</p>
+                </div>
+              </div>
+              <div class="h-px bg-[var(--border)]"></div>
+              <div class="flex flex-col gap-3">
+                <div class="flex items-center gap-3">
+                  <div class="w-2.5 h-2.5 rounded-full bg-[var(--primary)] flex-shrink-0"></div>
+                  <div>
+                    <p class="text-xs font-bold text-[var(--text-primary)]">{{ trip()!.departureTime | timeFormat }} — {{ trip()!.fromCity }}</p>
+                    <p class="text-[10px] text-[var(--text-muted)]">{{ trip()!.fromStation }}</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3">
+                  <div class="w-2.5 h-2.5 rounded-full border-2 border-[var(--primary)] flex-shrink-0"></div>
+                  <div>
+                    <p class="text-xs font-bold text-[var(--text-primary)]">{{ trip()!.arrivalTime | timeFormat }} — {{ trip()!.toCity }}</p>
+                    <p class="text-[10px] text-[var(--text-muted)]">{{ trip()!.toStation }}</p>
+                  </div>
+                </div>
+              </div>
+              <div class="flex flex-col gap-2 p-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border)]">
+                <p class="text-xs font-bold text-[var(--text-primary)]">تفاصيل المقاعد</p>
+                <div class="flex flex-wrap gap-1.5">
+                  @for (s of selectedSeats(); track s) {
+                    <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-[var(--primary)] text-white">{{ s | arabicNumber }}</span>
+                  }
+                </div>
+              </div>
+              <div class="flex items-center justify-between px-3 py-3 rounded-xl bg-[var(--primary-light)] border border-[var(--border)]">
+                <span class="text-sm font-bold text-[var(--primary)]">الإجمالي</span>
+                <span class="text-lg font-extrabold text-[var(--primary)]">{{ totalPayment() | arabicNumber }} {{ currency() }}</span>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- ══ TAB 3: PAYMENT ══ -->
+        @if (currentStep() === 'payment') {
+          <div class="flex flex-col lg:flex-row gap-0 min-h-[500px]">
+
+            <!-- RIGHT: Payment options -->
+            <div class="flex-1 p-6 border-l border-[var(--border)] flex flex-col gap-6">
+              <h3 class="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2">
+                <svg lucideCreditCard class="w-4 h-4 text-[var(--primary)]"></svg>
+                اختر طريقة الدفع
+              </h3>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                @for (gw of paymentGateways(); track gw.id) {
+                  <button (click)="selectGateway(gw.id)"
+                    class="flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border-2 transition-all duration-150 cursor-pointer min-h-[100px]"
+                    [ngClass]="selectedGateway() === gw.id
+                      ? ['border-[var(--primary)]', 'bg-[var(--primary-light)]', 'shadow-md']
+                      : ['border-[var(--border)]', 'bg-[var(--bg-card)]', 'hover:border-[var(--primary)]', 'hover:bg-[var(--primary-light)]']">
+                    <div class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                      [ngClass]="selectedGateway()===gw.id ? ['bg-[var(--primary)]'] : ['bg-[var(--bg-base)]']">
+                      @switch (gw.icon) {
+                        @case ('wallet') { <svg lucideWallet class="w-6 h-6" [ngClass]="selectedGateway()===gw.id ? ['text-white'] : ['text-[var(--primary)]']"></svg> }
+                        @case ('credit-card') { <svg lucideCreditCard class="w-6 h-6" [ngClass]="selectedGateway()===gw.id ? ['text-white'] : ['text-[var(--primary)]']"></svg> }
+                        @case ('landmark') { <svg lucideLandmark class="w-6 h-6" [ngClass]="selectedGateway()===gw.id ? ['text-white'] : ['text-[var(--primary)]']"></svg> }
+                        @case ('smartphone') { <svg lucideSmartphone class="w-6 h-6" [ngClass]="selectedGateway()===gw.id ? ['text-white'] : ['text-[var(--primary)]']"></svg> }
+                      }
+                    </div>
+                    <span class="text-sm font-bold"
+                      [ngClass]="selectedGateway()===gw.id ? ['text-[var(--primary)]'] : ['text-[var(--text-primary)]']">{{ gw.name }}</span>
+                    @if (selectedGateway() === gw.id) {
+                      <div class="w-5 h-5 rounded-full bg-[var(--primary)] flex items-center justify-center">
+                        <svg lucideCheckCircle class="w-3.5 h-3.5 text-white"></svg>
+                      </div>
+                    }
+                  </button>
+                }
+              </div>
+
+              @if (selectedGateway()) {
+                <div class="flex flex-col gap-1.5">
+                  <span class="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">رقم التحويل</span>
+                  <div class="flex items-center justify-between px-4 py-3.5 rounded-2xl bg-[var(--primary-light)] border-2 border-[var(--primary)]">
+                    <div class="flex flex-col gap-0.5">
+                      <span class="text-xs text-[var(--primary)] font-medium">حوّل المبلغ على هذا الرقم</span>
+                      <span class="text-xl font-extrabold text-[var(--primary)] tabular-nums tracking-wider" dir="ltr">{{ gatewayAccountNumber() | arabicNumber }}</span>
+                    </div>
+                    <button (click)="copyAccountNumber()"
+                      class="px-3 py-2 rounded-xl bg-[var(--primary)] text-white text-xs font-bold active:scale-90 transition-all flex-shrink-0">
+                      @if (copied()) {
+                        <svg lucideCheck class="w-4 h-4"></svg>
+                      } @else {
+                        نسخ
+                      }
+                    </button>
+                  </div>
+                  <span class="text-xs text-[var(--text-muted)] text-center">
+                    المبلغ المطلوب: <span class="font-bold text-[var(--primary)]">{{ totalPayment() | arabicNumber }} {{ currency() }}</span>
+                  </span>
+                </div>
+              }
+
+              <div class="flex flex-col gap-4">
+                <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-4 flex flex-col gap-3">
+                  <span class="text-xs font-bold text-[var(--text-primary)]">بيانات الدفع</span>
+                  <input [ngModel]="paymentForm.get('transactionId')?.value" (ngModelChange)="paymentForm.get('transactionId')?.setValue($event)" type="text" placeholder="رقم العملية *"
+                    class="w-full px-4 py-3 rounded-xl border bg-[var(--bg-base)] text-sm font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none">
+                  <div>
+                    <label class="flex items-center gap-3 px-4 py-4 rounded-xl border-2 border-dashed border-[var(--border)] bg-[var(--bg-base)] cursor-pointer active:scale-[0.98] transition-all hover:border-[var(--primary)]">
+                      <svg lucideUpload class="w-5 h-5 text-[var(--primary)] flex-shrink-0"></svg>
+                      <span class="text-sm font-semibold text-[var(--text-secondary)]">{{ receiptFileName() || 'إرفاق إيصال الدفع' }}</span>
+                      <input type="file" accept="image/*" (change)="onFileSelected($event)" class="hidden">
+                    </label>
+                  </div>
+                </div>
+                @if (error()) {
+                  <div class="flex items-center gap-2 px-4 py-3 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800">
+                    <svg lucideAlertCircle class="w-4 h-4 text-red-500 flex-shrink-0"></svg>
+                    <span class="text-xs font-semibold text-red-600 dark:text-red-400">{{ error() }}</span>
+                  </div>
+                }
+                <button (click)="onSubmit()" [disabled]="!selectedGateway() || isSubmitting()"
+                  class="w-full flex items-center justify-center gap-2 py-4 px-6 rounded-xl text-sm font-bold text-white bg-[var(--primary)] hover:bg-[var(--primary-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-150 active:scale-95 shadow-lg">
+                  @if (isSubmitting()) {
+                    <svg lucideLoader class="w-5 h-5 animate-spin"></svg>
+                    <span>جاري تأكيد الحجز...</span>
+                  } @else {
+                    <svg lucideCheckCircle class="w-5 h-5"></svg>
+                    <span>تأكيد الحجز والدفع</span>
+                  }
+                </button>
+              </div>
+            </div>
+
+            <!-- LEFT: Booking summary -->
+            <div class="w-full lg:w-[320px] flex-shrink-0 p-6 bg-[var(--bg-card)] flex flex-col gap-5">
+              <p class="text-sm font-bold text-[var(--text-primary)]">{{ trip()!.Bus?.name }}</p>
+              <div class="h-px bg-[var(--border)]"></div>
+              <div class="flex flex-col gap-3">
+                <div class="flex items-start gap-3">
+                  <div class="w-2.5 h-2.5 rounded-full bg-[var(--primary)] mt-1 flex-shrink-0"></div>
+                  <div>
+                    <p class="text-xs font-bold text-[var(--text-primary)]">{{ trip()!.departureTime | timeFormat }}</p>
+                    <p class="text-[10px] text-[var(--text-muted)]">{{ trip()!.fromCity }} — {{ trip()!.fromStation }}</p>
+                  </div>
+                </div>
+                <div class="flex items-start gap-3">
+                  <div class="w-2.5 h-2.5 rounded-full border-2 border-[var(--primary)] mt-1 flex-shrink-0"></div>
+                  <div>
+                    <p class="text-xs font-bold text-[var(--text-primary)]">{{ trip()!.arrivalTime | timeFormat }}</p>
+                    <p class="text-[10px] text-[var(--text-muted)]">{{ trip()!.toCity }} — {{ trip()!.toStation }}</p>
+                  </div>
+                </div>
+              </div>
+              <div class="flex flex-col gap-2">
+                <p class="text-xs font-bold text-[var(--text-primary)]">الركاب</p>
+                @for (p of passengersArray.controls; track $index) {
+                  <div class="flex items-center justify-between text-xs text-[var(--text-secondary)]">
+                    <span>{{ p.get('name')?.value || 'راكب ' + ($index + 1) }}</span>
+                    <span class="text-[var(--text-muted)]">مقعد {{ selectedSeats()[$index] | arabicNumber }}</span>
+                  </div>
+                }
+              </div>
+              <div class="flex items-center gap-2 text-xs text-[var(--text-secondary)] p-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border)]">
+                <svg lucideSmartphone class="w-4 h-4 text-[var(--primary)] flex-shrink-0"></svg>
+                <span>سيتم إرسال التذكرة على: {{ contactForm.get('countryCode')?.value }} {{ contactForm.get('whatsappNumber')?.value }}</span>
+              </div>
+              <div class="h-px bg-[var(--border)]"></div>
+              <div class="flex justify-between text-sm font-extrabold text-[var(--primary)] pt-2 border-t border-[var(--border)]">
+                <span>الإجمالي</span>
+                <span>{{ totalPayment() | arabicNumber }} {{ currency() }}</span>
+              </div>
+            </div>
+          </div>
+        }
+      }
     </div>
   </div>
 }

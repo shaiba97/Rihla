@@ -1,0 +1,116 @@
+<div dir="rtl" class="p-6 flex flex-col gap-6">
+  <div class="flex flex-col gap-1">
+    <h1 class="text-2xl font-extrabold text-[var(--text-primary)]">المستخدمون</h1>
+    <p class="text-sm text-[var(--text-secondary)]">إدارة مستخدمي المنصة</p>
+  </div>
+
+  <div class="flex items-center justify-between flex-wrap gap-3">
+    <div class="relative flex-1 max-w-xs">
+      <svg lucideSearch class="w-4 h-4 absolute top-1/2 -translate-y-1/2 right-3 text-[var(--text-muted)]"></svg>
+      <input type="text" [ngModel]="search()" (ngModelChange)="onSearch($event)" placeholder="بحث بالاسم أو الهاتف أو البريد..." class="w-full pr-10 pl-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-card)] text-sm text-[var(--text-primary)] outline-none focus:border-[var(--text-primary)] transition-all">
+    </div>
+    <div class="flex items-center gap-2">
+      @for (r of ['USER', 'COMPANY']; track r) {
+        <button (click)="setRole(r)" class="px-3 py-1.5 rounded-lg text-xs font-bold border transition-all"
+          [ngClass]="roleFilter() === r ? 'bg-[var(--text-primary)] text-white border-[var(--text-primary)]' : 'bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border)] hover:border-[var(--text-primary)]'">
+          {{ r === 'USER' ? 'مستخدمين' : 'شركات' }}
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="px-4 py-3 rounded-xl bg-[var(--danger-light)] border border-red-200 text-[var(--danger)] text-sm flex items-center gap-2">{{ error() }}</div>
+  }
+
+  @if (isLoading()) {
+    <div class="flex items-center justify-center py-16"><svg lucideLoaderCircle class="w-8 h-8 animate-spin text-[var(--text-primary)]"></svg></div>
+  } @else {
+    <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] overflow-hidden">
+      @if (users().length > 0) {
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="bg-[var(--bg-base)] border-b border-[var(--border)]">
+                <th class="text-right px-5 py-3.5 text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">المستخدم</th>
+                <th class="text-right px-5 py-3.5 text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">جهة الاتصال</th>
+                @if (roleFilter() === 'USER') {
+                  <th class="text-right px-5 py-3.5 text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">الحجوزات</th>
+                  <th class="text-right px-5 py-3.5 text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">الإجراءات</th>
+                } @else {
+                  <th class="text-right px-5 py-3.5 text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">الرحلات</th>
+                  <th class="text-right px-5 py-3.5 text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">الحافلات</th>
+                  <th class="text-right px-5 py-3.5 text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">الإجراءات</th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (u of users(); track u.id) {
+                <tr (click)="goToUser(u.id)" class="border-b border-[var(--border)] hover:bg-[var(--bg-base)] transition-colors cursor-pointer">
+                  <td class="px-5 py-3.5">
+                    <div class="flex flex-col">
+                      <span class="text-sm font-semibold text-[var(--text-primary)]">{{ u.name }}</span>
+                      <!-- <span class="text-xs text-[var(--text-muted)]" dir="ltr">{{ u.phone || u.email || '—' }}</span> -->
+                    </div>
+                  </td>
+                  <td class="px-5 py-3.5"><span class="text-sm text-[var(--text-secondary)]" dir="ltr">{{ u.phone || u.email || '—' }}</span></td>
+                  @if (roleFilter() === 'USER') {
+                    <td class="px-5 py-3.5"><span class="text-sm font-semibold text-[var(--text-primary)]">{{ toArabic(u._count?.Booking ?? 0) }}</span></td>
+                    <td class="px-5 py-3.5">
+                      <button (click)="$event.stopPropagation(); confirmDelete(u.id, u.name)" class="w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--border)] text-[var(--text-muted)] hover:border-red-300 hover:text-red-500 hover:bg-red-50 transition-all">
+                        <svg lucideTrash2 class="w-3.5 h-3.5"></svg>
+                      </button>
+                    </td>
+                  } @else {
+                    <td class="px-5 py-3.5"><span class="text-sm font-semibold text-[var(--text-primary)]">{{ toArabic(u._count?.Trip ?? 0) }}</span></td>
+                    <td class="px-5 py-3.5"><span class="text-sm font-semibold text-[var(--text-primary)]">{{ toArabic(u._count?.Bus ?? 0) }}</span></td>
+                    <td class="px-5 py-3.5">
+                      <button (click)="$event.stopPropagation(); confirmDelete(u.id, u.name)" class="w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--border)] text-[var(--text-muted)] hover:border-red-300 hover:text-red-500 hover:bg-red-50 transition-all">
+                        <svg lucideTrash2 class="w-3.5 h-3.5"></svg>
+                      </button>
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="flex items-center justify-between px-5 py-3 border-t border-[var(--border)] bg-[var(--bg-base)]">
+          <span class="text-xs text-[var(--text-muted)]">إجمالي {{ toArabic(total()) }} مستخدم</span>
+          <div class="flex items-center gap-1">
+            <button (click)="goPage(page() - 1)" [disabled]="page() <= 1" class="w-7 h-7 flex items-center justify-center rounded-lg border border-[var(--border)] text-[var(--text-secondary)] disabled:opacity-30 hover:bg-[var(--bg-card)] transition-all">
+              <svg lucideChevronRight class="w-3.5 h-3.5"></svg>
+            </button>
+            @for (p of [].constructor(pages()); track $index) {
+              <button (click)="goPage($index + 1)" class="w-7 h-7 rounded-lg text-xs font-bold transition-all" [ngClass]="page() === $index + 1 ? 'bg-[var(--text-primary)] text-white' : 'text-[var(--text-secondary)] hover:bg-[var(--bg-card)]'">{{ toArabic($index + 1) }}</button>
+            }
+            <button (click)="goPage(page() + 1)" [disabled]="page() >= pages()" class="w-7 h-7 flex items-center justify-center rounded-lg border border-[var(--border)] text-[var(--text-secondary)] disabled:opacity-30 hover:bg-[var(--bg-card)] transition-all">
+              <svg lucideChevronLeft class="w-3.5 h-3.5"></svg>
+            </button>
+          </div>
+        </div>
+      } @else {
+        <div class="flex flex-col items-center justify-center py-16 gap-3 text-[var(--text-muted)]">
+          <svg lucideUsers class="w-10 h-10 opacity-30"></svg>
+          <p class="text-sm">لا يوجد مستخدمون</p>
+        </div>
+      }
+    </div>
+  }
+
+  @if (deleteId()) {
+    <div class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" (click)="cancelDelete()">
+      <div class="bg-[var(--bg-card)] rounded-2xl p-6 max-w-sm w-full flex flex-col gap-4 shadow-xl" (click)="$event.stopPropagation()">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center"><svg lucideAlertCircle class="w-5 h-5 text-red-500"></svg></div>
+          <div class="flex flex-col"><span class="text-sm font-bold text-[var(--text-primary)]">حذف المستخدم</span><span class="text-xs text-[var(--text-muted)]">{{ deleteName() }}</span></div>
+        </div>
+        <p class="text-sm text-[var(--text-secondary)]">هل أنت متأكد من حذف هذا المستخدم؟ لا يمكن التراجع عن هذا الإجراء.</p>
+        <div class="flex items-center gap-2">
+          <button (click)="deleteUser()" class="flex-1 py-2.5 rounded-lg bg-red-500 text-white text-sm font-bold active:scale-95 transition-all">تأكيد الحذف</button>
+          <button (click)="cancelDelete()" class="flex-1 py-2.5 rounded-lg border border-[var(--border)] text-[var(--text-secondary)] text-sm font-bold active:scale-95 transition-all">إلغاء</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>
