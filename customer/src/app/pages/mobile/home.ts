@@ -56,14 +56,17 @@ export class Home implements OnInit {
     const [y, m] = this.currentMonth().split('-').map(Number);
     const daysInMonth = new Date(y, m, 0).getDate();
     const pills = [];
+    const todayStr = this.today;
     for (let d = 1; d <= daysInMonth; d++) {
       const dateObj = new Date(y, m - 1, d);
       const value = dateObj.toISOString().split('T')[0];
+      if (value < todayStr) continue;
       pills.push({ value, day: dateObj.toLocaleDateString('ar-SA', { weekday: 'short' }), num: this.toArabicNumeral(d), isToday: value === this.today });
     }
     return pills;
   });
 
+  canGoPrev = computed(() => this.currentMonth() > this.today.slice(0, 7));
   selectedDate = computed(() => this.date() || this.today);
 
   private toArabicNumeral(n: number): string {
@@ -86,12 +89,12 @@ export class Home implements OnInit {
   prevMonth(): void {
     const [y, m] = this.currentMonth().split('-').map(Number);
     const d = new Date(y, m - 2, 1);
-    this.currentMonth.set(d.toISOString().split('T')[0].slice(0, 7));
+    this.currentMonth.set(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
   }
   nextMonth(): void {
     const [y, m] = this.currentMonth().split('-').map(Number);
     const d = new Date(y, m, 1);
-    this.currentMonth.set(d.toISOString().split('T')[0].slice(0, 7));
+    this.currentMonth.set(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
   }
 
   goToSeat(trip: any): void { if (trip?.id) this.router.navigate(['/m/seat', trip.id], { state: { trip } }); }

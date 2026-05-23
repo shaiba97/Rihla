@@ -1,10 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { AdminModule } from './admin.module';
+import { RedisIoAdapter } from '@app/websocket';
 import * as path from 'path';
 import * as express from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AdminModule);
+  app.useWebSocketAdapter(new RedisIoAdapter(app));
   app.setGlobalPrefix('api');
   app.enableCors({
     origin: [
@@ -20,6 +22,6 @@ async function bootstrap() {
   app.use('/uploads', express.static(path.join(__dirname, '../../../uploads')));
 
   await app.listen(3000);
-  console.log('Listening on port 3001');
+  console.log('Listening on port 3000');
 }
 bootstrap();

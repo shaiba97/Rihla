@@ -1,4 +1,4 @@
-import { Component, signal, computed, inject, OnInit } from '@angular/core';
+import { Component, signal, computed, inject, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { NgClass } from '@angular/common';
 import {
@@ -8,6 +8,7 @@ import {
   LucideBadgeDollarSign, LucideShield, LucideRefreshCw, LucideZap,
 } from '@lucide/angular';
 import { DashboardService } from '../../core/services/dashboard/dashboard.service';
+import { WsService } from '../../core/services/ws.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -21,9 +22,11 @@ import { DashboardService } from '../../core/services/dashboard/dashboard.servic
   ],
   templateUrl: './dashboard.html',
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   private svc = inject(DashboardService);
   private router = inject(Router);
+  private ws = inject(WsService);
+  private wsCleanups: (() => void)[] = [];
 
   data = signal<any>(null);
   isLoading = signal<boolean>(true);
@@ -39,7 +42,15 @@ export class DashboardComponent implements OnInit {
 
   chartAnimated = signal<boolean>(false);
 
-  ngOnInit(): void { this.load(); }
+  ngOnInit(): void {
+    this.load();
+    this.wsCleanups.push(this.ws.on('payment:created', () => this.load()));
+    this.wsCleanups.push(this.ws.on('stats:updated', () => this.load()));
+    this.wsCleanups.push(this.ws.on('payment:confirmed', () => this.load()));
+    this.wsCleanups.push(this.ws.on('payment:rejected', () => this.load()));
+  }
+
+  ngOnDestroy() { this.wsCleanups.forEach(fn => fn()); }
 
   load(): void {
     this.isLoading.set(true); this.error.set('');

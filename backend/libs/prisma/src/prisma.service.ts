@@ -49,6 +49,7 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
   get platformFee() { return this.prisma.platformFee; }
   get paymentAccount() { return this.prisma.paymentAccount; }
   get expense() { return this.prisma.expense; }
+  get supportContact() { return this.prisma.supportContact; }
 
   async $connect() { return this.prisma.$connect(); }
   async $disconnect() { return this.prisma.$disconnect(); }

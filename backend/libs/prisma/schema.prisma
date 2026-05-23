@@ -93,19 +93,20 @@ model users {
 }
 
 model Booking {
-  id               String        @id @default(uuid())
-  customerId       String
-  tripId           String
-  seatNumbers      Int[]
-  passenger        Json
-  passengerContact String
-  status           BookingStatus @default(PENDING)
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
-  Customer         users         @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  Trip             Trip          @relation(fields: [tripId], references: [id], onDelete: Cascade)
-  Payment          Payment?
-  TicketPDF        TicketPDF?
+  id                 String        @id @default(uuid())
+  customerId         String
+  tripId             String
+  seatNumbers        Int[]
+  passenger          Json
+  passengerContact   String
+  status             BookingStatus @default(PENDING)
+  cancellationReason String?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  Customer           users         @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  Trip               Trip          @relation(fields: [tripId], references: [id], onDelete: Cascade)
+  Payment            Payment?
+  TicketPDF          TicketPDF?
 }
 
 model Payment {
@@ -200,4 +201,14 @@ model PaymentAccount {
   isActive        Boolean  @default(true)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+}
+
+model SupportContact {
+  id        String   @id @default(uuid())
+  type      String
+  value     String
+  label     String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

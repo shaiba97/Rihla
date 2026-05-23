@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
+import { Component, signal, inject, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { LucideCalendarClock, LucideBus, LucideLoaderCircle, LucideLogIn, LucideArrowLeft, LucideDownload, LucideEye, LucideX } from '@lucide/angular';
@@ -6,6 +6,7 @@ import { ArabicNumberPipe } from '../../pipes/arabic-number/arabic-number-pipe';
 import { TimeFormatPipe } from '../../pipes/time-format/time-format-pipe';
 import { BookingService } from '../../services/booking/booking.service';
 import { AuthStoreService } from '../../services/auth-store/auth-store.service';
+import { WsService } from '../../services/ws.service';
 import { NgClass, DatePipe } from '@angular/common';
 
 @Component({
@@ -13,10 +14,11 @@ import { NgClass, DatePipe } from '@angular/common';
   imports: [LucideCalendarClock, LucideBus, LucideLoaderCircle, LucideLogIn, LucideArrowLeft, LucideDownload, LucideEye, LucideX, ArabicNumberPipe, TimeFormatPipe, NgClass, DatePipe],
   templateUrl: './bookings.html',
 })
-export class BookingsComponent implements OnInit {
+export class BookingsComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private bookingSvc = inject(BookingService);
   private sanitizer = inject(DomSanitizer);
+  private ws = inject(WsService);
   authStore = inject(AuthStoreService);
 
   bookings = signal<any[]>([]);
@@ -24,11 +26,21 @@ export class BookingsComponent implements OnInit {
   error = signal<string>('');
   showTicketModal = signal<boolean>(false);
   activeTicketUrl = signal<string>('');
+  private wsCleanups: (() => void)[] = [];
 
   ngOnInit(): void {
     if (this.authStore.isLoggedIn()) {
       this.loadBookings();
     }
+
+    this.wsCleanups.push(this.ws.on('booking:created', () => this.loadBookings()));
+    this.wsCleanups.push(this.ws.on('booking:cancelled', () => this.loadBookings()));
+    this.wsCleanups.push(this.ws.on('payment:confirmed', () => this.loadBookings()));
+    this.wsCleanups.push(this.ws.on('payment:rejected', () => this.loadBookings()));
+  }
+
+  ngOnDestroy(): void {
+    this.wsCleanups.forEach(fn => fn());
   }
 
   loadBookings(): void {

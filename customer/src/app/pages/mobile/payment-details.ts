@@ -2,7 +2,7 @@ import { Component, signal, inject, OnInit, computed } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { LucideArrowRight, LucideCheckCircle, LucideAlertCircle, LucideClock, LucideUpload, LucideCreditCard, LucideCopy, LucideCheck } from '@lucide/angular';
+import { LucideArrowRight, LucideClock, LucideUpload, LucideCreditCard, LucideCopy, LucideCheck } from '@lucide/angular';
 import { BookingService } from '../../services/booking/booking.service';
 import { SessionService } from '../../services/session/session.service';
 import { ArabicNumberPipe } from '../../pipes/arabic-number/arabic-number-pipe';
@@ -10,7 +10,7 @@ import { formatArabicDateTime, formatArabicTime } from '../../pipes/arabic-numbe
 
 @Component({
   selector: 'app-payment-details',
-  imports: [ReactiveFormsModule, ArabicNumberPipe, LucideArrowRight, LucideCheckCircle, LucideAlertCircle, LucideClock, LucideUpload, LucideCreditCard, LucideCopy, LucideCheck],
+  imports: [ReactiveFormsModule, ArabicNumberPipe, LucideArrowRight, LucideClock, LucideUpload, LucideCreditCard, LucideCopy, LucideCheck],
   templateUrl: './payment-details.html',
 })
 export class PaymentDetails implements OnInit {
@@ -34,36 +34,44 @@ export class PaymentDetails implements OnInit {
   copied = signal<string | null>(null);
   copySuccess = signal<boolean>(false);
 
-  paymentMethods = [
-    { id: 'bankak', label: 'بنكك', icon: 'bankak' },
-    { id: 'fawry', label: 'فوري', icon: 'fawry' },
-    { id: 'mashriq', label: 'مصرف', icon: 'mashriq' },
-    { id: 'bravo', label: 'برافو', icon: 'bravo' },
-  ];
+  paymentAccounts = signal<any[]>([]);
 
-  accountNumbers: Record<string, { bank: string; number: string }[]> = {
-    bankak: [
-      { bank: 'بنكك - الخرطوم', number: '1234567890123456' },
-    ],
-    fawry: [
-      { bank: 'فوري - الخرطوم', number: '6543210987654321' },
-    ],
-    mashriq: [
-      { bank: 'مصرف - الخرطوم', number: '1111222233334444' },
-    ],
-    bravo: [
-      { bank: 'برافو - الخرطوم', number: '5555666677778888' },
-    ],
-  };
+  paymentMethods = computed(() =>
+    this.paymentAccounts().map(a => ({
+      id: a.id,
+      label: a.gatewayName,
+      icon: this.iconForGateway(a.gatewayName),
+    }))
+  );
+
+  private iconForGateway(name: string): string {
+    const n = name?.toLowerCase();
+    if (n?.includes('بنكك') || n === 'bankak') return 'wallet';
+    if (n?.includes('فوري') || n === 'fawry') return 'credit-card';
+    if (n?.includes('مشرق') || n === 'mashriq') return 'landmark';
+    if (n?.includes('برافو') || n === 'bravo') return 'smartphone';
+    return 'credit-card';
+  }
+
+  paymentForm = this.fb.group({
+    paymentMethod: ['', Validators.required],
+    transactionId: ['', Validators.required],
+  });
+
+  selectedMethodId = toSignal(this.paymentForm.get('paymentMethod')!.valueChanges, { initialValue: '' });
+
+  selectedAccount = computed(() => {
+    const id = this.selectedMethodId();
+    if (!id) return null;
+    return this.paymentAccounts().find(a => a.id === id) ?? null;
+  });
+
+  selectedAccountNumber = computed(() => this.selectedAccount()?.accountNumber ?? null);
+  selectedAccountBank = computed(() => this.selectedAccount()?.accountHolder ?? null);
 
   formattedDate = computed(() => formatArabicDateTime(this.trip()?.tripDate, this.trip()?.tripTime));
   formattedTime = computed(() => formatArabicTime(this.trip()?.tripTime));
   formattedSeats = computed(() => this.selectedSeats().join('، '));
-
-  paymentForm = this.fb.group({
-    paymentMethod: ['bankak', Validators.required],
-    transactionId: ['', Validators.required],
-  });
 
   private paymentStatus = toSignal(this.paymentForm.statusChanges, { initialValue: 'INVALID' });
   canSubmit = computed(() => this.paymentStatus() === 'VALID' && !this.isSubmitting());
@@ -83,6 +91,17 @@ export class PaymentDetails implements OnInit {
     this.totalAmount.set(s.totalAmount ?? 0);
     this.contact.set(s.contact ?? null);
     this.passengers.set(s.passengers ?? []);
+    this.sessionSvc.onExpire = () => {
+      this.router.navigate([`/m/seat/${s.trip.id}`]);
+    };
+    this.bookingSvc.getActivePaymentAccounts().subscribe({
+      next: (accounts: any[]) => {
+        if (accounts && accounts.length > 0) {
+          this.paymentAccounts.set(accounts);
+          this.paymentForm.get('paymentMethod')?.setValue(accounts[0].id);
+        }
+      },
+    });
   }
 
   onFileSelected(event: Event): void {
@@ -107,12 +126,13 @@ export class PaymentDetails implements OnInit {
     const selectedSeats = this.selectedSeats();
     const formVal = this.paymentForm.value;
 
+    const selectedAccount = this.selectedAccount();
     this.bookingSvc.createBookingWithPayment({
       tripId: trip.id,
       seatNumbers: selectedSeats,
       passenger: passengers.map((p: any) => ({ name: p.name, age: Number(p.age), gender: p.gender })),
       passengerContact: `${contact?.countryCode ?? '+249'}${contact?.whatsappNumber ?? ''}`,
-      paymentMethod: formVal.paymentMethod!,
+      paymentMethod: selectedAccount?.gatewayName ?? formVal.paymentMethod!,
       transactionId: formVal.transactionId!,
       receiptFile: this.receiptFile() ?? undefined,
       totalAmount: this.totalAmount(),
@@ -122,7 +142,7 @@ export class PaymentDetails implements OnInit {
     }).subscribe({
       next: () => {
         this.submitSuccess.set(true);
-        this.sessionSvc.clear();
+        this.sessionSvc.releaseSeats();
         this.isSubmitting.set(false);
       },
       error: (err) => {
@@ -143,20 +163,6 @@ export class PaymentDetails implements OnInit {
   invalid(c: any): boolean {
     return c && c.invalid && c.touched;
   }
-
-  selectedGateway = computed(() => this.paymentForm.get('paymentMethod')?.value ?? 'bankak');
-
-  selectedAccountNumber = computed(() => {
-    const gw = this.selectedGateway();
-    const accounts = this.accountNumbers[gw];
-    return accounts && accounts.length > 0 ? accounts[0].number : null;
-  });
-
-  selectedAccountBank = computed(() => {
-    const gw = this.selectedGateway();
-    const accounts = this.accountNumbers[gw];
-    return accounts && accounts.length > 0 ? accounts[0].bank : null;
-  });
 
   async copyAccountNumber(): Promise<void> {
     const num = this.selectedAccountNumber();

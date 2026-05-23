@@ -79,6 +79,153 @@ export class PDFService {
     return { publicUrl, filePath: outputPath };
   }
 
+  async generatePassengerList(
+    trip: any,
+    bookings: any[],
+  ): Promise<{ publicUrl: string; filePath: string }> {
+    const outputDir = path.resolve(this.outputDir);
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir, { recursive: true });
+    }
+
+    const tripId = trip.id;
+    const filename = `passengers_${tripId}.pdf`;
+    const outputPath = path.join(outputDir, filename);
+    const publicUrl = `/upload/${filename}`;
+
+    const arabicDigits: Record<string, string> = {
+      '0': '٠', '1': '١', '2': '٢', '3': '٣', '4': '٤',
+      '5': '٥', '6': '٦', '7': '٧', '8': '٨', '9': '٩',
+    };
+
+    const toArabicNum = (n: any): string => String(n).replace(/[0-9]/g, d => arabicDigits[d]);
+
+    const arabicMonths = [
+      'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+      'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر',
+    ];
+
+    const fmtDate = (val: any): string => {
+      if (!val) return '—';
+      const d = new Date(val);
+      if (isNaN(d.getTime())) return String(val);
+      return `${toArabicNum(d.getDate())} ${arabicMonths[d.getMonth()]} ${toArabicNum(d.getFullYear())}`;
+    };
+
+    const fmtTime = (val: any): string => {
+      if (!val) return '—';
+      if (val instanceof Date && !isNaN(val.getTime())) {
+        return `${toArabicNum(val.getHours())}:${toArabicNum(val.getMinutes())}`;
+      }
+      const str = String(val);
+      if (/^\d{1,2}:\d{2}/.test(str)) {
+        const [h, m] = str.split(':');
+        return `${toArabicNum(h)}:${toArabicNum(m)}`;
+      }
+      return str;
+    };
+
+    const rows = bookings.flatMap((b: any) => {
+      const passengers = Array.isArray(b.passenger)
+        ? b.passenger
+        : [b.passenger].filter(Boolean);
+      return passengers.map((p: any, i: number) => {
+        const seatNumber = Array.isArray(b.seatNumbers)
+          ? toArabicNum(b.seatNumbers[i])
+          : toArabicNum(b.seatNumbers);
+        const genderLabel =
+          p.gender === 'MALE' ? 'ذكر' : p.gender === 'FEMALE' ? 'أنثى' : '—';
+        return {
+          seatNumber,
+          name: p.name || '—',
+          age: p.age != null ? toArabicNum(p.age) : '—',
+          gender: genderLabel,
+        };
+      });
+    });
+
+    const rowsHtml = rows
+      .map(
+        (r: any) => `
+      <tr>
+        <td style="padding:8px 12px;border:1px solid #D1D5DB;text-align:center;font-size:13px;">${r.seatNumber}</td>
+        <td style="padding:8px 12px;border:1px solid #D1D5DB;text-align:center;font-size:13px;">${r.name}</td>
+        <td style="padding:8px 12px;border:1px solid #D1D5DB;text-align:center;font-size:13px;">${r.age}</td>
+        <td style="padding:8px 12px;border:1px solid #D1D5DB;text-align:center;font-size:13px;">${r.gender}</td>
+      </tr>
+    `,
+      )
+      .join('');
+
+    const primaryColor = '#8B5E3C';
+    const primaryLight = '#D4A574';
+    const primaryBg = '#F5EDE3';
+    const primaryDark = '#6B4226';
+    const textDark = '#4A3520';
+
+    const html = `<!DOCTYPE html>
+<html dir="rtl">
+<head><meta charset="utf-8"><style>
+  body { font-family: 'DejaVu Sans', sans-serif; margin:0; padding:20px; }
+  h1 { font-size:20px; color:${primaryColor}; text-align:center; margin-bottom:8px; }
+  .trip-info { text-align:center; font-size:14px; color:#374151; margin-bottom:20px; }
+  table { width:100%; border-collapse:collapse; }
+  th { background:${primaryColor}; color:#fff; padding:10px 12px; font-size:13px; border:1px solid ${primaryColor}; }
+  td { padding:8px 12px; border:1px solid #D1D5DB; text-align:center; font-size:13px; }
+  tr:nth-child(even) { background:${primaryBg}; }
+  .count { text-align:center; font-size:12px; color:#6B7280; margin-top:12px; }
+</style></head>
+<body>
+  <h1>قائمة الركاب</h1>
+  <div class="trip-info">
+    ${trip.fromCity || ''} ← ${trip.toCity || ''} — ${fmtDate(trip.departureDate)} ${fmtTime(trip.departureTime)}
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>رقم المقعد</th>
+        <th>الاسم</th>
+        <th>العمر</th>
+        <th>الجنس</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${rowsHtml || '<tr><td colspan="4" style="text-align:center;padding:20px;color:#9CA3AF;">لا يوجد ركاب</td></tr>'}
+    </tbody>
+  </table>
+  <div class="count">إجمالي الركاب: ${toArabicNum(rows.length)}</div>
+</body>
+</html>`;
+
+    try {
+      const puppeteer = await import('puppeteer');
+      const browser = await puppeteer.launch({
+        headless: true,
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+        ],
+      });
+      try {
+        const page = await browser.newPage();
+        await page.setContent(html, { waitUntil: 'networkidle0' });
+        await page.pdf({
+          path: outputPath,
+          format: 'A4',
+          printBackground: true,
+        });
+      } finally {
+        await browser.close();
+      }
+    } catch (error) {
+      this.logger.warn('Passenger list PDF generation failed', error);
+      fs.writeFileSync(outputPath, 'PDF placeholder');
+    }
+
+    return { publicUrl, filePath: outputPath };
+  }
+
   private buildTicketHTML(payment: any): string {
     const booking = payment.Booking;
     const trip = booking.Trip;
@@ -240,7 +387,10 @@ export class PDFService {
       ? Number(payment.totalAmount).toLocaleString('ar-SA')
       : '—';
 
-    // const ticketPrice = Number(payment.price).toLocaleString('ar-SA');
+    const ticketPrice = Number(payment.ticketPrice).toLocaleString('ar-SA');
+    const platformFee = Number(payment.platformFeeAmount).toLocaleString(
+      'ar-SA',
+    );
     const currency = 'جنيه سوداني';
     const bookingDate = fmtDate(booking.createdAt);
 
@@ -624,7 +774,11 @@ export class PDFService {
         <tbody>
           <tr style="border-bottom:1px solid #99F6E4;">
             <td style="padding:10px 14px;font-size:13px;">سعر التذكرة الواحدة</td>
-            <td style="padding:10px 14px;font-size:13px;text-align:left;direction:ltr;">${totalAmount} ${currency}</td>
+            <td style="padding:10px 14px;font-size:13px;text-align:left;direction:ltr;">${ticketPrice} ${currency}</td>
+          </tr>
+          <tr style="border-bottom:1px solid #99F6E4;">
+            <td style="padding:10px 14px;font-size:13px;">رسوم المنصة</td>
+            <td style="padding:10px 14px;font-size:13px;text-align:left;direction:ltr;">${platformFee} ${currency}</td>
           </tr>
           <tr style="border-bottom:1px solid #99F6E4;background:#F0FDFA;">
             <td style="padding:10px 14px;font-size:13px;">عدد المقاعد المحجوزة</td>
@@ -645,7 +799,7 @@ export class PDFService {
   </div>
 
   <div class="ticket-footer">
-    <div class="footer-text">يُرجى الحضور قبل موعد الانطلاق بـ 30 دقيقة</div>
+    <div class="footer-text">يُرجى الحضور قبل موعد الانطلاق بساعة دقيقة</div>
   </div>
 
 </div>

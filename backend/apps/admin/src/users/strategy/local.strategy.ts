@@ -16,6 +16,9 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     if (!user) {
       throw new UnauthorizedException('البريد الإلكتروني أو كلمة المرور غير صحيحة');
     }
+    if (user.role !== 'ADMIN') {
+      throw new UnauthorizedException('هذا الحساب غير مصرح له بلوحة تحكم المشرف');
+    }
     return user;
   }
 }

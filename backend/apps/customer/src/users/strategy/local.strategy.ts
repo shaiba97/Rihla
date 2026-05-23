@@ -22,6 +22,9 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
         'البريد الإلكتروني أو كلمة المرور غير صحيحة',
       );
     }
+    if (user.role !== 'USER') {
+      throw new UnauthorizedException('هذا الحساب غير مصرح له بتطبيق العميل');
+    }
     return user;
   }
 }

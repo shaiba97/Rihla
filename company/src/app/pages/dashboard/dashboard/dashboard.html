@@ -1,21 +1,217 @@
-<div class="flex flex-col gap-4" dir="rtl">
-  <div class="rounded-xl border border-[var(--border)]
-              bg-[var(--bg-card)]
-              shadow-[0_1px_3px_var(--shadow)]
-              p-6 flex items-center gap-4">
-    <div class="w-12 h-12 rounded-xl
-                bg-[var(--primary-light)]
-                flex items-center justify-center">
-      <svg lucideLayoutDashboard class="w-6 h-6 text-[var(--primary)]"></svg>
+<div dir="rtl" class="p-6 flex flex-col gap-6">
+
+  <div class="flex items-center justify-between flex-wrap gap-3">
+    <div class="flex flex-col gap-1">
+      <h1 class="text-2xl font-extrabold text-[var(--text-primary)]">مرحباً بك في {{ companyName() }}</h1>
+      <p class="text-sm text-[var(--text-secondary)]">نظرة عامة على نشاط شركتك اليوم</p>
     </div>
-    <div>
-      <h2 class="text-lg font-bold
-                 text-[var(--text-primary)] m-0">
-        الرئيسة
-      </h2>
-      <p class="text-sm text-[var(--text-muted)] m-0">
-        سيتم بناء هذه الصفحة قريباً
-      </p>
-    </div>
+    <button (click)="load()" [disabled]="isLoading()" class="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-card)] text-sm font-semibold text-[var(--text-secondary)] hover:border-[var(--primary)] hover:text-[var(--primary)] transition-all duration-150 disabled:opacity-50">
+      <svg lucideRefreshCw class="w-4 h-4" [class.animate-spin]="isLoading()"></svg>
+      تحديث
+    </button>
   </div>
+
+  @if (isLoading() && !summary()) {
+    <div class="flex flex-col items-center justify-center py-24 gap-4">
+      <svg lucideLoaderCircle class="w-12 h-12 animate-spin text-[var(--primary)]"></svg>
+      <p class="text-sm font-medium text-[var(--text-muted)]">جاري تحميل البيانات...</p>
+    </div>
+  }
+
+  @if (error() && !summary()) {
+    <div class="flex flex-col items-center justify-center py-24 gap-4">
+      <div class="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center"><svg lucideAlertCircle class="w-8 h-8 text-red-400"></svg></div>
+      <p class="text-base font-semibold text-[var(--text-primary)]">{{ error() }}</p>
+      <button (click)="load()" class="px-6 py-2.5 rounded-xl bg-[var(--primary)] text-white font-semibold text-sm hover:bg-[var(--primary-hover)] transition-all">حاول مجدداً</button>
+    </div>
+  }
+
+  @if (summary()) {
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      @for (card of stats(); track card.label) {
+        <div class="flex flex-col gap-3 p-4 rounded-2xl border bg-[var(--bg-card)] hover:shadow-md transition-all duration-200">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center"
+            [class.bg-emerald-50]="card.color === 'emerald'"
+            [class.bg-blue-50]="card.color === 'blue'"
+            [class.bg-violet-50]="card.color === 'violet'"
+            [class.bg-orange-50]="card.color === 'orange'">
+            @if (card.icon === 'trending-up') { <svg lucideTrendingUp class="w-5 h-5 text-emerald-600"></svg> }
+            @if (card.icon === 'calendar') { <svg lucideCalendar class="w-5 h-5 text-blue-600"></svg> }
+            @if (card.icon === 'ticket') { <svg lucideTicket class="w-5 h-5 text-violet-600"></svg> }
+            @if (card.icon === 'route') { <svg lucideRoute class="w-5 h-5 text-orange-600"></svg> }
+          </div>
+          <div class="flex flex-col gap-0.5">
+            <span class="text-[11px] font-medium text-[var(--text-muted)] leading-tight">{{ card.label }}</span>
+            <div class="flex items-baseline gap-1 flex-wrap">
+              <span class="text-xl font-extrabold leading-none tabular-nums"
+                [class.text-emerald-600]="card.color === 'emerald'"
+                [class.text-blue-600]="card.color === 'blue'"
+                [class.text-violet-600]="card.color === 'violet'"
+                [class.text-orange-600]="card.color === 'orange'">{{ fmt(card.value) }}</span>
+              @if (card.currency) { <span class="text-[10px] font-medium text-[var(--text-muted)]">{{ card.currency }}</span> }
+            </div>
+            <span class="text-[10px] text-[var(--text-muted)] mt-0.5 leading-tight">{{ card.sub }}</span>
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+      <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] overflow-hidden">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--border)]">
+          <h2 class="text-base font-bold text-[var(--text-primary)] flex items-center gap-2"><svg lucideRoute class="w-4 h-4 text-[var(--primary)]"></svg>الرحلات القادمة</h2>
+          <button (click)="goToTrips()" class="text-xs font-bold text-[var(--primary)] hover:underline">عرض الكل</button>
+        </div>
+        @if (upcomingTrips().length > 0) {
+          <div class="flex flex-col divide-y divide-[var(--border)]">
+            @for (t of upcomingTrips(); track t.id) {
+              <button (click)="goToTrip(t.id)" class="flex items-center gap-3 px-5 py-3.5 hover:bg-[var(--bg-base)] transition-all text-right">
+                <div class="w-9 h-9 rounded-xl bg-[var(--primary-light)] flex items-center justify-center flex-shrink-0"><svg lucideBus class="w-4 h-4 text-[var(--primary)]"></svg></div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-sm font-bold text-[var(--text-primary)] truncate">{{ t.fromCity }}</span>
+                    <svg lucideArrowLeft class="w-3.5 h-3.5 text-[var(--text-muted)] flex-shrink-0"></svg>
+                    <span class="text-sm font-bold text-[var(--text-primary)] truncate">{{ t.toCity }}</span>
+                  </div>
+                  <div class="flex items-center gap-2 mt-0.5">
+                    <span class="text-[11px] text-[var(--text-muted)]">{{ t.departureDate | date:'yyyy-MM-dd' | arabicNumber }} {{ t.departureTime | arabicNumber }}</span>
+                  </div>
+                </div>
+                <div class="flex flex-col items-end gap-1">
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold" [style.background]="getStatusColor(t.status) + '20'" [style.color]="getStatusColor(t.status)">{{ getStatusLabel(t.status) }}</span>
+                  <span class="text-[11px] font-bold text-[var(--text-primary)] tabular-nums">{{ t.price | arabicNumber:'price' }} ج س</span>
+                </div>
+              </button>
+            }
+          </div>
+        } @else {
+          <div class="flex flex-col items-center justify-center py-12 gap-2 text-[var(--text-muted)]">
+            <svg lucideRoute class="w-8 h-8 opacity-30"></svg>
+            <p class="text-sm">لا توجد رحلات قادمة</p>
+          </div>
+        }
+      </div>
+
+      <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] overflow-hidden">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--border)]">
+          <h2 class="text-base font-bold text-[var(--text-primary)] flex items-center gap-2"><svg lucideBarChart3 class="w-4 h-4 text-[var(--primary)]"></svg>آخر الرحلات المكتملة</h2>
+          <button (click)="goToTrips()" class="text-xs font-bold text-[var(--primary)] hover:underline">عرض الكل</button>
+        </div>
+        @if (recentTrips().length > 0) {
+          <div class="flex flex-col divide-y divide-[var(--border)]">
+            @for (t of recentTrips(); track t.id) {
+              <button (click)="goToTrip(t.id)" class="flex items-center gap-3 px-5 py-3.5 hover:bg-[var(--bg-base)] transition-all text-right">
+                <div class="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center flex-shrink-0"><svg lucideBus class="w-4 h-4 text-emerald-600"></svg></div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-sm font-bold text-[var(--text-primary)] truncate">{{ t.fromCity }}</span>
+                    <svg lucideArrowLeft class="w-3.5 h-3.5 text-[var(--text-muted)] flex-shrink-0"></svg>
+                    <span class="text-sm font-bold text-[var(--text-primary)] truncate">{{ t.toCity }}</span>
+                  </div>
+                  <div class="flex items-center gap-2 mt-0.5">
+                    <span class="text-[11px] text-[var(--text-muted)]">{{ t.departureDate | date:'yyyy-MM-dd' | arabicNumber }} {{ t.departureTime | arabicNumber }}</span>
+                    <span class="text-[11px] text-[var(--text-muted)]">·</span>
+                    <span class="text-[11px] font-bold text-emerald-600 tabular-nums">{{ t.price | arabicNumber:'price' }} ج س</span>
+                  </div>
+                </div>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-50 text-green-600">مكتملة</span>
+              </button>
+            }
+          </div>
+        } @else {
+          <div class="flex flex-col items-center justify-center py-12 gap-2 text-[var(--text-muted)]">
+            <svg lucideBarChart3 class="w-8 h-8 opacity-30"></svg>
+            <p class="text-sm">لا توجد رحلات مكتملة بعد</p>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-5">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-base font-bold text-[var(--text-primary)] flex items-center gap-2"><svg lucideWallet class="w-4 h-4 text-[var(--primary)]"></svg>الإيرادات</h2>
+          <button (click)="goToFinancials()" class="text-xs font-bold text-[var(--primary)] hover:underline">التفاصيل</button>
+        </div>
+        @let s = summary()!;
+        @let total = s.totalRevenue || 1;
+        @let netPct = (s.netEarnings / total) * 100;
+        @let commPct = (s.totalCommission / total) * 100;
+        <div class="flex flex-col gap-3">
+          <div class="w-full h-4 rounded-full overflow-hidden bg-[var(--bg-base)] border border-[var(--border)] flex">
+            <div class="h-full bg-[var(--primary)] transition-all duration-700 ease-out" [style.width.%]="netPct"></div>
+            <div class="h-full bg-amber-400 transition-all duration-700 ease-out" [style.width.%]="commPct"></div>
+          </div>
+          <div class="flex flex-wrap gap-3">
+            <div class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-[var(--primary)]"></div><span class="text-[11px] font-medium text-[var(--text-secondary)]">صافي أرباحك ({{ toArabic(netPct.toFixed(0)) }}٪) — {{ fmt(s.netEarnings) }} ج</span></div>
+            <div class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-amber-400"></div><span class="text-[11px] font-medium text-[var(--text-secondary)]">عمولة المنصة ({{ toArabic(commPct.toFixed(0)) }}٪) — {{ fmt(s.totalCommission) }} ج</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-5">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-base font-bold text-[var(--text-primary)] flex items-center gap-2"><svg lucideBus class="w-4 h-4 text-[var(--primary)]"></svg>أسطول الحافلات</h2>
+          <button routerLink="/buses" class="text-xs font-bold text-[var(--primary)] hover:underline">إدارة</button>
+        </div>
+        @if (buses().length > 0) {
+          <div class="flex flex-col gap-2">
+            <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-[var(--bg-base)] border border-[var(--border)]">
+              <span class="text-xs font-medium text-[var(--text-muted)]">إجمالي الحافلات</span>
+              <span class="text-sm font-extrabold text-[var(--text-primary)] tabular-nums">{{ fmt(buses().length) }}</span>
+            </div>
+            <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-[var(--bg-base)] border border-[var(--border)]">
+              <span class="text-xs font-medium text-[var(--text-muted)]">إجمالي المقاعد</span>
+              <span class="text-sm font-extrabold text-[var(--text-primary)] tabular-nums">{{ fmt(buses().reduce((a, b) => a + b.chairs, 0)) }}</span>
+            </div>
+            <div class="flex items-center justify-between px-3 py-2 rounded-xl bg-[var(--bg-base)] border border-[var(--border)]">
+              <span class="text-xs font-medium text-[var(--text-muted)]">الرحلات المجدولة</span>
+              <span class="text-sm font-extrabold text-[var(--text-primary)] tabular-nums">{{ fmt(trips().filter(t => t.status === 'SCHEDULED').length) }}</span>
+            </div>
+          </div>
+        } @else {
+          <div class="flex flex-col items-center justify-center py-8 gap-2 text-[var(--text-muted)]">
+            <svg lucideBus class="w-8 h-8 opacity-30"></svg>
+            <p class="text-sm text-center">لم يتم إضافة حافلات بعد</p>
+          </div>
+        }
+      </div>
+    </div>
+
+    @if (s.recentPayments.length) {
+      <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] overflow-hidden">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--border)]">
+          <h2 class="text-base font-bold text-[var(--text-primary)] flex items-center gap-2"><svg lucideUsers class="w-4 h-4 text-[var(--primary)]"></svg>آخر الحجوزات</h2>
+          <button (click)="goToFinancials()" class="text-xs font-bold text-[var(--primary)] hover:underline">عرض الكل</button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="bg-[var(--bg-base)] border-b border-[var(--border)]">
+                <th class="text-right px-5 py-3 text-xs font-bold text-[var(--text-secondary)]">المسار</th>
+                <th class="text-right px-5 py-3 text-xs font-bold text-[var(--text-secondary)]">طريقة الدفع</th>
+                <th class="text-right px-5 py-3 text-xs font-bold text-[var(--text-secondary)]">المبلغ</th>
+                <th class="text-right px-5 py-3 text-xs font-bold text-[var(--text-secondary)]">التاريخ</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (p of s.recentPayments.slice(0, 5); track p.id; let i = $index) {
+                <tr class="border-b border-[var(--border)] hover:bg-[var(--bg-base)] transition-colors" [class.bg-[var(--bg-base)]/40]="i % 2 !== 0">
+                  <td class="px-5 py-3.5">
+                    <span class="text-sm font-semibold text-[var(--text-primary)]">{{ p.from ?? '—' }} ← {{ p.to ?? '—' }}</span>
+                  </td>
+                  <td class="px-5 py-3.5">
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-[var(--primary-light)] text-[var(--primary)] border border-[var(--border)]">{{ methodLabel(p.paymentMethod) }}</span>
+                  </td>
+                  <td class="px-5 py-3.5"><span class="text-sm font-bold text-[var(--text-primary)] tabular-nums">{{ fmt(p.companyAmount) }} <span class="text-xs font-normal text-[var(--text-muted)]">جنيه</span></span></td>
+                  <td class="px-5 py-3.5"><span class="text-xs font-medium text-[var(--text-muted)]">{{ fmtDate(p.createdAt) }}</span></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+  }
 </div>

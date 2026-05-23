@@ -1,9 +1,9 @@
 import { Component, signal, inject } from '@angular/core'; import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router'; import { NgClass } from '@angular/common'; import { AuthService } from '../../core/services/auth/auth.service';
-import { LucideLayoutDashboard, LucideUsers, LucideWallet, LucideUser, LucideSun, LucideMoon, LucideLogOut, LucideMenu, LucideX, LucideBus, LucideChevronDown } from '@lucide/angular';
+import { LucideLayoutDashboard, LucideUsers, LucideWallet, LucideUser, LucideSun, LucideMoon, LucideLogOut, LucideMenu, LucideX, LucideBus, LucideChevronDown, LucidePhone } from '@lucide/angular';
 
 @Component({
   selector: 'app-shell', standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, NgClass, LucideLayoutDashboard, LucideUsers, LucideWallet, LucideUser, LucideSun, LucideMoon, LucideLogOut, LucideMenu, LucideX, LucideBus, LucideChevronDown],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, NgClass, LucideLayoutDashboard, LucideUsers, LucideWallet, LucideUser, LucideSun, LucideMoon, LucideLogOut, LucideMenu, LucideX, LucideBus, LucideChevronDown, LucidePhone],
   templateUrl: './shell.html',
 })
 export class ShellComponent {
@@ -12,6 +12,7 @@ export class ShellComponent {
     { path: '/dashboard', label: 'الرئيسية', icon: 'layout-dashboard' },
     { path: '/users', label: 'المستخدمون', icon: 'users' },
     { path: '/financial', label: 'المالية', icon: 'wallet' },
+    { path: '/support-contacts', label: 'جهات الاتصال', icon: 'phone' },
     { path: '/profile', label: 'الملف الشخصي', icon: 'user' },
   ];
   toggleSidebar() { this.sidebarOpen.update(v => !v); }

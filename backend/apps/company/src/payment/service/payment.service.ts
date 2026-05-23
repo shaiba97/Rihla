@@ -3,7 +3,9 @@ import { PrismaService } from '@app/prisma';
 
 @Injectable()
 export class PaymentService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+  ) {}
 
   async getFinancialSummary(companyId: string) {
     const payments = await this.prisma.payment.findMany({

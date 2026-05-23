@@ -16,6 +16,9 @@
   --shadow:         rgba(13, 148, 136, 0.1);
   --safe-top:       env(safe-area-inset-top, 0px);
   --safe-bottom:    env(safe-area-inset-bottom, 0px);
+  --danger:         #DC2626;
+  --success:        #059669;
+  --warning:        #D97706;
 }
 
 * {
@@ -41,4 +44,11 @@ html, body {
   --text-secondary: #5EEAD4;
   --text-muted:     #0D9488;
   --shadow:         rgba(0, 0, 0, 0.3);
+  --danger:         #FCA5A5;
+  --success:        #6EE7B7;
+  --warning:        #FCD34D;
 }
+
+.text-danger  { color: var(--danger); }
+.text-success { color: var(--success); }
+.text-warning { color: var(--warning); }

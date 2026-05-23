@@ -103,4 +103,28 @@ export class TripService {
   deleteTrip(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/trips/delete-trip/${id}`);
   }
+
+  downloadPassengers(tripId: string): string {
+    return `${this.apiUrl}/trips/download-passengers/${tripId}`;
+  }
+
+  getPassengersPdfUrl(tripId: string): Observable<{ url: string }> {
+    return this.http.get<{ url: string }>(`${this.apiUrl}/trips/get-passengers-pdf/${tripId}`);
+  }
+
+  generatePassengersPdf(trip: any, bookings: any[]): Observable<{ url: string }> {
+    return this.http.post<{ url: string }>(`${this.apiUrl}/trips/generate-passengers-pdf`, { trip, bookings });
+  }
+
+  createBooking(tripId: string, data: { seatNumbers: number[]; passenger: any; customerId: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/trips/create-booking/${tripId}`, data);
+  }
+
+  cancelBooking(bookingId: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/trips/cancel-booking/${bookingId}`);
+  }
+
+  getTripBookings(tripId: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/trips/bookings/${tripId}`);
+  }
 }

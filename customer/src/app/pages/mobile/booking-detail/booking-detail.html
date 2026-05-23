@@ -12,96 +12,121 @@
     } @else {
       @let b = booking();
 
-      <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-4 flex flex-col gap-3">
-        <div class="flex items-center gap-2">
-          <svg lucideCalendar class="w-4 h-4 text-[var(--primary)]"></svg>
-          <span class="text-[13px] font-bold text-[var(--text-primary)]">معلومات الحجز</span>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <span class="text-[11px] text-[var(--text-muted)]">تاريخ الرحلة</span>
-            <p class="text-[13px] font-semibold text-[var(--text-primary)]">{{ b.Trip?.departureDate | date:'EEE d MMM':'':'ar' | arabicNumber}}</p>
+      @if (b.status !== 'CANCELLED') {
+        <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-4 flex flex-col gap-3">
+          <div class="flex items-center gap-2">
+            <svg lucideCalendar class="w-4 h-4 text-[var(--primary)]"></svg>
+            <span class="text-[13px] font-bold text-[var(--text-primary)]">معلومات الحجز</span>
           </div>
-          <div>
-            <span class="text-[11px] text-[var(--text-muted)]">وقت الرحلة</span>
-            <p class="text-[13px] font-semibold text-[var(--text-primary)]">{{ b.Trip?.departureTime | timeFormat }}</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-4 flex flex-col gap-3">
-        <div class="flex items-center gap-2">
-          <svg lucideBus class="w-4 h-4 text-[var(--primary)]"></svg>
-          <span class="text-[13px] font-bold text-[var(--text-primary)]">الرحلة</span>
-        </div>
-        <div class="flex items-center gap-3">
-          <div class="flex flex-col items-center">
-            <span class="text-[15px] font-extrabold text-[var(--text-primary)]">{{ b.Trip?.fromCity }}</span>
-            <span class="text-[10px] text-[var(--text-muted)]">المغادرة</span>
-          </div>
-          <div class="flex-1 flex items-center gap-1 px-2">
-            <div class="w-2 h-2 rounded-full bg-[var(--primary)]"></div>
-            <div class="flex-1 border-t border-dashed border-[var(--border)]"></div>
-            <div class="w-2 h-2 rounded-full border-2 border-[var(--primary)]"></div>
-          </div>
-          <div class="flex flex-col items-center">
-            <span class="text-[15px] font-extrabold text-[var(--text-primary)]">{{ b.Trip?.toCity }}</span>
-            <span class="text-[10px] text-[var(--text-muted)]">الوصول</span>
-          </div>
-        </div>
-        <div class="flex items-center justify-between pt-2 border-t border-[var(--border)]">
-          <span class="text-[11px] text-[var(--text-muted)]">حالة الرحلة</span>
-          <span class="px-2 py-0.5 rounded-full text-[10px] font-bold" [ngClass]="tripStatusClass(b.Trip?.status)">{{ tripStatusLabel(b.Trip?.status) }}</span>
-        </div>
-      </div>
-
-      <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-4 flex flex-col gap-3">
-        <div class="flex items-center gap-2">
-          <svg lucideMapPin class="w-4 h-4 text-[var(--primary)]"></svg>
-          <span class="text-[13px] font-bold text-[var(--text-primary)]">الحافلة</span>
-        </div>
-        <div class="flex items-center justify-between">
-          <span class="text-[12px] text-[var(--text-muted)]">اسم الحافلة</span>
-          <span class="text-[13px] font-semibold text-[var(--text-primary)]">{{ b.Bus?.name || '--' }}</span>
-        </div>
-        <div class="flex items-center justify-between">
-          <span class="text-[12px] text-[var(--text-muted)]">المقاعد</span>
-          <span class="text-[13px] font-semibold text-[var(--text-primary)]">{{ (b.seatNumbers ?? []).join('، ') | arabicNumber}}</span>
-        </div>
-      </div>
-
-      <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-4 flex flex-col gap-3">
-        <div class="flex items-center gap-2">
-          <svg lucideUser class="w-4 h-4 text-[var(--primary)]"></svg>
-          <span class="text-[13px] font-bold text-[var(--text-primary)]">الركاب</span>
-        </div>
-        @if ((b.passenger ?? []).length > 0) {
-          @for (p of b.passenger; track $index) {
-            <div class="flex items-center justify-between py-1 border-b border-[var(--border)] last:border-0">
-              <span class="text-[13px] text-[var(--text-secondary)]">{{ p.name }}</span>
-              <span class="text-[11px] text-[var(--text-muted)]">{{ genderLabel(p.gender) }}</span>
-              <span class="text-[11px] text-[var(--text-muted)]">{{ p.age | arabicNumber }} سنة</span>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <span class="text-[11px] text-[var(--text-muted)]">تاريخ الرحلة</span>
+              <p class="text-[13px] font-semibold text-[var(--text-primary)]">{{ b.Trip?.departureDate | date:'EEE d MMM':'':'ar' | arabicNumber}}</p>
             </div>
-          }
-        } @else {
-          <span class="text-[13px] text-[var(--text-secondary)]">{{ b.passenger.name || '--' }}</span>
-        }
-      </div>
+            <div>
+              <span class="text-[11px] text-[var(--text-muted)]">وقت الرحلة</span>
+              <p class="text-[13px] font-semibold text-[var(--text-primary)]">{{ b.Trip?.departureTime | timeFormat }}</p>
+            </div>
+          </div>
+        </div>
 
-      <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-4 flex flex-col gap-3">
-        <div class="flex items-center gap-2">
-          <svg lucideCreditCard class="w-4 h-4 text-[var(--primary)]"></svg>
-          <span class="text-[13px] font-bold text-[var(--text-primary)]">الدفع</span>
+        <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-4 flex flex-col gap-3">
+          <div class="flex items-center gap-2">
+            <svg lucideBus class="w-4 h-4 text-[var(--primary)]"></svg>
+            <span class="text-[13px] font-bold text-[var(--text-primary)]">الرحلة</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="flex flex-col items-center">
+              <span class="text-[15px] font-extrabold text-[var(--text-primary)]">{{ b.Trip?.fromCity }}</span>
+              <span class="text-[10px] text-[var(--text-muted)]">المغادرة</span>
+            </div>
+            <div class="flex-1 flex items-center gap-1 px-2">
+              <div class="w-2 h-2 rounded-full bg-[var(--primary)]"></div>
+              <div class="flex-1 border-t border-dashed border-[var(--border)]"></div>
+              <div class="w-2 h-2 rounded-full border-2 border-[var(--primary)]"></div>
+            </div>
+            <div class="flex flex-col items-center">
+              <span class="text-[15px] font-extrabold text-[var(--text-primary)]">{{ b.Trip?.toCity }}</span>
+              <span class="text-[10px] text-[var(--text-muted)]">الوصول</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between pt-2 border-t border-[var(--border)]">
+            <span class="text-[11px] text-[var(--text-muted)]">حالة الرحلة</span>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold" [ngClass]="tripStatusClass(b.Trip?.status)">{{ tripStatusLabel(b.Trip?.status) }}</span>
+          </div>
         </div>
-        <div class="flex items-center justify-between">
-          <span class="text-[12px] text-[var(--text-muted)]">طريقة الدفع</span>
-          <span class="text-[13px] font-semibold text-[var(--text-primary)]">{{ methodLabel(b.Payment?.paymentMethod) }}</span>
+
+        <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-4 flex flex-col gap-3">
+          <div class="flex items-center gap-2">
+            <svg lucideMapPin class="w-4 h-4 text-[var(--primary)]"></svg>
+            <span class="text-[13px] font-bold text-[var(--text-primary)]">الحافلة</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-[12px] text-[var(--text-muted)]">اسم الحافلة</span>
+            <span class="text-[13px] font-semibold text-[var(--text-primary)]">{{ b.Bus?.name || '--' }}</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-[12px] text-[var(--text-muted)]">المقاعد</span>
+            <span class="text-[13px] font-semibold text-[var(--text-primary)]">{{ (b.seatNumbers ?? []).join('، ') | arabicNumber}}</span>
+          </div>
         </div>
-        <div class="border-t border-[var(--border)] pt-2 flex items-center justify-between">
-          <span class="text-[14px] font-bold text-[var(--text-primary)]">الإجمالي</span>
-          <span class="text-[18px] font-extrabold text-[var(--primary)] tabular-nums">{{ (b.Payment?.totalAmount || 0) | arabicNumber }} <span class="text-[11px] font-medium"> جنيه سوداني </span></span>
+
+        <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-4 flex flex-col gap-3">
+          <div class="flex items-center gap-2">
+            <svg lucideUser class="w-4 h-4 text-[var(--primary)]"></svg>
+            <span class="text-[13px] font-bold text-[var(--text-primary)]">الركاب</span>
+          </div>
+          @if ((b.passenger ?? []).length > 0) {
+            @for (p of b.passenger; track $index) {
+              <div class="flex items-center justify-between py-1 border-b border-[var(--border)] last:border-0">
+                <span class="text-[13px] text-[var(--text-secondary)]">{{ p.name }}</span>
+                <span class="text-[11px] text-[var(--text-muted)]">{{ genderLabel(p.gender) }}</span>
+                <span class="text-[11px] text-[var(--text-muted)]">{{ p.age | arabicNumber }} سنة</span>
+              </div>
+            }
+          } @else {
+            <span class="text-[13px] text-[var(--text-secondary)]">{{ b.passenger.name || '--' }}</span>
+          }
         </div>
-      </div>
+
+        <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-4 flex flex-col gap-3">
+          <div class="flex items-center gap-2">
+            <svg lucideCreditCard class="w-4 h-4 text-[var(--primary)]"></svg>
+            <span class="text-[13px] font-bold text-[var(--text-primary)]">الدفع</span>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-[12px] text-[var(--text-muted)]">طريقة الدفع</span>
+            <span class="text-[13px] font-semibold text-[var(--text-primary)]">{{ methodLabel(b.Payment?.paymentMethod) }}</span>
+          </div>
+          <div class="border-t border-[var(--border)] pt-2 flex items-center justify-between">
+            <span class="text-[14px] font-bold text-[var(--text-primary)]">الإجمالي</span>
+            <span class="text-[18px] font-extrabold text-[var(--primary)] tabular-nums">{{ (b.Payment?.totalAmount || 0) | arabicNumber }} <span class="text-[11px] font-medium"> جنيه سوداني </span></span>
+          </div>
+        </div>
+      }
+
+      @if (b.status === 'CANCELLED' && b.cancellationReason) {
+        <div class="bg-red-50 border border-red-200 rounded-2xl p-4 flex flex-col gap-2">
+          <span class="text-[13px] font-bold text-red-700">سبب الإلغاء</span>
+          <span class="text-[12px] text-red-600">{{ b.cancellationReason }}</span>
+        </div>
+      }
+
+      @if (supportContacts().length > 0) {
+        <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-4 flex flex-col gap-3">
+          <span class="text-[13px] font-bold text-[var(--text-primary)]">جهات الدعم</span>
+          @for (c of supportContacts(); track c.id) {
+            <a [href]="c.type === 'whatsapp' ? 'https://wa.me/' + c.value : 'mailto:' + c.value" target="_blank" class="flex items-center gap-2 py-1.5 text-[13px] text-[var(--primary)] hover:underline">
+              @if (c.type === 'whatsapp') {
+                <svg lucidePhone class="w-4 h-4"></svg>
+              } @else {
+                <svg lucideMail class="w-4 h-4"></svg>
+              }
+              <span>{{ c.label || c.value }}</span>
+            </a>
+          }
+        </div>
+      }
     }
   </div>
 

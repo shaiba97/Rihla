@@ -52,7 +52,7 @@
           </div>
         </div>
         <div class="flex items-center justify-between mb-1 px-1">
-          <button (click)="prevEditMonth()" class="w-6 h-6 flex items-center justify-center rounded-full hover:bg-[var(--bg-base)] text-[var(--text-secondary)]">
+          <button (click)="prevEditMonth()" [disabled]="!canGoPrevEdit()" class="w-6 h-6 flex items-center justify-center rounded-full hover:bg-[var(--bg-base)] text-[var(--text-secondary)] disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent">
             <svg lucideChevronRight class="w-3.5 h-3.5"></svg>
           </button>
           <span class="text-[12px] font-bold text-[var(--text-primary)]">{{ editMonthLabel() }}</span>

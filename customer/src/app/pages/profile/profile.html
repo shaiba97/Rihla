@@ -38,13 +38,13 @@
 
         @if (saveSuccess()) {
           <div class="px-6 pb-2">
-            <p class="text-center text-sm font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 px-4 py-3 rounded-xl">{{ saveSuccess() }}</p>
+            <p class="text-center text-sm font-semibold bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 px-4 py-3 rounded-xl text-success">{{ saveSuccess() }}</p>
           </div>
         }
 
         @if (saveError()) {
           <div class="px-6 pb-2">
-            <p class="text-center text-sm font-semibold text-red-600 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 px-4 py-3 rounded-xl">{{ saveError() }}</p>
+            <p class="text-center text-sm font-semibold bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 px-4 py-3 rounded-xl text-danger">{{ saveError() }}</p>
           </div>
         }
 
@@ -103,7 +103,7 @@
           <div class="bg-[var(--bg-card)] rounded-3xl p-6 max-w-sm w-full flex flex-col gap-4 shadow-xl" (click)="$event.stopPropagation()">
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 rounded-full bg-red-50 dark:bg-red-950/20 flex items-center justify-center flex-shrink-0">
-                <svg lucideAlertCircle class="w-5 h-5 text-red-500"></svg>
+                <svg lucideAlertCircle class="w-5 h-5 text-danger"></svg>
               </div>
               <div class="flex flex-col">
                 <span class="text-[15px] font-bold text-[var(--text-primary)]">حذف الحساب</span>
@@ -112,7 +112,7 @@
             </div>
 
             @if (deleteError()) {
-              <p class="text-xs font-semibold text-red-600 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 px-3 py-2 rounded-xl">{{ deleteError() }}</p>
+              <p class="text-xs font-semibold bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 px-3 py-2 rounded-xl text-danger">{{ deleteError() }}</p>
             }
 
             <div class="flex items-center gap-2">

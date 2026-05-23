@@ -1,19 +1,28 @@
-import { Component, signal, inject } from '@angular/core';
+import { Component, signal, inject, OnInit } from '@angular/core';
 import { Location } from '@angular/common';
-import { LucideArrowRight, LucideBus, LucideCalendar, LucideUser, LucideCreditCard, LucideDownload, LucideMapPin, LucideEye } from '@lucide/angular';
+import { LucideArrowRight, LucideBus, LucideCalendar, LucideUser, LucideCreditCard, LucideDownload, LucideMapPin, LucideEye, LucidePhone, LucideMail } from '@lucide/angular';
 import { ArabicNumberPipe } from '../../pipes/arabic-number/arabic-number-pipe';
 import { TimeFormatPipe } from '../../pipes/time-format/time-format-pipe';
 import { DatePipe, NgClass } from '@angular/common';
+import { BookingService } from '../../services/booking/booking.service';
 
 @Component({
   selector: 'app-booking-detail',
-  imports: [LucideArrowRight, LucideBus, LucideCalendar, LucideUser, LucideCreditCard, LucideDownload, LucideMapPin, LucideEye, ArabicNumberPipe, TimeFormatPipe, DatePipe, NgClass],
+  imports: [LucideArrowRight, LucideBus, LucideCalendar, LucideUser, LucideCreditCard, LucideDownload, LucideMapPin, LucideEye, LucidePhone, LucideMail, ArabicNumberPipe, TimeFormatPipe, DatePipe, NgClass],
   templateUrl: './booking-detail.html',
 })
-export class BookingDetailComponent {
+export class BookingDetailComponent implements OnInit {
   private location = inject(Location);
+  private bookingSvc = inject(BookingService);
 
   booking = signal<any>(history.state?.booking ?? null);
+  supportContacts = signal<any[]>([]);
+
+  ngOnInit(): void {
+    this.bookingSvc.getSupportContacts().subscribe({
+      next: (res: any) => this.supportContacts.set(res ?? []),
+    });
+  }
 
   statusClass(status: string): Record<string, boolean> {
     const s = status?.toLowerCase();

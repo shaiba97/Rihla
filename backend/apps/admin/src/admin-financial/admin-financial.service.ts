@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '@app/prisma';
 import { PDFService } from '@app/pdf';
+import { RihlaWsGateway, WS_EVENTS } from '@app/websocket';
 
 type Period = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'half-yearly' | 'yearly';
 
@@ -9,6 +10,7 @@ export class AdminFinancialService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly pdfService: PDFService,
+    private readonly wsGateway: RihlaWsGateway,
   ) {}
 
   async getDashboardSummary() {
@@ -176,6 +178,11 @@ export class AdminFinancialService {
       await tx.booking.update({ where: { id: payment.bookingId }, data: { status: 'CONFIRMED' } });
     });
 
+    this.wsGateway.emitToAdmin(WS_EVENTS.PAYMENT_CONFIRMED, { paymentId, bookingId: payment.bookingId });
+    this.wsGateway.emitToRoom('customer:' + payment.Booking?.customerId, WS_EVENTS.PAYMENT_CONFIRMED, { paymentId, bookingId: payment.bookingId });
+    this.wsGateway.emitSeatUpdate(payment.Booking?.tripId ?? '', { seatNumbers: payment.Booking?.seatNumbers ?? [], action: 'booked' });
+    this.wsGateway.emitPublic(WS_EVENTS.STATS_UPDATED, {});
+
     let ticketUrl = '';
     try {
       const result = await this.pdfService.generateTicket(payment.bookingId);
@@ -194,14 +201,18 @@ export class AdminFinancialService {
   }
 
   async rejectPayment(paymentId: string, reason?: string) {
-    const payment = await this.prisma.payment.findUnique({ where: { id: paymentId } });
+    const payment = await this.prisma.payment.findUnique({ where: { id: paymentId }, include: { Booking: true } });
     if (!payment) throw new NotFoundException('الدفعة غير موجودة');
     if (payment.status !== 'PENDING') throw new BadRequestException('يمكن رفض الدفعات المعلقة فقط');
 
     await this.prisma.$transaction(async (tx: any) => {
       await tx.payment.update({ where: { id: paymentId }, data: { status: 'FAILED' } });
-      await tx.booking.update({ where: { id: payment.bookingId }, data: { status: 'CANCELLED' } });
+      await tx.booking.update({ where: { id: payment.bookingId }, data: { status: 'CANCELLED', cancellationReason: reason || null } });
     });
+    this.wsGateway.emitToAdmin(WS_EVENTS.PAYMENT_REJECTED, { paymentId, bookingId: payment.bookingId });
+    this.wsGateway.emitToRoom('customer:' + payment.Booking?.customerId, WS_EVENTS.PAYMENT_REJECTED, { paymentId, bookingId: payment.bookingId });
+    this.wsGateway.emitSeatUpdate(payment.Booking?.tripId ?? '', { seatNumbers: payment.Booking?.seatNumbers ?? [], action: 'released' });
+    this.wsGateway.emitPublic(WS_EVENTS.STATS_UPDATED, {});
     return { message: 'تم رفض الدفعة وإلغاء الحجز' };
   }
 

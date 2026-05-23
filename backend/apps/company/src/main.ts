@@ -1,11 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import { CompanyModule } from './company.module';
+import { RedisIoAdapter } from '@app/websocket';
 import * as path from 'path';
 import * as express from 'express';
 import { getWhatsAppSock } from './config/whatsapp';
 
 async function bootstrap() {
   const app = await NestFactory.create(CompanyModule);
+  app.useWebSocketAdapter(new RedisIoAdapter(app));
 
   app.setGlobalPrefix('api');
   app.enableCors({

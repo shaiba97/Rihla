@@ -35,6 +35,8 @@ export class SearchResults implements OnInit {
   today = new Date().toISOString().split('T')[0];
   editMonth = signal<string>(this.today.slice(0, 7));
 
+  canGoPrevEdit = computed(() => this.editMonth() > this.today.slice(0, 7));
+
   dateLabel = computed(() => {
     if (!this.date()) return '';
     return new Date(this.date()).toLocaleDateString('ar-SA', { weekday: 'short', day: 'numeric', month: 'long' });
@@ -49,9 +51,11 @@ export class SearchResults implements OnInit {
     const [y, m] = this.editMonth().split('-').map(Number);
     const daysInMonth = new Date(y, m, 0).getDate();
     const pills = [];
+    const todayStr = this.today;
     for (let d = 1; d <= daysInMonth; d++) {
       const dateObj = new Date(y, m - 1, d);
       const value = dateObj.toISOString().split('T')[0];
+      if (value < todayStr) continue;
       pills.push({ value, day: dateObj.toLocaleDateString('ar-SA', { weekday: 'short' }), num: this.toArabicNumeral(d) });
     }
     return pills;
@@ -81,8 +85,8 @@ export class SearchResults implements OnInit {
   openEdit(): void { this.editFrom.set(this.from()); this.editTo.set(this.to()); this.editDate.set(this.date()); this.editMonth.set(this.date().slice(0, 7) || this.today.slice(0, 7)); this.showEdit.set(true); }
   closeEdit(): void { this.showEdit.set(false); }
   swapEdit(): void { const t = this.editFrom(); this.editFrom.set(this.editTo()); this.editTo.set(t); this.editSwapped.set(!this.editSwapped()); }
-  prevEditMonth(): void { const [y, m] = this.editMonth().split('-').map(Number); const d = new Date(y, m - 2, 1); this.editMonth.set(d.toISOString().split('T')[0].slice(0, 7)); }
-  nextEditMonth(): void { const [y, m] = this.editMonth().split('-').map(Number); const d = new Date(y, m, 1); this.editMonth.set(d.toISOString().split('T')[0].slice(0, 7)); }
+  prevEditMonth(): void { const [y, m] = this.editMonth().split('-').map(Number); const d = new Date(y, m - 2, 1); this.editMonth.set(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`); }
+  nextEditMonth(): void { const [y, m] = this.editMonth().split('-').map(Number); const d = new Date(y, m, 1); this.editMonth.set(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`); }
   applyEdit(): void { if (!this.editFrom() || !this.editTo() || !this.editDate()) return; this.showEdit.set(false); this.router.navigate(['/m/results'], { queryParams: { from: this.editFrom(), to: this.editTo(), date: this.editDate() } }); }
   goBack(): void { this.router.navigate(['/m']); }
   onTripSelected(trip: any): void { this.router.navigate(['/m/seat', trip.id], { state: { trip } }); }

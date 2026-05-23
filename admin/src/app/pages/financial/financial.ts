@@ -1,10 +1,11 @@
-import { Component, signal, inject, OnInit, computed } from '@angular/core';
+import { Component, signal, inject, OnInit, computed, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideWallet, LucideTrendingUp, LucideClock, LucidePlus, LucidePencil, LucideTrash2, LucideCheck, LucideX, LucideLoaderCircle, LucideRefreshCw, LucideEye, LucideCreditCard, LucideBadgeDollarSign, LucideToggleLeft, LucideToggleRight, LucideReceiptText, LucideShield, LucideActivity, LucideBarChart3 } from '@lucide/angular';
 import { FinancialService } from '../../core/services/financial/financial.service';
 import { PlatformFeeService } from '../../core/services/platform-fee/platform-fee.service';
 import { PaymentAccountsService } from '../../core/services/payment-accounts/payment-accounts.service';
 import { environment } from '../../../environments/environment';
+import { WsService } from '../../core/services/ws.service';
 
 type Tab = 'overview' | 'pending' | 'platform-fee' | 'expenses' | 'accounts' | 'performance';
 
@@ -13,10 +14,13 @@ type Tab = 'overview' | 'pending' | 'platform-fee' | 'expenses' | 'accounts' | '
   imports: [FormsModule, LucideWallet, LucideTrendingUp, LucideClock, LucidePlus, LucidePencil, LucideTrash2, LucideCheck, LucideX, LucideLoaderCircle, LucideRefreshCw, LucideEye, LucideCreditCard, LucideBadgeDollarSign, LucideToggleLeft, LucideToggleRight, LucideReceiptText, LucideShield, LucideActivity, LucideBarChart3],
   templateUrl: './financial.html',
 })
-export class FinancialComponent implements OnInit {
+export class FinancialComponent implements OnInit, OnDestroy {
   private financialSvc = inject(FinancialService);
   private feeSvc = inject(PlatformFeeService);
   private accountsSvc = inject(PaymentAccountsService);
+  private ws = inject(WsService);
+
+  private wsCleanups: (() => void)[] = [];
 
   activeTab = signal<Tab>('overview');
   earningsPeriod = signal<'daily' | 'weekly' | 'monthly' | 'yearly'>('monthly');
@@ -84,7 +88,15 @@ export class FinancialComponent implements OnInit {
 
   pendingCount = computed(() => this.pendingList().length);
 
-  ngOnInit(): void { this.refresh(); }
+  ngOnInit(): void {
+    this.refresh();
+    this.wsCleanups.push(this.ws.on('payment:created', () => this.loadTab(this.activeTab())));
+    this.wsCleanups.push(this.ws.on('payment:confirmed', () => this.loadTab(this.activeTab())));
+    this.wsCleanups.push(this.ws.on('payment:rejected', () => this.loadTab(this.activeTab())));
+    this.wsCleanups.push(this.ws.on('financial:updated', () => this.loadTab(this.activeTab())));
+  }
+
+  ngOnDestroy() { this.wsCleanups.forEach(fn => fn()); }
 
   refresh(): void {
     console.log('Refreshing financial data...');
@@ -101,7 +113,18 @@ export class FinancialComponent implements OnInit {
   loadExpenses(): void { this.financialSvc.getExpenses().subscribe({ next: (r: any) => this.expenses.set(r?.data ?? r ?? []), error: () => {} }); }
   loadAccounts(): void { this.accountsSvc.getAll().subscribe({ next: (r: any) => this.accounts.set(r?.data ?? r ?? []), error: () => {} }); }
 
-  switchTab(tab: Tab): void { this.activeTab.set(tab); this.error.set(''); this.successMsg.set(''); }
+  loadTab(tab: Tab): void {
+    switch (tab) {
+      case 'overview': this.loadOverview(); this.loadEarnings(); break;
+      case 'pending': this.loadPending(); break;
+      case 'platform-fee': this.loadFees(); break;
+      case 'expenses': this.loadExpenses(); break;
+      case 'accounts': this.loadAccounts(); break;
+      case 'performance': this.loadPerformance(); break;
+    }
+  }
+
+  switchTab(tab: Tab): void { this.activeTab.set(tab); this.error.set(''); this.successMsg.set(''); this.loadTab(tab); }
 
   startConfirm(id: string): void { this.confirmingId.set(id); }
   cancelConfirm(): void { this.confirmingId.set(null); }

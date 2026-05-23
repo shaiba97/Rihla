@@ -1,5 +1,5 @@
 import { Component, input, output, computed, signal, inject, OnInit } from '@angular/core';
-import { LucideBus, LucideCalendar } from '@lucide/angular';
+import { LucideBus, LucideCalendar, LucideClock } from '@lucide/angular';
 import { TimeFormatPipe } from '../pipes/time-format/time-format-pipe';
 import { DurationPipe } from '../pipes/duration/duration-pipe';
 import { ArabicNumberPipe } from '../pipes/arabic-number/arabic-number-pipe';
@@ -9,7 +9,7 @@ import { BookingService } from '../services/booking/booking.service';
 @Component({
   selector: 'app-mobile-trip-card',
   standalone: true,
-  imports: [TimeFormatPipe, DurationPipe, ArabicNumberPipe, LucideBus, LucideCalendar],
+  imports: [TimeFormatPipe, DurationPipe, ArabicNumberPipe, LucideBus, LucideCalendar, LucideClock],
   templateUrl: './mobile-trip-card.html',
 })
 export class MobileTripCardComponent implements OnInit {

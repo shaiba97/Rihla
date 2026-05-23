@@ -6,10 +6,14 @@ import {
   SeatStartFrom,
 } from '../dto/bus.dto';
 import { PrismaService } from '@app/prisma';
+import { RihlaWsGateway, WS_EVENTS } from '@app/websocket';
 
 @Injectable()
 export class BusesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly wsGateway: RihlaWsGateway,
+  ) {}
 
   async create(createBusDto: CreateBusDto, userId?: string) {
     if (!userId) {
@@ -70,6 +74,9 @@ export class BusesService {
           },
         },
       });
+
+      this.wsGateway.emitToRoom('company:' + userId, WS_EVENTS.BUS_CREATED, bus);
+      this.wsGateway.emitToAdmin(WS_EVENTS.BUS_CREATED, bus);
 
       return {
         success: true,
@@ -166,6 +173,9 @@ export class BusesService {
         data: updateData,
       });
 
+      this.wsGateway.emitToRoom('company:' + bus.companyId, WS_EVENTS.BUS_UPDATED, updatedBus);
+      this.wsGateway.emitToAdmin(WS_EVENTS.BUS_UPDATED, updatedBus);
+
       return {
         success: true,
         message: 'تم تحديث الحافلة بنجاح',
@@ -187,7 +197,13 @@ export class BusesService {
   }
 
   async remove(id: string) {
+    const bus = await this.prisma.bus.findUnique({ where: { id } });
+    const companyId = bus?.companyId;
     await this.prisma.bus.delete({ where: { id } });
+    if (companyId) {
+      this.wsGateway.emitToRoom('company:' + companyId, WS_EVENTS.BUS_DELETED, { id });
+      this.wsGateway.emitToAdmin(WS_EVENTS.BUS_DELETED, { id });
+    }
 
     return {
       success: true,

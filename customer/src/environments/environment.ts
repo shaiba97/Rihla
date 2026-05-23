@@ -4,4 +4,5 @@ export const environment = {
     company: '/api-company',
     customer: '/api-customer',
   },
+  wsUrl: 'http://localhost:3002',
 };

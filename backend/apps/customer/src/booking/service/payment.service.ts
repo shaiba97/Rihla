@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '@app/prisma';
 import { PDFService } from '@app/pdf';
+import { RihlaWsGateway, WS_EVENTS } from '@app/websocket';
 import { PaymentStatus } from '@prisma/client';
 import { CreatePaymentDto, UpdatePaymentDto } from '../dto/booking.dto';
 
@@ -35,6 +36,7 @@ export class PaymentService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly pdfService: PDFService,
+    private readonly wsGateway: RihlaWsGateway,
   ) {}
 
   async create(createPaymentDto: CreatePaymentDto) {
@@ -87,6 +89,21 @@ export class PaymentService {
     });
 
     const ticket = await this.generateTicket(booking, payment);
+
+    this.wsGateway.emitToAdmin(WS_EVENTS.PAYMENT_CREATED, {
+      paymentId: payment.id,
+      bookingId: payment.bookingId,
+      amount: payment.totalAmount,
+      method: payment.paymentMethod,
+      status: payment.status,
+    });
+    this.wsGateway.emitToCustomer(payment.customerId, WS_EVENTS.PAYMENT_CREATED, {
+      paymentId: payment.id,
+      bookingId: payment.bookingId,
+      status: payment.status,
+      message: 'تم إنشاء طلب الدفع بنجاح',
+    });
+
     return {
       message: 'تم إنشاء الدفعة بنجاح',
       payment,
@@ -225,6 +242,8 @@ export class PaymentService {
     await this.prisma.payment.delete({
       where: { id },
     });
+
+    this.wsGateway.emitToAdmin(WS_EVENTS.PAYMENT_REJECTED, { paymentId: id, bookingId: existingPayment.bookingId });
 
     return { message: 'تم حذف الدفعة بنجاح' };
   }

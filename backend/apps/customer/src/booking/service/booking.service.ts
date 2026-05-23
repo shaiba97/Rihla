@@ -12,12 +12,18 @@ import {
   CreateBookingWithPaymentDto,
 } from '../dto/booking.dto';
 import { BookingStatus, PaymentStatus } from '@prisma/client';
+import { RihlaWsGateway, WS_EVENTS } from '@app/websocket';
+import { RedisService } from '@app/redis';
+
+const SEAT_LOCK_TTL = 420;
 
 @Injectable()
 export class BookingService {
   constructor(
     private readonly paymentService: PaymentService,
     private readonly prisma: PrismaService,
+    private readonly wsGateway: RihlaWsGateway,
+    private readonly redis: RedisService,
   ) {}
 
   async create(createBookingDto: CreateBookingDto, customerId: string) {
@@ -56,6 +62,12 @@ export class BookingService {
         throw new BadRequestException('هذا المقعد محجوز بالفعل');
       }
 
+      const blockedSeats = await this.getBlockedSeatsFromRedis(createBookingDto.tripId);
+      const hasBlocked = sanitizedSeats.some((s) => blockedSeats.includes(s));
+      if (hasBlocked) {
+        throw new BadRequestException('هذا المقعد محجوز بالفعل');
+      }
+
       const booking = await this.prisma.booking.create({
         data: {
           ...createBookingDto,
@@ -68,6 +80,11 @@ export class BookingService {
           Payment: true,
           TicketPDF: true,
         },
+      });
+
+      this.wsGateway.emitToCustomer(customerId, WS_EVENTS.BOOKING_CREATED, {
+        bookingId: booking.id,
+        status: booking.status,
       });
 
       const tripPrice = Number(trip.price ?? 0);
@@ -129,103 +146,133 @@ export class BookingService {
         } catch {
           dto.passenger = [];
         }
-        if (!Array.isArray(dto.seatNumbers) || dto.seatNumbers.length === 0) {
-          throw new BadRequestException('يجب اختيار مقعد واحد على الأقل');
-        }
+      }
+      if (!Array.isArray(dto.seatNumbers) || dto.seatNumbers.length === 0) {
+        throw new BadRequestException('يجب اختيار مقعد واحد على الأقل');
+      }
 
-        const sanitizedSeats = dto.seatNumbers.map(Number);
+      const sanitizedSeats = dto.seatNumbers.map(Number);
 
-        const result = await this.prisma.$transaction(async (tx) => {
-          const trip = await tx.trip.findUnique({
-            where: { id: dto.tripId },
-          });
+      const blocked = await this.getBlockedSeatsFromRedis(dto.tripId);
+      const hasBlocked = sanitizedSeats.some((s) => blocked.includes(s));
+      if (hasBlocked) {
+        throw new BadRequestException('هذا المقعد محجوز بالفعل');
+      }
 
-          if (!trip) {
-            throw new NotFoundException('الرحلة غير موجودة');
-          }
-
-          const existingBooking = await tx.booking.findFirst({
-            where: {
-              tripId: dto.tripId,
-              seatNumbers: { hasSome: sanitizedSeats },
-              status: { in: [BookingStatus.PENDING, BookingStatus.CONFIRMED] },
-            },
-          });
-
-          if (existingBooking) {
-            throw new BadRequestException('هذا المقعد محجوز بالفعل');
-          }
-
-          const tripPrice = Number(trip.price ?? 0);
-          const seatCount = sanitizedSeats.length;
-          const baseAmount = tripPrice * seatCount;
-
-          const booking = await tx.booking.create({
-            data: {
-              tripId: dto.tripId,
-              customerId,
-              seatNumbers: sanitizedSeats,
-              passenger: dto.passenger as any,
-              passengerContact: dto.passengerContact,
-              status: BookingStatus.PENDING,
-            },
-          });
-
-          const activeFee = await this.prisma.platformFee.findFirst({
-            where: { isActive: true },
-            orderBy: { createdAt: 'desc' },
-          });
-
-          const platformFeeAmount = activeFee ? Number(activeFee.amount) : 0;
-
-          const payment = await tx.payment.create({
-            data: {
-              bookingId: booking.id,
-              customerId,
-              price: dto.companyAmount,
-              totalAmount: dto.totalAmount,
-              companyAmount: dto.companyAmount,
-              commissionAmount: dto.commissionAmount,
-              platformFeeAmount: dto.platformFeeAmount ?? platformFeeAmount,
-              currency: dto.currency || 'SDG',
-              status: PaymentStatus.PENDING,
-              paymentMethod: dto.paymentMethod,
-              transactionId: dto.transactionId,
-              receiptFile: receiptFile ?? null,
-            },
-            include: {
-              Booking: {
-                include: {
-                  Trip: { include: { Bus: true } },
-                },
-              },
-            },
-          });
-
-          return {
-            booking,
-            payment,
-            _pricing: {
-              tripPrice,
-              seatCount,
-              baseAmount,
-              platformFeeAmount,
-              totalAmount: dto.totalAmount,
-            },
-          };
+      const result = await this.prisma.$transaction(async (tx) => {
+        const trip = await tx.trip.findUnique({
+          where: { id: dto.tripId },
         });
 
-        const ticket = await this.paymentService.generateTicket(
-          result.booking,
-          result.payment,
-        );
+        if (!trip) {
+          throw new NotFoundException('الرحلة غير موجودة');
+        }
+
+        const existingBooking = await tx.booking.findFirst({
+          where: {
+            tripId: dto.tripId,
+            seatNumbers: { hasSome: sanitizedSeats },
+            status: { in: [BookingStatus.PENDING, BookingStatus.CONFIRMED] },
+          },
+        });
+
+        if (existingBooking) {
+          throw new BadRequestException('هذا المقعد محجوز بالفعل');
+        }
+
+        const tripPrice = Number(trip.price ?? 0);
+        const seatCount = sanitizedSeats.length;
+        const baseAmount = tripPrice * seatCount;
+
+        const booking = await tx.booking.create({
+          data: {
+            tripId: dto.tripId,
+            customerId,
+            seatNumbers: sanitizedSeats,
+            passenger: dto.passenger as any,
+            passengerContact: dto.passengerContact,
+            status: BookingStatus.PENDING,
+          },
+        });
+
+        const activeFee = await this.prisma.platformFee.findFirst({
+          where: { isActive: true },
+          orderBy: { createdAt: 'desc' },
+        });
+
+        const platformFeeAmount = activeFee ? Number(activeFee.amount) : 0;
+
+        const payment = await tx.payment.create({
+          data: {
+            bookingId: booking.id,
+            customerId,
+            price: dto.companyAmount,
+            totalAmount: dto.totalAmount,
+            companyAmount: dto.companyAmount,
+            commissionAmount: dto.commissionAmount,
+            platformFeeAmount: dto.platformFeeAmount ?? platformFeeAmount,
+            currency: dto.currency || 'SDG',
+            status: PaymentStatus.PENDING,
+            paymentMethod: dto.paymentMethod,
+            transactionId: dto.transactionId,
+            receiptFile: receiptFile ?? null,
+          },
+          include: {
+            Booking: {
+              include: {
+                Trip: { include: { Bus: true } },
+              },
+            },
+          },
+        });
 
         return {
-          message: 'تم إنشاء الحجز والدفعة بنجاح',
-          ...result,
-          ticket,
+          booking,
+          payment,
+          _pricing: {
+            tripPrice,
+            seatCount,
+            baseAmount,
+            platformFeeAmount,
+            totalAmount: dto.totalAmount,
+          },
         };
+      });
+
+      const companyId = result.payment.Booking?.Trip?.Bus?.companyId;
+
+      this.wsGateway.emitToCustomer(customerId, WS_EVENTS.BOOKING_CREATED, {
+        bookingId: result.booking.id,
+        status: result.booking.status,
+      });
+
+      if (companyId) {
+        this.wsGateway.emitToCompany(companyId, WS_EVENTS.BOOKING_CREATED, {
+          bookingId: result.booking.id,
+          tripId: dto.tripId,
+          status: result.booking.status,
+          seatNumbers: sanitizedSeats,
+        });
       }
+
+      this.wsGateway.emitSeatUpdate(dto.tripId, {
+        seatNumbers: sanitizedSeats,
+        action: 'held',
+        bookingId: result.booking.id,
+      });
+
+      const ticket = await this.paymentService.generateTicket(
+        result.booking,
+        result.payment,
+      );
+
+      await this.clearSeatLocksOnBooking(customerId, dto.tripId);
+
+      return {
+        message: 'تم إنشاء الحجز والدفعة بنجاح',
+        ...result,
+        ticket,
+      };
     } catch (error) {
       if (error instanceof Prisma.PrismaClientValidationError) {
         throw new BadRequestException(
@@ -256,8 +303,112 @@ export class BookingService {
 
     const bookedSeats = bookings.flatMap((booking: any) => booking.seatNumbers);
 
-    // Flatten the array of seat numbers
-    return bookedSeats;
+    const heldSeats = await this.getHeldSeatsFromRedis(tripId);
+
+    const blockedSeats = await this.getBlockedSeatsFromRedis(tripId);
+
+    return [...new Set([...bookedSeats, ...heldSeats, ...blockedSeats])];
+  }
+
+  private async getBlockedSeatsFromRedis(tripId: string): Promise<number[]> {
+    try {
+      const raw = await this.redis.get(`blocked-seats:${tripId}`);
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  private async getHeldSeatsFromRedis(tripId: string): Promise<number[]> {
+    try {
+      const keys = await this.redis.keys(`booking-session:*:${tripId}`);
+      if (keys.length === 0) return [];
+      const values = await Promise.all(keys.map((k) => this.redis.get(k)));
+      const seats: number[] = [];
+      for (const v of values) {
+        if (v) {
+          try {
+            const data = JSON.parse(v);
+            if (Array.isArray(data.seats)) {
+              seats.push(...data.seats);
+            }
+          } catch {}
+        }
+      }
+      return [...new Set(seats)];
+    } catch {
+      return [];
+    }
+  }
+
+  async lockSeats(
+    customerId: string,
+    tripId: string,
+    seats: number[],
+  ): Promise<{ expiresAt: number }> {
+    const expiresAt = Date.now() + SEAT_LOCK_TTL * 1000;
+    const key = `booking-session:${customerId}:${tripId}`;
+    const existing = await this.redis.get(key);
+    let data: any = {};
+    if (existing) {
+      try {
+        data = JSON.parse(existing);
+      } catch {}
+    }
+    data.seats = seats;
+    data.expiresAt = expiresAt;
+    await this.redis.setex(key, SEAT_LOCK_TTL, JSON.stringify(data));
+    return { expiresAt };
+  }
+
+  async unlockSeats(customerId: string, tripId: string): Promise<void> {
+    const key = `booking-session:${customerId}:${tripId}`;
+    await this.redis.del(key);
+  }
+
+  async updateSessionStep(
+    customerId: string,
+    tripId: string,
+    step: 'seat' | 'passenger' | 'payment',
+  ): Promise<{ expiresAt: number }> {
+    const key = `booking-session:${customerId}:${tripId}`;
+    const existing = await this.redis.get(key);
+    if (!existing) {
+      return { expiresAt: 0 };
+    }
+    const data = JSON.parse(existing);
+    data.step = step;
+    const expiresAt = Date.now() + SEAT_LOCK_TTL * 1000;
+    data.expiresAt = expiresAt;
+    await this.redis.setex(key, SEAT_LOCK_TTL, JSON.stringify(data));
+    return { expiresAt };
+  }
+
+  async getSessionState(
+    customerId: string,
+    tripId: string,
+  ): Promise<{
+    seats: number[];
+    step: string;
+    expiresAt: number;
+  } | null> {
+    const key = `booking-session:${customerId}:${tripId}`;
+    const raw = await this.redis.get(key);
+    if (!raw) return null;
+    try {
+      const data = JSON.parse(raw);
+      return {
+        seats: data.seats ?? [],
+        step: data.step ?? 'seat',
+        expiresAt: data.expiresAt ?? 0,
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  async clearSeatLocksOnBooking(customerId: string, tripId: string): Promise<void> {
+    await this.unlockSeats(customerId, tripId);
   }
 
   async getBookings() {
@@ -428,8 +579,14 @@ export class BookingService {
     });
   }
 
+  async getSupportContacts() {
+    return this.prisma.supportContact.findMany({
+      where: { isActive: true },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   async delete(id: string) {
-    // Check if booking exists
     const existingBooking = await this.prisma.booking.findUnique({
       where: { id },
     });
@@ -440,6 +597,16 @@ export class BookingService {
 
     await this.prisma.booking.delete({
       where: { id },
+    });
+
+    this.wsGateway.emitToCustomer(existingBooking.customerId, WS_EVENTS.BOOKING_CANCELLED, {
+      bookingId: id,
+      status: 'CANCELLED',
+    });
+    this.wsGateway.emitSeatUpdate(existingBooking.tripId, {
+      seatNumbers: existingBooking.seatNumbers,
+      action: 'released',
+      bookingId: id,
     });
 
     return { message: 'تم حذف الحجز بنجاح' };

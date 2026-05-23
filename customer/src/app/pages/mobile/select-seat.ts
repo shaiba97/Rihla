@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit, computed } from '@angular/core';
+import { Component, signal, inject, OnInit, OnDestroy, computed } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgClass, DatePipe } from '@angular/common';
 import { LucideArrowRight, LucideArmchair } from '@lucide/angular';
@@ -6,6 +6,7 @@ import { BookingService } from '../../services/booking/booking.service';
 import { SessionService } from '../../services/session/session.service';
 import { TimeFormatPipe } from '../../pipes/time-format/time-format-pipe';
 import { ArabicNumberPipe } from '../../pipes/arabic-number/arabic-number-pipe';
+import { WsService } from '../../services/ws.service';
 
 type SeatStatus = 'available' | 'reserved' | 'booked';
 interface Seat { number: number; status: SeatStatus; }
@@ -16,11 +17,15 @@ interface Seat { number: number; status: SeatStatus; }
   imports: [NgClass, DatePipe, TimeFormatPipe, ArabicNumberPipe, LucideArrowRight, LucideArmchair],
   templateUrl: './select-seat.html',
 })
-export class SelectSeat implements OnInit {
+export class SelectSeat implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private bookingSvc = inject(BookingService);
   private sessionSvc = inject(SessionService);
+  private ws = inject(WsService);
+
+  private _tripId = '';
+  private wsCleanups: (() => void)[] = [];
 
   trip = signal<any>(null);
   bookedSeats = signal<number[]>([]);
@@ -55,25 +60,44 @@ export class SelectSeat implements OnInit {
   backSeats = computed(() => this.seatMap().slice(-5));
 
   ngOnInit(): void {
-    const tripId = this.route.snapshot.paramMap.get('tripId') ?? '';
+    this._tripId = this.route.snapshot.paramMap.get('tripId') ?? '';
     const nav = history.state?.trip;
     if (nav) this.trip.set(nav);
     this.bookingSvc.getActiveFee().subscribe(fee => {
       if (fee) this.platformFee.set(Number(fee.amount));
     });
-    this.bookingSvc.getBookedSeats(tripId).subscribe({
+    this.loadBookedSeats();
+    this.sessionSvc.restoreFromStorage().then(state => {
+      if (state && state.step !== 'seat') {
+        this.router.navigate([`/m/${state.step}/${this._tripId}`]);
+      }
+    });
+    this.wsCleanups.push(this.ws.on('seat:updated', (data: any) => {
+      if (data.tripId === this._tripId) this.loadBookedSeats();
+    }));
+  }
+
+  private loadBookedSeats(): void {
+    this.bookingSvc.getBookedSeats(this._tripId).subscribe({
       next: r => { this.bookedSeats.set(r.data ?? []); this.isLoading.set(false); },
       error: () => this.isLoading.set(false),
     });
   }
 
-  toggleSeat(seat: Seat): void {
+  ngOnDestroy(): void {
+    this.wsCleanups.forEach(fn => fn());
+  }
+
+  async toggleSeat(seat: Seat): Promise<void> {
     if (seat.status === 'booked') return;
     const cur = this.selectedSeats();
     const next = cur.includes(seat.number) ? cur.filter(s => s !== seat.number) : [...cur, seat.number];
     this.selectedSeats.set(next);
-    if (next.length > 0) this.sessionSvc.startCountdown();
-    this.sessionSvc.updateSeats(next);
+    if (next.length > 0) {
+      await this.sessionSvc.lockSeats(this._tripId, next);
+    } else {
+      await this.sessionSvc.releaseSeats();
+    }
   }
 
   seatColor(seat: Seat): string[] {

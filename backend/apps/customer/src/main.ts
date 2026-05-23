@@ -1,11 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import { CustomerModule } from './customer.module';
+import { RedisIoAdapter } from '@app/websocket';
 import * as path from 'path';
 import * as express from 'express';
 import * as fs from 'fs';
 
 async function bootstrap() {
   const app = await NestFactory.create(CustomerModule);
+  app.useWebSocketAdapter(new RedisIoAdapter(app));
 
   app.setGlobalPrefix('api');
   app.enableCors({

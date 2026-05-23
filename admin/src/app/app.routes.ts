@@ -16,6 +16,7 @@ export const routes: Routes = [
       { path: 'financial', loadComponent: () => import('./pages/financial/financial').then(m => m.FinancialComponent) },
       { path: 'platform-fee', loadComponent: () => import('./pages/platform-fee/platform-fee').then(m => m.PlatformFeeComponent) },
       { path: 'payment-accounts', loadComponent: () => import('./pages/payment-accounts/payment-accounts').then(m => m.PaymentAccountsComponent) },
+      { path: 'support-contacts', loadComponent: () => import('./pages/support-contacts/support-contacts').then(m => m.SupportContactsComponent) },
       { path: 'profile', loadComponent: () => import('./pages/profile/profile').then(m => m.ProfileComponent) },
     ],
   },

@@ -1,10 +1,11 @@
 import { Component, signal, inject, OnInit, computed } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormArray, ReactiveFormsModule, Validators, AbstractControl } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { LucideArrowRight, LucideUser, LucideSmartphone, LucideAlertCircle } from '@lucide/angular';
 import { ArabicNumberPipe } from '../../pipes/arabic-number/arabic-number-pipe';
+import { SessionService } from '../../services/session/session.service';
 
 @Component({
   selector: 'app-passenger-details',
@@ -14,7 +15,9 @@ import { ArabicNumberPipe } from '../../pipes/arabic-number/arabic-number-pipe';
 })
 export class PassengerDetails implements OnInit {
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private fb = inject(FormBuilder);
+  private sessionSvc = inject(SessionService);
 
   trip = signal<any>(null);
   selectedSeats = signal<number[]>([]);
@@ -51,10 +54,11 @@ export class PassengerDetails implements OnInit {
   setGender(i: number, g: 'MALE' | 'FEMALE'): void { const ctrl = this.passengersArray.at(i).get('gender'); ctrl?.setValue(g); ctrl?.markAsTouched(); }
   invalid(c: AbstractControl | null): boolean { return !!c && c.invalid && c.touched; }
 
-  onProceed(): void {
+  async onProceed(): Promise<void> {
     this.contactGroup.markAllAsTouched();
     this.passengersGroup.markAllAsTouched();
     if (!this.canProceed()) return;
+    await this.sessionSvc.updateStep('payment');
     this.router.navigate(['/m/payment'], { state: { trip: this.trip(), selectedSeats: this.selectedSeats(), baseAmount: this.baseAmount(), platformFee: this.platformFee(), totalAmount: this.totalAmount(), contact: this.contactGroup.value, passengers: this.passengersArray.value } });
   }
 

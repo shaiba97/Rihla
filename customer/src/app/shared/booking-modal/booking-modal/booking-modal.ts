@@ -1,6 +1,6 @@
 import {
   Component, input, output, signal,
-  computed, inject, OnInit,
+  computed, inject, OnInit, OnDestroy,
 } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormArray, Validators } from '@angular/forms';
 import { NgClass, DatePipe } from '@angular/common';
@@ -26,6 +26,7 @@ import {
   LucideShare2,
 } from '@lucide/angular';
 import { BookingStep, SeatMap, PassengerForm, ContactForm } from './booking.interfaces';
+import { WsService } from '../../../services/ws.service';
 import { BookingService, BackendTrip } from '../../../services/booking/booking.service';
 import { SessionService } from '../../../services/session/session.service';
 import { TimeFormatPipe } from '../../../pipes/time-format/time-format-pipe';
@@ -63,7 +64,7 @@ import { ArabicNumberPipe } from '../../../pipes/arabic-number/arabic-number-pip
   ],
   templateUrl: './booking-modal.component.html',
 })
-export class BookingModalComponent implements OnInit {
+export class BookingModalComponent implements OnInit, OnDestroy {
   tripId = input.required<string>();
   ticketId = input.required<string>();
   price = input.required<number>();
@@ -72,8 +73,11 @@ export class BookingModalComponent implements OnInit {
   closed = output<void>();
 
   private bookingSvc = inject(BookingService);
-  private sessionSvc = inject(SessionService);
+  sessionSvc = inject(SessionService);
   private fb = inject(FormBuilder);
+  private ws = inject(WsService);
+
+  private wsCleanups: (() => void)[] = [];
 
   currentStep = signal<BookingStep>('seat');
   trip = signal<BackendTrip | null>(null);
@@ -194,6 +198,17 @@ export class BookingModalComponent implements OnInit {
     this.contactForm.statusChanges.subscribe(() => this.contactFormValid.set(this.contactForm.valid));
     this.passengerFormValid.set(this.passengerForm.valid);
     this.passengerForm.statusChanges.subscribe(() => this.passengerFormValid.set(this.passengerForm.valid));
+    this.sessionSvc.onExpire = () => {
+      this.currentStep.set('seat');
+      this.selectedSeats.set([]);
+    };
+    this.wsCleanups.push(this.ws.on('seat:updated', (data: any) => {
+      if (data.tripId === this.tripId()) this.loadBookedSeats();
+    }));
+  }
+
+  ngOnDestroy(): void {
+    this.wsCleanups.forEach(fn => fn());
   }
 
   loadPaymentAccounts(): void {
@@ -226,13 +241,17 @@ export class BookingModalComponent implements OnInit {
     });
   }
 
-  toggleSeat(seat: SeatMap): void {
+  async toggleSeat(seat: SeatMap): Promise<void> {
     if (seat.status === 'booked') return;
     const current = this.selectedSeats();
     const exists = current.includes(seat.seatNumber);
     const updated = exists ? current.filter(s => s !== seat.seatNumber) : [...current, seat.seatNumber];
     this.selectedSeats.set(updated);
-    this.sessionSvc.updateSeats(updated);
+    if (updated.length > 0) {
+      await this.sessionSvc.lockSeats(this.tripId(), updated);
+    } else {
+      await this.sessionSvc.releaseSeats();
+    }
     this.syncPassengerForms(updated);
   }
 
@@ -254,10 +273,15 @@ export class BookingModalComponent implements OnInit {
     });
   }
 
-  goToStep(step: BookingStep): void {
+  async goToStep(step: BookingStep): Promise<void> {
     if (step === 'passenger' && !this.canGoToPassenger()) return;
     if (step === 'payment' && !this.canGoToPayment()) return;
     this.currentStep.set(step);
+    if (step === 'payment') {
+      await this.sessionSvc.updateStep('payment');
+    } else if (step === 'passenger') {
+      await this.sessionSvc.updateStep('passenger');
+    }
   }
 
   seatClasses(seat: SeatMap): string[] {
@@ -277,6 +301,13 @@ export class BookingModalComponent implements OnInit {
     if (!sel) return '';
     const gw = this.paymentGateways().find(g => g.id === sel);
     return gw?.accountNumber ?? '';
+  });
+
+  gatewayAccountHolder = computed(() => {
+    const sel = this.selectedGateway();
+    if (!sel) return '';
+    const gw = this.paymentGateways().find(g => g.id === sel);
+    return gw?.accountHolder ?? '';
   });
 
   async copyAccountNumber(): Promise<void> {
@@ -347,7 +378,7 @@ export class BookingModalComponent implements OnInit {
         }).subscribe({
           next: () => {
             this.isSubmitting.set(false);
-            this.sessionSvc.clear();
+            this.sessionSvc.releaseSeats();
             this.submitSuccess.set(true);
           },
           error: (err: any) => {

@@ -1,8 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@app/prisma';
+import { RihlaWsGateway, WS_EVENTS } from '@app/websocket';
 @Injectable()
 export class AdminUsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly wsGateway: RihlaWsGateway,
+  ) {}
   async getStats() {
     const [total, customers, companies] = await Promise.all([
       this.prisma.users.count(),
@@ -66,14 +70,18 @@ export class AdminUsersService {
   async toggleActive(id: string) {
     const user = await this.prisma.users.findUnique({ where: { id } });
     if (!user) throw new NotFoundException('غير موجود');
-    return this.prisma.users.update({
+    const updated = await this.prisma.users.update({
       where: { id },
       data: { isActive: !user.isActive },
       select: { id: true, name: true, isActive: true },
     });
+    this.wsGateway.emitToAdmin(WS_EVENTS.USER_TOGGLED, updated);
+    return updated;
   }
   async remove(id: string) {
     await this.findOne(id);
-    return this.prisma.users.delete({ where: { id } });
+    const result = await this.prisma.users.delete({ where: { id } });
+    this.wsGateway.emitToAdmin(WS_EVENTS.USER_DELETED, { id });
+    return result;
   }
 }

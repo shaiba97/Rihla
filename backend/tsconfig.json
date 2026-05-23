@@ -51,6 +51,12 @@
       ],
       "@app/pdf/*": [
         "libs/pdf/src/*"
+      ],
+      "@app/websocket": [
+        "libs/websocket/src"
+      ],
+      "@app/websocket/*": [
+        "libs/websocket/src/*"
       ]
     }
   }

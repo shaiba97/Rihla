@@ -61,7 +61,7 @@ export class FinancialsComponent implements OnInit {
       { label: 'إجمالي الإيرادات', value: s.totalRevenue, currency: 'جنيه', icon: 'trending-up', color: 'emerald', sub: 'كامل المبالغ المحصلة' },
       { label: 'إيرادات الشهر', value: s.thisMonthRevenue, currency: 'جنيه', icon: 'calendar', color: 'blue', sub: 'الشهر الجاري' },
       { label: 'حجوزات مؤكدة', value: s.totalBookings, currency: '', icon: 'ticket', color: 'violet', sub: 'إجمالي المقاعد المباعة' },
-      { label: 'قيد الانتظار', value: s.pendingBookings, currency: '', icon: 'clock', color: 'orange', sub: 'بانتظار التأكيد' },
+      { label: 'متوسط التذكرة', value: s.totalBookings > 0 ? Math.round(s.totalRevenue / s.totalBookings) : 0, currency: 'جنيه', icon: 'banknote', color: 'amber', sub: 'متوسط سعر المقعد الواحد' },
     ];
   });
 

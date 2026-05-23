@@ -4,11 +4,19 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '@app/prisma';
+import { RedisService } from '@app/redis';
+import { RihlaWsGateway, WS_EVENTS } from '@app/websocket';
+import { PDFService } from '@app/pdf';
 import { CreateTripDto, UpdateTripDto } from '../dto/trips.dto';
 
 @Injectable()
 export class TripsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly wsGateway: RihlaWsGateway,
+    private readonly pdfService: PDFService,
+    private readonly redisService: RedisService,
+  ) {}
 
   async create(createTripDto: CreateTripDto) {
     if (!createTripDto || !createTripDto.busId) {
@@ -44,6 +52,12 @@ export class TripsService {
       },
     });
 
+    if (bus) {
+      this.wsGateway.emitToRoom('company:' + bus.companyId, WS_EVENTS.TRIP_CREATED, trip);
+    }
+    this.wsGateway.emitToAdmin(WS_EVENTS.TRIP_CREATED, trip);
+    this.wsGateway.emitPublic(WS_EVENTS.TRIP_CREATED, trip);
+
     return {
       success: true,
       message: 'تم إنشاء الرحلة بنجاح',
@@ -51,8 +65,11 @@ export class TripsService {
     };
   }
 
-  async getTrips() {
+  async getTrips(status?: string) {
+    const where: any = {};
+    if (status) where.status = status;
     return this.prisma.trip.findMany({
+      where,
       include: {
         Bus: true,
         Booking: {
@@ -62,9 +79,33 @@ export class TripsService {
     });
   }
 
-  async getTripsByProperty(property: string, value: string) {
+  async getAvailableTrips() {
+    const trips = await this.prisma.trip.findMany({
+      where: { status: 'SCHEDULED' },
+      include: {
+        Bus: true,
+        Booking: {
+          where: { status: { in: ['PENDING', 'CONFIRMED'] as any } },
+          select: { seatNumbers: true },
+        },
+      },
+    });
+
+    return trips.filter((t) => {
+      const totalSeats = t.Bus?.chairs ?? 0;
+      const bookedSeats = t.Booking.reduce(
+        (sum: number, b: any) => sum + (b.seatNumbers?.length ?? 0),
+        0,
+      );
+      return bookedSeats < totalSeats;
+    });
+  }
+
+  async getTripsByProperty(property: string, value: string, status?: string) {
+    const where: any = { [property]: value };
+    if (status) where.status = status;
     return this.prisma.trip.findMany({
-      where: { [property]: value },
+      where,
       include: {
         Bus: true,
         Booking: { include: { TicketPDF: true } },
@@ -106,10 +147,8 @@ export class TripsService {
     toCity?: string;
     departureDate?: string | Date;
   }) {
-    // 1. Initialize an empty filter object
-    const where: any = {};
+    const where: any = { status: 'SCHEDULED' };
 
-    // 2. Only add filters if the values actually exist
     if (searchCriteria.fromCity) {
       where.fromCity = searchCriteria.fromCity;
     }
@@ -118,36 +157,46 @@ export class TripsService {
       where.toCity = searchCriteria.toCity;
     }
 
-    // 3. Robust Date Validation
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    where.departureDate = { gte: todayStart };
+
     if (searchCriteria.departureDate) {
       const parsedDate = new Date(searchCriteria.departureDate);
-      // Only add to 'where' if the date is actually a valid date
       if (!isNaN(parsedDate.getTime())) {
         where.departureDate = {
           gte: parsedDate,
-          // Optional: match only within that specific day
           lt: new Date(parsedDate.getTime() + 24 * 60 * 60 * 1000),
         };
       }
     }
 
-    // 4. Run the query with the dynamically built 'where' object
     const trips = await this.prisma.trip.findMany({
-      where: {
-        AND: [where],
-      },
+      where,
       include: {
         Bus: true,
-        Booking: { include: { TicketPDF: true } },
+        Booking: {
+          where: { status: { in: ['PENDING', 'CONFIRMED'] as any } },
+          select: { seatNumbers: true },
+        },
       },
       orderBy: [{ departureDate: 'asc' }],
     });
 
+    const availableTrips = trips.filter((t) => {
+      const totalSeats = t.Bus?.chairs ?? 0;
+      const bookedSeats = t.Booking.reduce(
+        (sum: number, b: any) => sum + (b.seatNumbers?.length ?? 0),
+        0,
+      );
+      return bookedSeats < totalSeats;
+    });
+
     return {
       success: true,
-      message: `تم العثور على ${trips.length} رحلة`,
-      data: trips,
-      count: trips.length,
+      message: `تم العثور على ${availableTrips.length} رحلة`,
+      data: availableTrips,
+      count: availableTrips.length,
     };
   }
 
@@ -210,6 +259,8 @@ export class TripsService {
       updateData.toCity = updateTripDto.toCity;
     if (updateTripDto.toStation !== undefined)
       updateData.toStation = updateTripDto.toStation;
+    if (updateTripDto.status !== undefined)
+      updateData.status = updateTripDto.status;
 
     const updatedTrip = await this.prisma.trip.update({
       where: { id },
@@ -220,6 +271,13 @@ export class TripsService {
       },
     });
 
+    const bus = updatedTrip.Bus;
+    if (bus) {
+      this.wsGateway.emitToRoom('company:' + bus.companyId, WS_EVENTS.TRIP_UPDATED, updatedTrip);
+    }
+    this.wsGateway.emitToAdmin(WS_EVENTS.TRIP_UPDATED, updatedTrip);
+    this.wsGateway.emitPublic(WS_EVENTS.TRIP_UPDATED, updatedTrip);
+
     return {
       success: true,
       message: 'trip updated successfully',
@@ -228,17 +286,204 @@ export class TripsService {
   }
 
   async remove(id: string) {
-    const trip = await this.prisma.trip.findUnique({ where: { id } });
+    const trip = await this.prisma.trip.findUnique({
+      where: { id },
+      include: { Bus: true },
+    });
 
     if (!trip) {
       throw new NotFoundException('trip not found');
     }
 
+    const bus = (trip as any).Bus;
     await this.prisma.trip.delete({ where: { id } });
+
+    if (bus) {
+      this.wsGateway.emitToRoom('company:' + bus.companyId, WS_EVENTS.TRIP_DELETED, { id });
+    }
+    this.wsGateway.emitToAdmin(WS_EVENTS.TRIP_DELETED, { id });
+    this.wsGateway.emitPublic(WS_EVENTS.TRIP_DELETED, { id });
 
     return {
       success: true,
       message: 'trip deleted successfully',
     };
+  }
+
+  async generatePassengersPdf(trip: any, bookings: any[]) {
+    return this.pdfService.generatePassengerList(trip, bookings);
+  }
+
+  async downloadPassengers(tripId: string) {
+    const trip = await this.prisma.trip.findUnique({
+      where: { id: tripId },
+    });
+    if (!trip) throw new NotFoundException('الرحلة غير موجودة');
+
+    const bookings = await this.prisma.booking.findMany({
+      where: {
+        tripId,
+        status: 'CONFIRMED' as any,
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    return this.pdfService.generatePassengerList(trip, bookings);
+  }
+
+  private blockedSeatsKey(tripId: string): string {
+    return `blocked-seats:${tripId}`;
+  }
+
+  async blockSeat(tripId: string, seatNumber: number, note?: string) {
+    const trip = await this.prisma.trip.findUnique({ where: { id: tripId } });
+    if (!trip) throw new NotFoundException('الرحلة غير موجودة');
+
+    const existingBooking = await this.prisma.booking.findFirst({
+      where: {
+        tripId,
+        seatNumbers: { hasSome: [seatNumber] },
+        status: { in: ['PENDING', 'CONFIRMED'] as any },
+      },
+      select: { id: true },
+    });
+    if (existingBooking) {
+      throw new BadRequestException('المقعد محجوز بالفعل');
+    }
+
+    const key = this.blockedSeatsKey(tripId);
+    const raw = await this.redisService.get(key);
+    const blocked: number[] = raw ? JSON.parse(raw) : [];
+
+    if (blocked.includes(seatNumber)) {
+      throw new BadRequestException('المقعد محجوز بالفعل');
+    }
+
+    blocked.push(seatNumber);
+    await this.redisService.set(key, JSON.stringify(blocked));
+
+    this.wsGateway.emitSeatUpdate(tripId, {
+      seatNumbers: [seatNumber],
+      action: 'booked',
+    });
+
+    return { blockedSeats: blocked, message: 'تم حجز المقعد' };
+  }
+
+  async unblockSeat(tripId: string, seatNumber: number) {
+    const key = this.blockedSeatsKey(tripId);
+    const raw = await this.redisService.get(key);
+    const blocked: number[] = raw ? JSON.parse(raw) : [];
+
+    const updated = blocked.filter((s) => s !== seatNumber);
+    if (updated.length === blocked.length) {
+      throw new NotFoundException('المقعد غير موجود في الحجوزات المكتبية');
+    }
+
+    if (updated.length === 0) {
+      await this.redisService.del(key);
+    } else {
+      await this.redisService.set(key, JSON.stringify(updated));
+    }
+
+    this.wsGateway.emitSeatUpdate(tripId, {
+      seatNumbers: [seatNumber],
+      action: 'released',
+    });
+
+    return { blockedSeats: updated, message: 'تم إلغاء حجز المقعد' };
+  }
+
+  async getBlockedSeats(tripId: string): Promise<number[]> {
+    const key = this.blockedSeatsKey(tripId);
+    const raw = await this.redisService.get(key);
+    return raw ? JSON.parse(raw) : [];
+  }
+
+  async createBooking(tripId: string, seatNumbers: number[], passenger: any, customerId: string) {
+    const trip = await this.prisma.trip.findUnique({ where: { id: tripId }, include: { Bus: true } });
+    if (!trip) throw new NotFoundException('الرحلة غير موجودة');
+
+    if (!Array.isArray(seatNumbers) || seatNumbers.length === 0) {
+      throw new BadRequestException('يجب اختيار مقعد واحد على الأقل');
+    }
+
+    const sanitizedSeats = seatNumbers.map(Number);
+
+    const existingBooking = await this.prisma.booking.findFirst({
+      where: {
+        tripId,
+        seatNumbers: { hasSome: sanitizedSeats },
+        status: { in: ['PENDING', 'CONFIRMED'] as any },
+      },
+      select: { id: true },
+    });
+    if (existingBooking) {
+      throw new BadRequestException('المقعد محجوز بالفعل');
+    }
+
+    const blocked = await this.getBlockedSeats(tripId);
+    const hasBlocked = sanitizedSeats.some(s => blocked.includes(s));
+    if (hasBlocked) {
+      throw new BadRequestException('المقعد محجوز بالفعل');
+    }
+
+    const booking = await this.prisma.booking.create({
+      data: {
+        tripId,
+        customerId,
+        seatNumbers: sanitizedSeats,
+        passenger: passenger as any,
+        passengerContact: 'STATIONARY',
+        status: 'CONFIRMED' as any,
+      },
+      include: { Trip: true, TicketPDF: true },
+    });
+
+    const key = this.blockedSeatsKey(tripId);
+    const updatedBlocked = [...blocked, ...sanitizedSeats];
+    await this.redisService.set(key, JSON.stringify(updatedBlocked));
+
+    this.wsGateway.emitSeatUpdate(tripId, {
+      seatNumbers: sanitizedSeats,
+      action: 'booked',
+    });
+
+    return booking;
+  }
+
+  async cancelBooking(bookingId: string) {
+    const booking = await this.prisma.booking.findUnique({
+      where: { id: bookingId },
+      include: { Trip: true },
+    });
+    if (!booking) throw new NotFoundException('الحجز غير موجود');
+
+    await this.prisma.booking.delete({ where: { id: bookingId } });
+
+    const key = this.blockedSeatsKey(booking.tripId);
+    const raw = await this.redisService.get(key);
+    const blocked: number[] = raw ? JSON.parse(raw) : [];
+    const updated = blocked.filter(s => !booking.seatNumbers.includes(s));
+    if (updated.length === 0) {
+      await this.redisService.del(key);
+    } else {
+      await this.redisService.set(key, JSON.stringify(updated));
+    }
+
+    this.wsGateway.emitSeatUpdate(booking.tripId, {
+      seatNumbers: booking.seatNumbers,
+      action: 'released',
+    });
+
+    return { message: 'تم إلغاء الحجز' };
+  }
+
+  async getTripBookings(tripId: string) {
+    return this.prisma.booking.findMany({
+      where: { tripId },
+      include: { TicketPDF: true, Customer: { select: { id: true, name: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
   }
 }

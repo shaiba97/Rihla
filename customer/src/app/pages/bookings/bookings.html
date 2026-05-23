@@ -63,6 +63,11 @@
               </div>
               <span class="px-3 py-1 rounded-full text-[11px] font-bold flex-shrink-0" [ngClass]="statusClass(b.status)">{{ statusLabel(b.status) }}</span>
             </div>
+            @if (b.cancellationReason && b.status === 'CANCELLED') {
+              <div class="flex items-center gap-1 mb-2">
+                <span class="text-xs line-clamp-1 text-danger">{{ b.cancellationReason }}</span>
+              </div>
+            }
             <div class="flex items-center justify-between pt-3 border-t border-[var(--border)]">
               <span class="text-xs text-[var(--text-secondary)]">
                 <span class="font-semibold text-[var(--text-primary)]">{{ (b.seatNumbers ?? []).length | arabicNumber }}</span>

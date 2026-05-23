@@ -62,7 +62,7 @@ export class TripSearchService {
   private companyApiUrl = environment.apiUrl.company;
 
   getAllCities(): Observable<ApiResponse<string[]>> {
-    return this.http.get<BackendTrip[]>(`${this.companyApiUrl}/trips/get-trips`).pipe(
+    return this.http.get<BackendTrip[]>(`${this.companyApiUrl}/trips/available`).pipe(
       map(trips => {
         const cities = new Set<string>();
         trips.forEach(t => {
@@ -75,7 +75,7 @@ export class TripSearchService {
   }
 
   getAllTrips(): Observable<ApiResponse<Trip[]>> {
-    return this.http.get<BackendTrip[]>(`${this.companyApiUrl}/trips/get-trips`).pipe(
+    return this.http.get<BackendTrip[]>(`${this.companyApiUrl}/trips/available`).pipe(
       map(trips => ({
         data: trips.map(t => this.mapTrip(t)).sort((a, b) => new Date(a.tripDate ?? 0).getTime() - new Date(b.tripDate ?? 0).getTime()),
         count: trips.length,

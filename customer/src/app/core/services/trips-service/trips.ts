@@ -57,7 +57,7 @@ export class Trips {
   private apiUrl = environment.apiUrl.company;
 
   getTrips(): Observable<Trip[]> {
-    return this.http.get<Trip[]>(`${this.apiUrl}/trips/get-trips`);
+    return this.http.get<Trip[]>(`${this.apiUrl}/trips/available`);
   }
 
 

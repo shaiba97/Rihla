@@ -50,7 +50,15 @@
              <span class="text-[12px] text-[var(--text-muted)]">المقاعد</span>
              <span class="text-[13px] font-semibold text-[var(--text-primary)]">{{ formattedSeats() | arabicNumber }}</span>
            </div>
-           <div class="border-t border-[var(--border)] my-1 pt-2 flex items-center justify-between">
+            <div class="flex items-center justify-between">
+               <span class="text-[12px] text-[var(--text-muted)]">سعر التذكرة</span>
+               <span class="text-[13px] font-semibold text-[var(--text-primary)] tabular-nums">{{ (baseAmount() - platformFee()) * selectedSeats().length | arabicNumber }} <span class="text-[11px] font-medium">جنيه</span></span>
+             </div>
+            <div class="flex items-center justify-between">
+               <span class="text-[12px] text-[var(--text-muted)]">رسوم المنصة</span>
+               <span class="text-[13px] font-semibold text-[var(--text-primary)] tabular-nums">{{ platformFee() * selectedSeats().length | arabicNumber }} <span class="text-[11px] font-medium">جنيه</span></span>
+             </div>
+            <div class="border-t border-[var(--border)] my-1 pt-2 flex items-center justify-between">
               <span class="text-[13px] font-bold text-[var(--text-primary)]">الإجمالي</span>
               <span class="text-[18px] font-extrabold text-[var(--primary)] tabular-nums">{{ totalAmount() | arabicNumber }} <span class="text-[11px] font-medium">جنيه</span></span>
             </div>
@@ -75,7 +83,7 @@
           <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-4 flex flex-col gap-3">
             <span class="text-[13px] font-bold text-[var(--text-primary)] flex items-center gap-2"><svg lucideCreditCard class="w-4 h-4 text-[var(--primary)]"></svg>طريقة الدفع</span>
             <div class="grid grid-cols-4 gap-2">
-              @for (pm of paymentMethods; track pm.id) {
+              @for (pm of paymentMethods(); track pm.id) {
                 <button type="button" (click)="paymentForm.get('paymentMethod')?.setValue(pm.id)" class="py-2.5 rounded-xl border-2 text-[12px] font-semibold transition-all duration-150 active:scale-95"
                   [class.border-[var(--primary)]]="paymentForm.get('paymentMethod')?.value === pm.id"
                   [class.bg-[var(--primary-light)]]="paymentForm.get('paymentMethod')?.value === pm.id"
@@ -118,10 +126,9 @@
               [class.border-[var(--border)]]="!invalid(paymentForm.get('transactionId'))"
               [class.focus:border-[var(--primary)]]="!invalid(paymentForm.get('transactionId'))">
             <div class="flex flex-col gap-2">
-              <span class="text-[12px] text-[var(--text-muted)]">إرفاق إيصال الدفع *</span>
               <label class="flex items-center gap-3 px-4 py-4 rounded-xl border-2 border-dashed border-[var(--border)] bg-[var(--bg-base)] cursor-pointer active:scale-[0.98] transition-all hover:border-[var(--primary)]">
                 <svg lucideUpload class="w-5 h-5 text-[var(--primary)] flex-shrink-0"></svg>
-                <span class="text-[13px] font-semibold text-[var(--text-secondary)]">{{ receiptFileName() || 'اضغط لاختيار صورة الإيصال' }}</span>
+                <span class="text-[13px] font-semibold text-[var(--text-secondary)]">{{ receiptFileName() || 'إرفاق إيصال الدفع *' }}</span>
                 <input type="file" accept="image/*" (change)="onFileSelected($event)" class="hidden">
               </label>
             </div>

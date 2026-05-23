@@ -60,6 +60,10 @@ export class BookingService {
     return this.http.get<any[]>(`${this.apiUrl}/bookings/payment-accounts`);
   }
 
+  getSupportContacts(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/bookings/support-contacts`);
+  }
+
   createBooking(data: {
     tripId: string;
     seatNumbers: number[];

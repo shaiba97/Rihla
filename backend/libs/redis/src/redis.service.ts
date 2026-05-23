@@ -44,8 +44,16 @@ export class RedisService implements OnModuleInit {
     await this.redis.setex(key, ttl, value);
   }
 
+  async set(key: string, value: string): Promise<void> {
+    await this.redis.set(key, value);
+  }
+
   async del(key: string): Promise<void> {
     await this.redis.del(key);
+  }
+
+  async keys(pattern: string): Promise<string[]> {
+    return this.redis.keys(pattern);
   }
 
   getClient(): Redis {

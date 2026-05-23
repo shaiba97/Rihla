@@ -103,6 +103,11 @@ export class BookingController {
     return this.bookingService.getActivePaymentAccounts();
   }
 
+  @Get('support-contacts')
+  getSupportContacts() {
+    return this.bookingService.getSupportContacts();
+  }
+
   @Get('get-booked-seats/tripId/:tripId')
   async getBookedSats(@Param('tripId') tripId: string) {
     return await this.bookingService.getBookedSeats(tripId);
@@ -110,8 +115,39 @@ export class BookingController {
 
   @Get('held-seats/:tripId')
   async getHeldSeats(@Param('tripId') tripId: string) {
-    // Alias: held-seats returns same as booked-seats
     return await this.bookingService.getBookedSeats(tripId);
+  }
+
+  @Post('lock-seats')
+  @UseGuards(AuthGuard('jwt'))
+  async lockSeats(@Body() body: { tripId: string; seats: number[] }, @Req() req: Request) {
+    const customerId = (req as any).user.id;
+    return this.bookingService.lockSeats(customerId, body.tripId, body.seats);
+  }
+
+  @Post('unlock-seats')
+  @UseGuards(AuthGuard('jwt'))
+  async unlockSeats(@Body() body: { tripId: string }, @Req() req: Request) {
+    const customerId = (req as any).user.id;
+    await this.bookingService.unlockSeats(customerId, body.tripId);
+    return { message: 'ok' };
+  }
+
+  @Post('session-step')
+  @UseGuards(AuthGuard('jwt'))
+  async sessionStep(
+    @Body() body: { tripId: string; step: 'seat' | 'passenger' | 'payment' },
+    @Req() req: Request,
+  ) {
+    const customerId = (req as any).user.id;
+    return this.bookingService.updateSessionStep(customerId, body.tripId, body.step);
+  }
+
+  @Get('session-state/:tripId')
+  @UseGuards(AuthGuard('jwt'))
+  async getSessionState(@Param('tripId') tripId: string, @Req() req: Request) {
+    const customerId = (req as any).user.id;
+    return this.bookingService.getSessionState(customerId, tripId);
   }
 
   // @Get('bookings/select-seat/customerId/:customerId/tripId/:tripId')
