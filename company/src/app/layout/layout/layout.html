@@ -1,28 +1,55 @@
-<div class="flex flex-row-reverse h-screen
-            overflow-hidden bg-[var(--bg-base)]"
-     dir="rtl">
+<div dir="rtl" class="h-screen overflow-hidden bg-[var(--bg-base)]">
 
-  <div class="flex-1 flex flex-col
-              overflow-hidden min-w-0 z-40">
-    <app-topbar
-      (toggleSidebar)="toggleSidebar()">
-    </app-topbar>
-    <main class="flex-1 overflow-y-auto p-6 md:p-4
-                 bg-[var(--bg-base)]">
-      <router-outlet></router-outlet>
-    </main>
+  <div class="flex flex-row-reverse h-full">
+
+    <!-- MAIN AREA -->
+    <div class="flex-1 flex flex-col overflow-hidden min-w-0 z-40">
+
+      <!-- DESKTOP TOPBAR (hidden on mobile) -->
+      <app-topbar class="max-md:hidden" (toggleSidebar)="toggleSidebar()"></app-topbar>
+
+      <!-- MOBILE TOPBAR (hidden on desktop) -->
+      <header class="max-md:flex md:hidden flex-shrink-0 bg-[var(--bg-card)] border-b border-[var(--border)] px-4 h-14 flex items-center justify-between z-30 shadow-[var(--shadow-sm)]">
+        <span class="text-base font-bold text-[var(--text-primary)]">رحلة</span>
+        <button (click)="themeService.toggle()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-[var(--bg-base)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-150">
+          @if (themeService.isDark()) { <svg lucideSun class="w-4 h-4 text-amber-500"></svg> } @else { <svg lucideMoon class="w-4 h-4"></svg> }
+        </button>
+      </header>
+
+      <!-- SINGLE ROUTER-OUTLET for both views -->
+      <main class="flex-1 overflow-y-auto p-6 max-md:pb-16 bg-[var(--bg-base)]">
+        <router-outlet></router-outlet>
+      </main>
+
+    </div>
+
+    <!-- DESKTOP SIDEBAR (hidden on mobile) -->
+    <app-sidebar class="max-md:hidden" [isOpen]="sidebarOpen()" (closeSidebar)="sidebarOpen.set(false)"></app-sidebar>
+
+    @if (sidebarOpen()) {
+      <div class="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 md:hidden" (click)="sidebarOpen.set(false)"></div>
+    }
   </div>
 
-    <app-sidebar
-    [isOpen]="sidebarOpen()"
-    (closeSidebar)="sidebarOpen.set(false)">
-  </app-sidebar>
-
-  @if (sidebarOpen()) {
-    <div class="fixed inset-0 bg-black/40
-                backdrop-blur-sm z-40 md:hidden"
-         (click)="sidebarOpen.set(false)">
-    </div>
-  }
+  <!-- MOBILE BOTTOM NAV (hidden on desktop) -->
+  <nav class="max-md:flex md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[var(--bg-card)] border-t border-[var(--border)] items-center justify-around px-2 py-1 pb-[env(safe-area-inset-bottom,0px)]">
+    @for (item of navItems; track item.path) {
+      <a [routerLink]="item.path"
+         routerLinkActive="text-[var(--primary)]"
+         #rla="routerLinkActive"
+         class="flex flex-col items-center gap-0.5 py-1.5 px-3 rounded-xl transition-all duration-150 min-w-0 active:scale-95"
+         [class.text-[var(--text-muted)]]="!rla.isActive"
+         [class.text-[var(--primary)]]="rla.isActive">
+        @switch (item.icon) {
+          @case ('layout-dashboard') { <svg lucideLayoutDashboard class="w-5 h-5"></svg> }
+          @case ('bus') { <svg lucideBus class="w-5 h-5"></svg> }
+          @case ('route') { <svg lucideRoute class="w-5 h-5"></svg> }
+          @case ('wallet') { <svg lucideWallet class="w-5 h-5"></svg> }
+          @case ('user') { <svg lucideUser class="w-5 h-5"></svg> }
+        }
+        <span class="text-[9px] font-semibold whitespace-nowrap">{{ item.label }}</span>
+      </a>
+    }
+  </nav>
 
 </div>

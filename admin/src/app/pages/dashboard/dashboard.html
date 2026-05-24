@@ -24,6 +24,126 @@
   @if (!isLoading() && data()) {
     @let d = data();
 
+    <!-- MOBILE DASHBOARD -->
+    <div class="block md:hidden">
+      <div class="bg-[var(--primary)] px-4 pt-4 pb-6 relative overflow-hidden">
+        <div class="absolute -top-10 -left-10 w-32 h-32 rounded-full bg-white/5 pointer-events-none"></div>
+        <div class="absolute -bottom-12 -right-6 w-40 h-40 rounded-full bg-white/5 pointer-events-none"></div>
+        <div class="relative z-10 flex items-start justify-between gap-2">
+          <div class="flex flex-col gap-1">
+            <div class="flex items-center gap-1.5"><svg lucideZap class="w-3.5 h-3.5 text-white/70"></svg><span class="text-white/70 text-[11px] font-medium">{{ greeting() }}، مدير النظام</span></div>
+            <h1 class="text-xl font-extrabold text-white leading-tight">لوحة تحكم رحلة</h1>
+          </div>
+          @if (d.platform?.pendingPaymentsRequiringAction > 0) {
+            <button (click)="goTo('/financial')" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[var(--warning)] text-white text-[10px] font-bold animate-pulse whitespace-nowrap"><svg lucideAlertCircle class="w-3 h-3"></svg>{{ toArabic(d.platform.pendingPaymentsRequiringAction) }}</button>
+          }
+        </div>
+        <div class="relative z-10 flex gap-2 mt-4 overflow-x-auto scrollbar-hide">
+          @for (item of [
+            { label: 'رحلة نشطة', val: toArabic(d.operations?.activeTrips ?? 0) },
+            { label: 'حجز اليوم', val: toArabic(d.bookings?.today ?? 0) },
+            { label: 'إيرادات الشهر', val: fmtAmount(d.revenue?.revenueThisMonth ?? 0) + ' ج' },
+            { label: 'معلق', val: toArabic(d.platform?.pendingPaymentsRequiringAction ?? 0) },
+          ]; track item.label) {
+            <div class="flex flex-col gap-0.5 px-3 py-2 rounded-xl bg-white/10 whitespace-nowrap"><span class="text-white/60 text-[9px] font-medium">{{ item.label }}</span><span class="text-white font-extrabold text-xs tabular-nums">{{ item.val }}</span></div>
+          }
+        </div>
+      </div>
+      <div class="px-4 mt-4 pb-4 flex flex-col gap-4">
+        <!-- Metric cards horizontal scroll -->
+        <div class="flex gap-3 overflow-x-auto scrollbar-hide">
+          <div class="flex-shrink-0 w-44 flex flex-col gap-2 p-3 bg-[var(--bg-card)] rounded-2xl border-2 border-[var(--primary)]" (click)="goTo('/financial')">
+            <div class="w-8 h-8 rounded-xl bg-[var(--primary)] flex items-center justify-center"><svg lucideBadgeDollarSign class="w-4 h-4 text-white"></svg></div>
+            <div class="flex flex-col gap-0.5"><span class="text-[10px] font-medium text-[var(--text-muted)]">إجمالي الإيرادات</span><span class="text-base font-extrabold text-[var(--text-primary)] tabular-nums">{{ fmtAmount(d.revenue?.totalRevenue ?? 0) }} <span class="text-[9px] font-medium text-[var(--text-muted)]">ج</span></span></div>
+          </div>
+          <div class="flex-shrink-0 w-40 flex flex-col gap-2 p-3 bg-[var(--bg-card)] rounded-2xl border border-[var(--border)]" (click)="goTo('/users')">
+            <div class="w-8 h-8 rounded-xl bg-[var(--primary-light)] flex items-center justify-center"><svg lucideUsers class="w-4 h-4 text-[var(--text-primary)]"></svg></div>
+            <div class="flex flex-col gap-0.5"><span class="text-[10px] font-medium text-[var(--text-muted)]">المستخدمون</span><span class="text-base font-extrabold text-[var(--text-primary)] tabular-nums">{{ toArabic(d.users?.total ?? 0) }}</span></div>
+          </div>
+          <div class="flex-shrink-0 w-40 flex flex-col gap-2 p-3 bg-[var(--bg-card)] rounded-2xl border border-[var(--border)]" (click)="goTo('/financial')">
+            <div class="w-8 h-8 rounded-xl bg-[var(--primary-light)] flex items-center justify-center"><svg lucideTicket class="w-4 h-4 text-[var(--text-primary)]"></svg></div>
+            <div class="flex flex-col gap-0.5"><span class="text-[10px] font-medium text-[var(--text-muted)]">الحجوزات</span><span class="text-base font-extrabold text-[var(--text-primary)] tabular-nums">{{ toArabic(d.bookings?.total ?? 0) }}</span></div>
+          </div>
+          <div class="flex-shrink-0 w-40 flex flex-col gap-2 p-3 bg-[var(--bg-card)] rounded-2xl border border-[var(--border)]">
+            <div class="w-8 h-8 rounded-xl bg-[var(--primary-light)] flex items-center justify-center"><svg lucideBus class="w-4 h-4 text-[var(--text-primary)]"></svg></div>
+            <div class="flex flex-col gap-0.5"><span class="text-[10px] font-medium text-[var(--text-muted)]">العمليات</span><span class="text-base font-extrabold text-[var(--text-primary)] tabular-nums">{{ toArabic(d.operations?.activeTrips ?? 0) }}</span></div>
+          </div>
+        </div>
+
+        <!-- Pending payments alert -->
+        @if (d.pendingActions?.length > 0) {
+          <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--warning)] overflow-hidden">
+            <div class="flex items-center gap-2 px-4 py-3 bg-[var(--warning-light)]/40 border-b border-[var(--border)]">
+              <svg lucideClock class="w-4 h-4 text-[var(--warning)]"></svg>
+              <span class="text-sm font-bold text-[var(--text-primary)]">يحتاج تدخلك</span>
+              <span class="px-1.5 py-0.5 rounded-full bg-[var(--warning-light)] text-[var(--warning)] text-[10px] font-bold">{{ toArabic(d.pendingActions.length) }}</span>
+            </div>
+            <div class="flex flex-col divide-y divide-[var(--border)]">
+              @for (p of d.pendingActions; track p.id) {
+                <div class="px-4 py-3 flex items-center justify-between gap-2">
+                  <div class="flex items-center gap-2 flex-1 min-w-0">
+                    <div class="w-7 h-7 rounded-lg bg-[var(--warning-light)] flex items-center justify-center flex-shrink-0"><svg lucideClock class="w-3.5 h-3.5 text-[var(--warning)]"></svg></div>
+                    <div class="flex flex-col min-w-0"><span class="text-xs font-bold text-[var(--text-primary)] truncate">{{ p.customerName }}</span><span class="text-[9px] text-[var(--text-muted)] truncate">{{ p.from }} ← {{ p.to }}</span></div>
+                  </div>
+                  <div class="flex items-center gap-2 flex-shrink-0">
+                    <span class="text-xs font-extrabold text-[var(--text-primary)] tabular-nums">{{ fmtAmount(p.amount) }} ج</span>
+                    <button (click)="goTo('/financial')" class="text-[9px] font-bold px-2 py-1 rounded-lg bg-[var(--primary)] text-white">تأكيد</button>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Recent bookings -->
+        <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] overflow-hidden">
+          <div class="flex items-center justify-between px-4 py-3 border-b border-[var(--border)]">
+            <span class="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2"><svg lucideActivity class="w-4 h-4 text-[var(--primary)]"></svg>آخر الحجوزات</span>
+            <button (click)="goTo('/financial')" class="text-[10px] font-bold text-[var(--primary)]">عرض الكل</button>
+          </div>
+          <div class="flex flex-col divide-y divide-[var(--border)]">
+            @if (!d.recentBookings?.length) { <div class="flex items-center justify-center py-8 text-[var(--text-muted)] text-xs">لا توجد حجوزات بعد</div> }
+            @for (b of d.recentBookings?.slice(0, 5) ?? []; track b.id) {
+              <div class="flex items-center justify-between px-4 py-3 gap-2">
+                <div class="flex items-center gap-2 flex-1 min-w-0">
+                  <div class="w-2 h-2 rounded-full flex-shrink-0" [ngClass]="statusDot(b.status)"></div>
+                  <div class="flex flex-col min-w-0"><span class="text-xs font-bold text-[var(--text-primary)] truncate">{{ b.customerName }}</span><span class="text-[9px] text-[var(--text-muted)] truncate">{{ b.from }} ← {{ b.to }}</span></div>
+                </div>
+                <div class="flex flex-col items-end flex-shrink-0 gap-0.5">
+                  @if (b.amount > 0) { <span class="text-xs font-bold text-[var(--text-primary)] tabular-nums">{{ fmtAmount(b.amount) }} ج</span> }
+                  <span class="text-[9px] text-[var(--text-muted)]">{{ fmtDate(b.createdAt) }}</span>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Quick actions -->
+        <div class="grid grid-cols-2 gap-3">
+          @for (nav of [
+            { path: '/users', icon: 'users', label: 'المستخدمون' },
+            { path: '/financial', icon: 'wallet', label: 'المالية' },
+            { path: '/support-contacts', icon: 'phone', label: 'جهات الاتصال' },
+            { path: '/profile', icon: 'user', label: 'الملف الشخصي' },
+          ]; track nav.path) {
+            <button (click)="goTo(nav.path)" class="flex flex-col items-center gap-2 p-4 bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] active:scale-95 transition-all">
+              <div class="w-10 h-10 rounded-xl bg-[var(--primary-light)] flex items-center justify-center">
+                @switch (nav.icon) {
+                  @case ('users') { <svg lucideUsers class="w-5 h-5 text-[var(--text-primary)]"></svg> }
+                  @case ('wallet') { <svg lucideWallet class="w-5 h-5 text-[var(--text-primary)]"></svg> }
+                  @case ('phone') { <svg lucidePhone class="w-5 h-5 text-[var(--text-primary)]"></svg> }
+                  @case ('user') { <svg lucideUser class="w-5 h-5 text-[var(--text-primary)]"></svg> }
+                }
+              </div>
+              <span class="text-xs font-bold text-[var(--text-primary)]">{{ nav.label }}</span>
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- DESKTOP DASHBOARD -->
+    <div class="hidden md:block">
     <!-- HERO BANNER -->
     <div class="bg-[var(--primary)] px-6 pt-6 pb-10 relative overflow-hidden">
       <div class="absolute -top-12 -left-12 w-48 h-48 rounded-full bg-white/5 pointer-events-none"></div>
@@ -338,6 +458,7 @@
         }
       </div>
 
+    </div>
     </div>
   }
 

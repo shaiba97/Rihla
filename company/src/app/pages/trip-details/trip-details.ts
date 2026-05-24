@@ -49,7 +49,7 @@ export class TripDetailsComponent implements OnInit, OnDestroy {
     if (id) this.loadTrip(id);
 
     this.wsCleanups.push(this.ws.on('seat:updated', (data: any) => {
-      if (data.tripId === id) this.loadTrip(id);
+      if (id && data.tripId === id) this.loadTrip(id);
     }));
   }
 

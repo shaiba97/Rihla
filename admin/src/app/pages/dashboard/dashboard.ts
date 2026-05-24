@@ -6,6 +6,7 @@ import {
   LucideCheckCircle, LucideBus, LucideAlertCircle, LucideArrowLeft,
   LucideArrowUpRight, LucideActivity,
   LucideBadgeDollarSign, LucideShield, LucideRefreshCw, LucideZap,
+  LucideUser, LucidePhone,
 } from '@lucide/angular';
 import { DashboardService } from '../../core/services/dashboard/dashboard.service';
 import { WsService } from '../../core/services/ws.service';
@@ -19,6 +20,7 @@ import { WsService } from '../../core/services/ws.service';
     LucideCheckCircle, LucideBus, LucideAlertCircle, LucideArrowLeft,
     LucideArrowUpRight, LucideActivity,
     LucideBadgeDollarSign, LucideShield, LucideRefreshCw, LucideZap,
+    LucideUser, LucidePhone,
   ],
   templateUrl: './dashboard.html',
 })

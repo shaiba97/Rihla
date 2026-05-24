@@ -1,63 +1,107 @@
-<div dir="rtl" class="flex h-screen overflow-hidden bg-[var(--bg-base)]">
-  <aside class="flex flex-col flex-shrink-0 bg-[var(--bg-sidebar)] transition-all duration-300 overflow-hidden z-40" [ngClass]="sidebarOpen() ? 'w-64' : 'w-16'">
-    <div class="flex items-center justify-between px-4 py-5 border-b border-white/10 flex-shrink-0">
-      @if (sidebarOpen()) { <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center"><svg lucideBus class="w-4 h-4 text-[var(--primary)]"></svg></div><div class="flex flex-col leading-none"><span class="text-white font-extrabold text-[15px]">رحلة</span><span class="text-[var(--sidebar-muted)] text-[9px] font-medium uppercase tracking-wider">Admin</span></div></div> }
-      @else { <div class="w-8 h-8 rounded-lg bg-white mx-auto flex items-center justify-center"><svg lucideBus class="w-4 h-4 text-[var(--primary)]"></svg></div> }
-    </div>
-    <nav class="flex-1 overflow-y-auto py-4 px-2 flex flex-col gap-1">
-      @for (item of navItems; track item.path) {
-        <a [routerLink]="item.path" routerLinkActive="bg-[var(--sidebar-active-bg)] text-white" #rla="routerLinkActive"
-          class="flex items-center rounded-xl transition-all duration-150 group relative"
-          [ngClass]="sidebarOpen() ? 'gap-3 px-3 py-2.5' : 'justify-center px-0 py-2.5'"
-          [class.text-[var(--sidebar-muted)]]="!rla.isActive" [class.text-white]="rla.isActive" [class.hover:bg-white/5]="!rla.isActive" [class.hover:text-white]="!rla.isActive">
-          @switch (item.icon) {
-            @case ('layout-dashboard') { <svg lucideLayoutDashboard class="w-5 h-5 flex-shrink-0"></svg> }
-            @case ('users') { <svg lucideUsers class="w-5 h-5 flex-shrink-0"></svg> }
-            @case ('wallet') { <svg lucideWallet class="w-5 h-5 flex-shrink-0"></svg> }
-            @case ('user') { <svg lucideUser class="w-5 h-5 flex-shrink-0"></svg> }
-            @case ('phone') { <svg lucidePhone class="w-5 h-5 flex-shrink-0"></svg> }
+<div dir="rtl" class="h-screen overflow-hidden bg-[var(--bg-base)]">
+
+  <div class="flex h-full">
+
+    <!-- DESKTOP SIDEBAR (hidden on mobile) -->
+    <aside class="max-md:hidden flex flex-col flex-shrink-0 bg-[var(--bg-sidebar)] transition-all duration-300 overflow-hidden z-40" [ngClass]="sidebarOpen() ? 'w-64' : 'w-16'">
+      <div class="flex items-center justify-between px-4 py-5 border-b border-white/10 flex-shrink-0">
+        @if (sidebarOpen()) { <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center"><svg lucideBus class="w-4 h-4 text-[var(--primary)]"></svg></div><div class="flex flex-col leading-none"><span class="text-white font-extrabold text-[15px]">رحلة</span><span class="text-[var(--sidebar-muted)] text-[9px] font-medium uppercase tracking-wider">Admin</span></div></div> }
+        @else { <div class="w-8 h-8 rounded-lg bg-white mx-auto flex items-center justify-center"><svg lucideBus class="w-4 h-4 text-[var(--primary)]"></svg></div> }
+      </div>
+      <nav class="flex-1 overflow-y-auto py-4 px-2 flex flex-col gap-1">
+        @for (item of navItems; track item.path) {
+          <a [routerLink]="item.path" routerLinkActive="bg-[var(--sidebar-active-bg)] text-white" #rla="routerLinkActive"
+            class="flex items-center rounded-xl transition-all duration-150 group relative"
+            [ngClass]="sidebarOpen() ? 'gap-3 px-3 py-2.5' : 'justify-center px-0 py-2.5'"
+            [class.text-[var(--sidebar-muted)]]="!rla.isActive" [class.text-white]="rla.isActive" [class.hover:bg-white/5]="!rla.isActive" [class.hover:text-white]="!rla.isActive">
+            @switch (item.icon) {
+              @case ('layout-dashboard') { <svg lucideLayoutDashboard class="w-5 h-5 flex-shrink-0"></svg> }
+              @case ('users') { <svg lucideUsers class="w-5 h-5 flex-shrink-0"></svg> }
+              @case ('wallet') { <svg lucideWallet class="w-5 h-5 flex-shrink-0"></svg> }
+              @case ('user') { <svg lucideUser class="w-5 h-5 flex-shrink-0"></svg> }
+              @case ('phone') { <svg lucidePhone class="w-5 h-5 flex-shrink-0"></svg> }
+            }
+            @if (sidebarOpen()) { <span class="text-sm font-semibold whitespace-nowrap">{{ item.label }}</span> }
+            @if (rla.isActive) { <div class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-white"></div> }
+            @if (!sidebarOpen()) { <div class="absolute right-full top-1/2 -translate-y-1/2 mr-3 px-2.5 py-1.5 bg-white text-black text-xs font-bold rounded-lg whitespace-nowrap shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">{{ item.label }}</div> }
+          </a>
+        }
+      </nav>
+      <div class="px-2 pb-4 flex-shrink-0 border-t border-white/10 pt-4">
+        <button (click)="logout()" class="flex items-center rounded-xl text-[var(--sidebar-muted)] hover:bg-red-500/10 hover:text-red-400 transition-all duration-150 w-full" [ngClass]="sidebarOpen() ? 'gap-3 px-3 py-2.5' : 'justify-center py-2.5'">
+          <svg lucideLogOut class="w-5 h-5 flex-shrink-0"></svg>
+          @if (sidebarOpen()) { <span class="text-sm font-semibold">تسجيل الخروج</span> }
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN AREA -->
+    <div class="flex-1 flex flex-col overflow-hidden min-w-0">
+
+      <!-- DESKTOP TOPBAR (hidden on mobile) -->
+      <header class="max-md:hidden flex-shrink-0 bg-[var(--bg-card)] border-b border-[var(--border)] px-5 h-16 flex items-center justify-between gap-4 shadow-[var(--shadow-sm)] z-30">
+        <button (click)="toggleSidebar()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-[var(--bg-base)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-150">
+          @if (sidebarOpen()) { <svg lucideX class="w-5 h-5"></svg> } @else { <svg lucideMenu class="w-5 h-5"></svg> }
+        </button>
+        <div class="flex items-center gap-2">
+          <button (click)="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-[var(--bg-base)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-150">
+            @if (isDark()) { <svg lucideSun class="w-4 h-4 text-amber-500"></svg> } @else { <svg lucideMoon class="w-4 h-4"></svg> }
+          </button>
+          <div class="w-px h-6 bg-[var(--border)] mx-1"></div>
+          @if (auth.isLoggedIn()) {
+            <div class="relative">
+              <button (click)="showUserMenu.update(v => !v)" class="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-[var(--bg-base)] transition-all duration-150">
+                <div class="w-8 h-8 rounded-full bg-[var(--primary)] flex items-center justify-center"><svg lucideUser class="w-4 h-4 text-white"></svg></div>
+                <span class="text-xs font-bold text-[var(--text-primary)] hidden md:block">{{ auth.currentUser()?.name ?? 'أدمن' }}</span>
+                <svg lucideChevronDown class="w-3.5 h-3.5 text-[var(--text-muted)] hidden md:block"></svg>
+              </button>
+              @if (showUserMenu()) {
+                <div class="absolute left-0 top-12 w-48 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl shadow-lg overflow-hidden z-50">
+                  <a routerLink="/profile" (click)="showUserMenu.set(false)" class="flex items-center gap-2 px-4 py-3 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-base)] transition-colors"><svg lucideUser class="w-4 h-4"></svg>الملف الشخصي</a>
+                  <div class="h-px bg-[var(--border)]"></div>
+                  <button (click)="logout()" class="flex items-center gap-2 px-4 py-3 text-sm text-red-500 w-full hover:bg-red-50 transition-colors"><svg lucideLogOut class="w-4 h-4"></svg>تسجيل الخروج</button>
+                </div>
+              }
+            </div>
           }
-          @if (sidebarOpen()) { <span class="text-sm font-semibold whitespace-nowrap">{{ item.label }}</span> }
-          @if (rla.isActive) { <div class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-white"></div> }
-          @if (!sidebarOpen()) { <div class="absolute right-full top-1/2 -translate-y-1/2 mr-3 px-2.5 py-1.5 bg-white text-black text-xs font-bold rounded-lg whitespace-nowrap shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">{{ item.label }}</div> }
-        </a>
-      }
-    </nav>
-    <div class="px-2 pb-4 flex-shrink-0 border-t border-white/10 pt-4">
-      <button (click)="logout()" class="flex items-center rounded-xl text-[var(--sidebar-muted)] hover:bg-red-500/10 hover:text-red-400 transition-all duration-150 w-full" [ngClass]="sidebarOpen() ? 'gap-3 px-3 py-2.5' : 'justify-center py-2.5'">
-        <svg lucideLogOut class="w-5 h-5 flex-shrink-0"></svg>
-        @if (sidebarOpen()) { <span class="text-sm font-semibold">تسجيل الخروج</span> }
-      </button>
-    </div>
-  </aside>
-  <div class="flex-1 flex flex-col overflow-hidden min-w-0">
-    <header class="flex-shrink-0 bg-[var(--bg-card)] border-b border-[var(--border)] px-5 h-16 flex items-center justify-between gap-4 shadow-[var(--shadow-sm)] z-30">
-      <button (click)="toggleSidebar()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-[var(--bg-base)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-150">
-        @if (sidebarOpen()) { <svg lucideX class="w-5 h-5"></svg> } @else { <svg lucideMenu class="w-5 h-5"></svg> }
-      </button>
-      <div class="flex items-center gap-2">
+        </div>
+      </header>
+
+      <!-- MOBILE TOPBAR (hidden on desktop) -->
+      <header class="max-md:flex md:hidden flex-shrink-0 bg-[var(--bg-card)] border-b border-[var(--border)] px-4 h-14 flex items-center justify-between z-30 shadow-[var(--shadow-sm)]">
+        <span class="text-base font-bold text-[var(--text-primary)]">رحلة</span>
         <button (click)="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-[var(--bg-base)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-150">
           @if (isDark()) { <svg lucideSun class="w-4 h-4 text-amber-500"></svg> } @else { <svg lucideMoon class="w-4 h-4"></svg> }
         </button>
-        <div class="w-px h-6 bg-[var(--border)] mx-1"></div>
-        @if (auth.isLoggedIn()) {
-          <div class="relative">
-            <button (click)="showUserMenu.update(v => !v)" class="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-[var(--bg-base)] transition-all duration-150">
-              <div class="w-8 h-8 rounded-full bg-[var(--primary)] flex items-center justify-center"><svg lucideUser class="w-4 h-4 text-white"></svg></div>
-              <span class="text-xs font-bold text-[var(--text-primary)] hidden md:block">{{ auth.currentUser()?.name ?? 'أدمن' }}</span>
-              <svg lucideChevronDown class="w-3.5 h-3.5 text-[var(--text-muted)] hidden md:block"></svg>
-            </button>
-            @if (showUserMenu()) {
-              <div class="absolute left-0 top-12 w-48 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl shadow-lg overflow-hidden z-50">
-                <a routerLink="/profile" (click)="showUserMenu.set(false)" class="flex items-center gap-2 px-4 py-3 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-base)] transition-colors"><svg lucideUser class="w-4 h-4"></svg>الملف الشخصي</a>
-                <div class="h-px bg-[var(--border)]"></div>
-                <button (click)="logout()" class="flex items-center gap-2 px-4 py-3 text-sm text-red-500 w-full hover:bg-red-50 transition-colors"><svg lucideLogOut class="w-4 h-4"></svg>تسجيل الخروج</button>
-              </div>
-            }
-          </div>
-        }
-      </div>
-    </header>
-    <main class="flex-1 overflow-y-auto"><router-outlet></router-outlet></main>
+      </header>
+
+      <!-- SINGLE ROUTER-OUTLET for both views -->
+      <main class="flex-1 overflow-y-auto max-md:pb-16">
+        <router-outlet></router-outlet>
+      </main>
+
+    </div>
   </div>
+
+  <!-- MOBILE BOTTOM NAV (hidden on desktop) -->
+  <nav class="max-md:flex md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[var(--bg-card)] border-t border-[var(--border)] items-center justify-around px-2 py-1 pb-[env(safe-area-inset-bottom,0px)]">
+    @for (item of navItems; track item.path) {
+      <a [routerLink]="item.path"
+         routerLinkActive="text-[var(--primary)]"
+         #rla="routerLinkActive"
+         class="flex flex-col items-center gap-0.5 py-1.5 px-3 rounded-xl transition-all duration-150 min-w-0 active:scale-95"
+         [class.text-[var(--text-muted)]]="!rla.isActive"
+         [class.text-[var(--primary)]]="rla.isActive">
+        @switch (item.icon) {
+          @case ('layout-dashboard') { <svg lucideLayoutDashboard class="w-5 h-5"></svg> }
+          @case ('users') { <svg lucideUsers class="w-5 h-5"></svg> }
+          @case ('wallet') { <svg lucideWallet class="w-5 h-5"></svg> }
+          @case ('phone') { <svg lucidePhone class="w-5 h-5"></svg> }
+          @case ('user') { <svg lucideUser class="w-5 h-5"></svg> }
+        }
+        <span class="text-[9px] font-semibold whitespace-nowrap">{{ item.label }}</span>
+      </a>
+    }
+  </nav>
+
 </div>
