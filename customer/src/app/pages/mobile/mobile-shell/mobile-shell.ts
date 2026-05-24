@@ -1,12 +1,12 @@
 import { Component, inject, signal, computed } from '@angular/core';
 import { RouterOutlet, RouterLink, Router, NavigationEnd } from '@angular/router';
 import { NgClass } from '@angular/common';
-import { LucideCalendarClock, LucideUser, LucideHome } from '@lucide/angular';
+import { LucideCalendarClock, LucideUser, LucideHome, LucideBell } from '@lucide/angular';
 import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-mobile-shell',
-  imports: [RouterOutlet, RouterLink, NgClass, LucideCalendarClock, LucideUser, LucideHome],
+  imports: [RouterOutlet, RouterLink, NgClass, LucideCalendarClock, LucideUser, LucideHome, LucideBell],
   templateUrl: './mobile-shell.html',
 })
 export class MobileShell {
@@ -24,10 +24,14 @@ export class MobileShell {
   isHomeActive = computed(() => this.currentUrl() === '/m/home');
   isBookingsActive = computed(() => {
     const url = this.currentUrl();
-    return url.startsWith('/m/bookings') || url.startsWith('/m/booking');
+    return url.startsWith('/m/bookings');
   });
   isProfileActive = computed(() => {
     const url = this.currentUrl();
     return url.startsWith('/m/profile') || url.startsWith('/m/login') || url.startsWith('/m/register');
+  });
+  isNotifsActive = computed(() => {
+    const url = this.currentUrl();
+    return url.startsWith('/m/notifications');
   });
 }

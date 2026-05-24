@@ -20,13 +20,13 @@
 
       <div class="flex items-center gap-2.5">
         <div class="w-8 h-8 rounded-xl bg-[var(--primary-light)] flex items-center justify-center flex-shrink-0">
-          <span class="text-sm font-extrabold text-[var(--primary)]">{{ trip().bus.name.charAt(0) }}</span>
+          <svg lucideBus class="w-4 h-4 text-[var(--primary)]"></svg>
         </div>
         <div class="flex flex-col">
           <span class="text-sm font-bold text-[var(--text-primary)] truncate leading-tight">
             {{ trip().bus.name }}
           </span>
-          <span class="text-[10px] text-[var(--text-muted)]">حافلة ركاب</span>
+          <span class="text-[10px] text-[var(--text-secondary)]">حافلة ركاب</span>
         </div>
       </div>
 
@@ -41,7 +41,7 @@
             {{ trip().departureTime | timeFormat }}
           </span>
           <span class="text-xs
-                       text-[var(--text-muted)]
+                       text-[var(--text-secondary)]
                        text-center">
             {{ trip().departureDate | date:'dd/MM/yyyy' }}
           </span>
@@ -50,7 +50,7 @@
                        mt-1 text-center">
             {{ trip().fromCity }}
           </span>
-          <span class="text-xs text-[var(--text-muted)] text-center">
+          <span class="text-xs text-[var(--text-secondary)] text-center">
             {{ trip().fromStation }}
           </span>
         </div>
@@ -61,10 +61,10 @@
           <div class="flex items-center gap-1">
             <svg lucideClock
                  class="w-3 h-3
-                        text-[var(--text-muted)]">
+                        text-[var(--text-secondary)]">
             </svg>
             <span class="text-[10px] font-semibold
-                         text-[var(--text-muted)]
+                         text-[var(--text-secondary)]
                          whitespace-nowrap">
               {{
                 trip().departureTime
@@ -101,7 +101,7 @@
             {{ trip().arrivalTime | timeFormat }}
           </span>
           <span class="text-xs
-                       text-[var(--text-muted)]
+                       text-[var(--text-secondary)]
                        text-center">
             {{ trip().arrivalDate | date:'dd/MM/yyyy' }}
           </span>
@@ -110,7 +110,7 @@
                        mt-1 text-center">
             {{ trip().toCity }}
           </span>
-          <span class="text-xs text-[var(--text-muted)] text-center">
+          <span class="text-xs text-[var(--text-secondary)] text-center">
             {{ trip().toStation }}
           </span>
         </div>
@@ -130,7 +130,7 @@
         </div>
       </div>
 
-      <div class="flex items-center gap-1.5 text-[11px] text-[var(--text-muted)]">
+      <div class="flex items-center gap-1.5 text-[11px] text-[var(--text-secondary)]">
         <svg lucideClock class="w-3 h-3">
         </svg>
         <span>الحضور: قبل ساعة من المغادرة</span>

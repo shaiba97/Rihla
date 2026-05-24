@@ -39,7 +39,7 @@
     <div class="flex flex-col gap-3 px-4 py-4">
       @for (b of bookings(); track b.id) {
         @let t = b.Trip;
-        <div (click)="openDetail(b)" class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-4 active:scale-[0.98] transition-all duration-150 cursor-pointer shadow-sm">
+        <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-4 shadow-sm">
           <div class="flex items-start justify-between mb-3">
             <div class="flex items-center gap-2 flex-1 min-w-0">
               <div class="w-8 h-8 rounded-xl bg-[var(--primary-light)] flex items-center justify-center flex-shrink-0">

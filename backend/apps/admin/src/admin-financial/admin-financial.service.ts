@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '@app/prisma';
 import { PDFService } from '@app/pdf';
 import { RihlaWsGateway, WS_EVENTS } from '@app/websocket';
+import { NotificationsService } from '../notifications/notifications.service';
 
 type Period = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'half-yearly' | 'yearly';
 
@@ -11,6 +12,7 @@ export class AdminFinancialService {
     private readonly prisma: PrismaService,
     private readonly pdfService: PDFService,
     private readonly wsGateway: RihlaWsGateway,
+    private readonly notifications: NotificationsService,
   ) {}
 
   async getDashboardSummary() {
@@ -183,6 +185,22 @@ export class AdminFinancialService {
     this.wsGateway.emitSeatUpdate(payment.Booking?.tripId ?? '', { seatNumbers: payment.Booking?.seatNumbers ?? [], action: 'booked' });
     this.wsGateway.emitPublic(WS_EVENTS.STATS_UPDATED, {});
 
+    const customerId = payment.Booking?.customerId ?? '';
+    if (customerId) {
+      await this.notifications.create({
+        userId: customerId,
+        type: 'BOOKING_CONFIRMED',
+        title: 'تم تأكيد حجزك!',
+        body: `تم تأكيد حجزك بنجاح. المقعد: ${payment.Booking?.seatNumbers?.join('، ') ?? ''}`,
+        data: {
+          paymentId,
+          bookingId: payment.bookingId,
+          seatNumber: payment.Booking?.seatNumbers,
+        },
+        emitTo: `customer:${customerId}`,
+      });
+    }
+
     let ticketUrl = '';
     try {
       const result = await this.pdfService.generateTicket(payment.bookingId);
@@ -213,6 +231,23 @@ export class AdminFinancialService {
     this.wsGateway.emitToRoom('customer:' + payment.Booking?.customerId, WS_EVENTS.PAYMENT_REJECTED, { paymentId, bookingId: payment.bookingId });
     this.wsGateway.emitSeatUpdate(payment.Booking?.tripId ?? '', { seatNumbers: payment.Booking?.seatNumbers ?? [], action: 'released' });
     this.wsGateway.emitPublic(WS_EVENTS.STATS_UPDATED, {});
+
+    const customerId = payment.Booking?.customerId ?? '';
+    if (customerId) {
+      await this.notifications.create({
+        userId: customerId,
+        type: 'PAYMENT_REJECTED',
+        title: 'تم رفض طلب الدفع',
+        body: `للأسف تم رفض طلب دفعك${reason ? `. السبب: ${reason}` : ''}. يرجى التواصل مع الدعم.`,
+        data: {
+          paymentId,
+          bookingId: payment.bookingId,
+          reason,
+        },
+        emitTo: `customer:${customerId}`,
+      });
+    }
+
     return { message: 'تم رفض الدفعة وإلغاء الحجز' };
   }
 

@@ -39,6 +39,10 @@
           }
         </button>
 
+        @if (isLoggedIn()) {
+          <app-notification-bell></app-notification-bell>
+        }
+
         <!-- NOT LOGGED IN -->
         @if (!isLoggedIn()) {
           <div class="w-px h-6 bg-[var(--border)] mx-1"></div>
@@ -148,17 +152,22 @@
       <span class="text-base font-extrabold text-[var(--primary)]">رحلة</span>
     </a>
 
-    <button (click)="themeService.toggle()"
-      class="w-9 h-9 rounded-xl flex items-center justify-center
-             text-[var(--text-secondary)]
-             hover:bg-[var(--primary-light)] hover:text-[var(--primary)]
-             transition-all duration-150">
-      @if (themeService.isDark()) {
-        <svg lucideSun class="w-[18px] h-[18px] text-warning"></svg>
-      } @else {
-        <svg lucideMoon class="w-[18px] h-[18px]"></svg>
+    <div class="flex items-center gap-1">
+      @if (isLoggedIn()) {
+        <app-notification-bell></app-notification-bell>
       }
-    </button>
+      <button (click)="themeService.toggle()"
+        class="w-9 h-9 rounded-xl flex items-center justify-center
+               text-[var(--text-secondary)]
+               hover:bg-[var(--primary-light)] hover:text-[var(--primary)]
+               transition-all duration-150">
+        @if (themeService.isDark()) {
+          <svg lucideSun class="w-[18px] h-[18px] text-warning"></svg>
+        } @else {
+          <svg lucideMoon class="w-[18px] h-[18px]"></svg>
+        }
+      </button>
+    </div>
   </header>
 
   <!-- ==================== CONTENT (shared) ==================== -->
@@ -184,6 +193,25 @@
       [ngClass]="isBookingsActive() ? 'bg-[var(--primary-light)] text-[var(--primary)]' : 'text-[var(--text-muted)]'">
       <svg lucideCalendarClock class="w-5 h-5 transition-colors duration-200" [class.text-[var(--primary)]]="isBookingsActive()"></svg>
       <span class="text-[10px] font-bold transition-colors duration-200" [class.text-[var(--primary)]]="isBookingsActive()">حجوزاتي</span>
+    </a>
+
+    <a (click)="goToNotifs()"
+      class="flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-xl transition-all duration-200 relative cursor-pointer no-underline"
+      [ngClass]="isNotifsActive() ? 'bg-[var(--primary-light)] text-[var(--primary)]' : 'text-[var(--text-muted)]'">
+      <div class="relative">
+        <svg lucideBell class="w-5 h-5 transition-colors duration-200" [class.text-[var(--primary)]]="isNotifsActive()"></svg>
+        @if (isLoggedIn() && unreadCount() > 0) {
+          <span class="absolute -top-1.5 -right-1.5 min-w-[16px] h-[16px] rounded-full
+                       bg-red-500 text-white text-[8px] font-extrabold
+                       flex items-center justify-center px-0.5
+                       animate-in zoom-in duration-200">
+            @if (unreadCount() > 99) { +99 } @else {
+              {{ toArabicNum(unreadCount()) }}
+            }
+          </span>
+        }
+      </div>
+      <span class="text-[10px] font-bold transition-colors duration-200" [class.text-[var(--primary)]]="isNotifsActive()">الإشعارات</span>
     </a>
 
     <a routerLink="/profile"

@@ -4,6 +4,7 @@ import {
 } from '@angular/core';
 import { NgClass, DatePipe } from '@angular/common';
 import {
+  LucideBus,
   LucideClock,
   LucideArmchair,
   LucideArrowLeft,
@@ -65,6 +66,7 @@ export interface Booking {
   standalone: true,
   imports: [
     NgClass,
+    LucideBus,
     LucideClock,
     LucideArmchair,
     LucideArrowLeft,
@@ -97,12 +99,12 @@ export class TripCardComponent {
     if (s <= 10)
       return ['bg-amber-50',
               'text-amber-600',
-              'dark:bg-red-950',
+              'dark:bg-amber-950',
               'dark:text-amber-400'];
-    return ['bg-emerald-50',
-            'text-emerald-700',
-            'dark:bg-red-950',
-            'dark:text-emerald-400'];
+    return ['bg-[var(--primary-light)]',
+            'text-[var(--primary)]',
+            'dark:bg-[var(--primary)]/20',
+            'dark:text-[var(--primary)]'];
   });
 
   bookedSeats = signal<number[]>([]);

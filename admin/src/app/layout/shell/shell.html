@@ -47,8 +47,9 @@
           <button (click)="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-[var(--bg-base)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-150">
             @if (isDark()) { <svg lucideSun class="w-4 h-4 text-amber-500"></svg> } @else { <svg lucideMoon class="w-4 h-4"></svg> }
           </button>
-          <div class="w-px h-6 bg-[var(--border)] mx-1"></div>
           @if (auth.isLoggedIn()) {
+          <app-notification-bell></app-notification-bell>
+          <div class="w-px h-6 bg-[var(--border)] mx-1"></div>
             <div class="relative">
               <button (click)="showUserMenu.update(v => !v)" class="flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-[var(--bg-base)] transition-all duration-150">
                 <div class="w-8 h-8 rounded-full bg-[var(--primary)] flex items-center justify-center"><svg lucideUser class="w-4 h-4 text-white"></svg></div>
@@ -70,9 +71,12 @@
       <!-- MOBILE TOPBAR (hidden on desktop) -->
       <header class="max-md:flex md:hidden flex-shrink-0 bg-[var(--bg-card)] border-b border-[var(--border)] px-4 h-14 flex items-center justify-between z-30 shadow-[var(--shadow-sm)]">
         <span class="text-base font-bold text-[var(--text-primary)]">رحلة</span>
-        <button (click)="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-[var(--bg-base)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-150">
+        <div class="flex items-center gap-1">
+          <app-notification-bell></app-notification-bell>
+          <button (click)="toggleDark()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-[var(--bg-base)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-150">
           @if (isDark()) { <svg lucideSun class="w-4 h-4 text-amber-500"></svg> } @else { <svg lucideMoon class="w-4 h-4"></svg> }
         </button>
+        </div>
       </header>
 
       <!-- SINGLE ROUTER-OUTLET for both views -->

@@ -2,11 +2,9 @@ import {
   WebSocketGateway,
   WebSocketServer,
   SubscribeMessage,
-  OnGatewayInit,
   OnGatewayConnection,
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
-import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { WS_EVENTS } from './ws-events.constants';
 
@@ -22,49 +20,35 @@ import { WS_EVENTS } from './ws-events.constants';
   namespace: '/',
 })
 export class RihlaWsGateway
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+  implements OnGatewayConnection, OnGatewayDisconnect
 {
   @WebSocketServer()
   server: Server;
 
-  private readonly logger = new Logger(RihlaWsGateway.name);
+  handleConnection(_client: Socket) {}
 
-  afterInit() {
-    this.logger.log('WebSocket Gateway initialized');
-  }
-
-  handleConnection(client: Socket) {
-    this.logger.log(`Client connected: ${client.id}`);
-  }
-
-  handleDisconnect(client: Socket) {
-    this.logger.log(`Client disconnected: ${client.id}`);
-  }
+  handleDisconnect(_client: Socket) {}
 
   @SubscribeMessage(WS_EVENTS.JOIN_ROOM)
   handleJoinRoom(client: Socket, room: string) {
     client.join(room);
-    this.logger.log(`Client ${client.id} joined room: ${room}`);
   }
 
   @SubscribeMessage(WS_EVENTS.LEAVE_ROOM)
   handleLeaveRoom(client: Socket, room: string) {
     client.leave(room);
-    this.logger.log(`Client ${client.id} left room: ${room}`);
   }
 
   @SubscribeMessage(WS_EVENTS.WATCH_SEATS)
   handleWatchSeats(client: Socket, tripId: string) {
     const room = `trip:${tripId}`;
     client.join(room);
-    this.logger.log(`Client ${client.id} watching seats for trip: ${tripId}`);
   }
 
   @SubscribeMessage(WS_EVENTS.UNWATCH_SEATS)
   handleUnwatchSeats(client: Socket, tripId: string) {
     const room = `trip:${tripId}`;
     client.leave(room);
-    this.logger.log(`Client ${client.id} stopped watching seats for trip: ${tripId}`);
   }
 
   emitToRoom(room: string, event: string, data: any) {

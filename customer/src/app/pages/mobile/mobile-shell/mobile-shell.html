@@ -15,6 +15,14 @@
       <svg lucideCalendarClock class="w-5 h-5 transition-colors duration-200" [class.text-[var(--primary)]]="isBookingsActive()"></svg>
       <span class="text-[10px] font-bold transition-colors duration-200" [class.text-[var(--primary)]]="isBookingsActive()">حجوزاتي</span>
     </a>
+    <a routerLink="/m/notifications"
+      class="flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-xl transition-all duration-200 relative"
+      [ngClass]="isNotifsActive() ? 'bg-[var(--primary-light)] text-[var(--primary)]' : 'text-[var(--text-muted)]'">
+      <div class="relative">
+        <svg lucideBell class="w-5 h-5 transition-colors duration-200" [class.text-[var(--primary)]]="isNotifsActive()"></svg>
+      </div>
+      <span class="text-[10px] font-bold transition-colors duration-200" [class.text-[var(--primary)]]="isNotifsActive()">الإشعارات</span>
+    </a>
     <a routerLink="/m/profile"
       class="flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-xl transition-all duration-200"
       [ngClass]="isProfileActive() ? 'bg-[var(--primary-light)] text-[var(--primary)]' : 'text-[var(--text-muted)]'">

@@ -54,10 +54,6 @@ export class BookingsComponent implements OnInit, OnDestroy {
     });
   }
 
-  openDetail(booking: any): void {
-    this.router.navigate(['/booking', booking.id], { state: { booking } });
-  }
-
   goToLogin(): void {
     this.router.navigate(['/login']);
   }

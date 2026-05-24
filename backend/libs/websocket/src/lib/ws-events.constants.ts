@@ -51,6 +51,7 @@ export const WS_EVENTS = {
   // Notification events
   NOTIFICATION_NEW: 'notification:new',
   NOTIFICATION_READ: 'notification:read',
+  NOTIFICATION_CLEAR: 'notification:clear',
 
   // Room events (client -> server)
   JOIN_ROOM: 'join:room',

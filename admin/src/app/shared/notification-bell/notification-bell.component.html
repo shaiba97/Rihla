@@ -1,0 +1,168 @@
+<div class="relative notif-panel-host" dir="rtl">
+
+  <!-- BELL BUTTON -->
+  <button (click)="togglePanel()"
+    class="w-9 h-9 flex items-center justify-center rounded-xl
+           hover:bg-[var(--bg-base)] transition-all duration-150 relative"
+    [ngClass]="isPanelOpen() ? ['bg-[var(--bg-base)]'] : []">
+    @if (!settings().soundEnabled) {
+      <svg lucideBellOff class="w-4.5 h-4.5 text-[var(--text-muted)]"></svg>
+    } @else {
+      <svg lucideBell class="w-4.5 h-4.5 text-[var(--text-secondary)]"></svg>
+    }
+    @if (unreadCount() > 0) {
+      <span class="absolute -top-1 -left-1 min-w-[18px] h-[18px] rounded-full
+                   bg-red-500 text-white text-[9px] font-extrabold
+                   flex items-center justify-center px-1
+                   animate-in zoom-in duration-200">
+        @if (unreadCount() > 99) { +99 } @else {
+          {{ toArabicNum(unreadCount()) }}
+        }
+      </span>
+    }
+  </button>
+
+  <!-- PANEL -->
+  @if (isPanelOpen()) {
+    <div class="absolute left-0 md:left-0 right-0 md:right-auto mx-4 md:mx-0
+                w-auto md:w-[340px] max-h-[520px]
+                bg-[var(--bg-card)] border border-[var(--border)]
+                rounded-2xl shadow-xl overflow-hidden z-50 flex flex-col
+                animate-in fade-in slide-in-from-top-2 duration-200">
+
+      <!-- Header -->
+      <div class="flex items-center justify-between px-4 py-3.5
+                  border-b border-[var(--border)] flex-shrink-0">
+        <div class="flex items-center gap-2">
+          <h3 class="text-sm font-extrabold text-[var(--text-primary)]">الإشعارات</h3>
+          @if (unreadCount() > 0) {
+            <span class="px-2 py-0.5 rounded-full bg-red-100 text-red-600 text-[10px] font-bold">
+              {{ toArabicNum(unreadCount()) }} غير مقروء
+            </span>
+          }
+        </div>
+        <div class="flex items-center gap-1">
+          @if (unreadCount() > 0) {
+            <button (click)="markAllRead()"
+              class="w-8 h-8 flex items-center justify-center rounded-lg
+                     hover:bg-[var(--bg-base)] text-[var(--text-muted)]
+                     hover:text-[var(--success)] transition-all"
+              title="تحديد الكل كمقروء">
+              <svg lucideCheckCheck class="w-3.5 h-3.5"></svg>
+            </button>
+          }
+          <button (click)="toggleSettings()"
+            class="w-8 h-8 flex items-center justify-center rounded-lg
+                   hover:bg-[var(--bg-base)] transition-all"
+            [ngClass]="showSettings() ? ['text-[var(--primary)]', 'bg-[var(--primary-light)]'] : ['text-[var(--text-muted)]']">
+            <svg lucideSettings class="w-3.5 h-3.5"></svg>
+          </button>
+          <button (click)="isPanelOpen.set(false)"
+            class="w-8 h-8 flex items-center justify-center rounded-lg
+                   hover:bg-[var(--bg-base)] text-[var(--text-muted)] transition-all">
+            <svg lucideX class="w-3.5 h-3.5"></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      @if (showSettings()) {
+        <div class="px-4 py-4 border-b border-[var(--border)]
+                    bg-[var(--bg-base)] flex-shrink-0 animate-in fade-in duration-150">
+          <h4 class="text-xs font-extrabold text-[var(--text-primary)] uppercase tracking-wider mb-3">إعدادات الإشعارات</h4>
+          <div class="flex flex-col gap-2.5">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                @if (settings().soundEnabled) {
+                  <svg lucideVolume2 class="w-4 h-4 text-[var(--primary)]"></svg>
+                } @else {
+                  <svg lucideVolumeX class="w-4 h-4 text-[var(--text-muted)]"></svg>
+                }
+                <span class="text-xs font-semibold text-[var(--text-primary)]">صوت الإشعارات</span>
+              </div>
+              <button (click)="toggleSound()"
+                class="relative w-10 h-5.5 rounded-full transition-all duration-200"
+                [ngClass]="settings().soundEnabled ? ['bg-[var(--primary)]'] : ['bg-[var(--border)]']">
+                <span class="absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-all duration-200"
+                      [ngClass]="settings().soundEnabled ? ['right-0.5'] : ['left-0.5']"></span>
+              </button>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-[var(--text-primary)]">تنبيهات الحجوزات</span>
+              <button (click)="toggleSetting('bookingAlerts')"
+                class="relative w-10 h-5.5 rounded-full transition-all duration-200"
+                [ngClass]="settings().bookingAlerts ? ['bg-[var(--primary)]'] : ['bg-[var(--border)]']">
+                <span class="absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-all duration-200"
+                      [ngClass]="settings().bookingAlerts ? ['right-0.5'] : ['left-0.5']"></span>
+              </button>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-semibold text-[var(--text-primary)]">تنبيهات المدفوعات</span>
+              <button (click)="toggleSetting('paymentAlerts')"
+                class="relative w-10 h-5.5 rounded-full transition-all duration-200"
+                [ngClass]="settings().paymentAlerts ? ['bg-[var(--primary)]'] : ['bg-[var(--border)]']">
+                <span class="absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-all duration-200"
+                      [ngClass]="settings().paymentAlerts ? ['right-0.5'] : ['left-0.5']"></span>
+              </button>
+            </div>
+            @if (notifications().length > 0) {
+              <button (click)="clearAll()"
+                class="flex items-center gap-1.5 text-[10px] font-bold text-[var(--danger)] hover:underline mt-1 transition-colors">
+                <svg lucideTrash2 class="w-3 h-3"></svg>
+                حذف جميع الإشعارات
+              </button>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- LIST -->
+      <div class="flex-1 overflow-y-auto overscroll-contain">
+        @if (!notifications().length) {
+          <div class="flex flex-col items-center justify-center py-16 gap-3 text-[var(--text-muted)]">
+            <div class="w-14 h-14 rounded-full bg-[var(--bg-base)] flex items-center justify-center">
+              <svg lucideBell class="w-7 h-7 opacity-30"></svg>
+            </div>
+            <div class="text-center">
+              <p class="text-sm font-semibold text-[var(--text-primary)]">لا توجد إشعارات</p>
+              <p class="text-[10px] text-[var(--text-muted)] mt-1">ستظهر هنا عند وصول تحديثات</p>
+            </div>
+          </div>
+        }
+        <div class="flex flex-col divide-y divide-[var(--border)]">
+          @for (n of notifications(); track n.id) {
+            <div (click)="onNotifClick(n)"
+              class="flex items-start gap-3 px-4 py-3.5 cursor-pointer
+                     hover:bg-[var(--bg-base)] transition-colors duration-100 group relative"
+              [ngClass]="!n.isRead ? ['bg-[var(--primary-light)]/40'] : []">
+              @if (!n.isRead) {
+                <div class="absolute top-4 right-2.5 w-1.5 h-1.5 rounded-full bg-[var(--primary)]"></div>
+              }
+              <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" [ngClass]="[notifColor(n.type)[1]]">
+                @switch (notifIcon(n.type)) {
+                  @case ('check-circle') { <svg lucideCheckCircle class="w-4.5 h-4.5" [ngClass]="[notifColor(n.type)[0]]"></svg> }
+                  @case ('x-circle') { <svg lucideXCircle class="w-4.5 h-4.5" [ngClass]="[notifColor(n.type)[0]]"></svg> }
+                  @default { <svg lucideAlertCircle class="w-4.5 h-4.5" [ngClass]="[notifColor(n.type)[0]]"></svg> }
+                }
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-bold text-[var(--text-primary)] leading-snug">{{ n.title }}</p>
+                <p class="text-[10px] text-[var(--text-secondary)] mt-0.5 leading-relaxed line-clamp-2">{{ n.body }}</p>
+                <p class="text-[9px] text-[var(--text-muted)] mt-1">{{ timeSince(n.createdAt) }}</p>
+              </div>
+              <button (click)="removeNotif($event, n.id)"
+                class="w-6 h-6 flex items-center justify-center rounded-lg
+                       opacity-0 group-hover:opacity-100
+                       hover:bg-[var(--danger-light)] text-[var(--text-muted)]
+                       hover:text-[var(--danger)] transition-all flex-shrink-0 self-center">
+                <svg lucideX class="w-3 h-3"></svg>
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+
+    </div>
+  }
+
+</div>

@@ -27,12 +27,16 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/bookings/bookings').then(m => m.BookingsComponent),
       },
       {
-        path: 'booking/:id',
-        loadComponent: () => import('./pages/booking-detail/booking-detail').then(m => m.BookingDetailComponent),
-      },
-      {
         path: 'profile',
         loadComponent: () => import('./pages/profile/profile').then(m => m.ProfileComponent),
+      },
+      {
+        path: 'notifications',
+        loadComponent: () => import('./pages/notifications/notifications').then(m => m.NotificationsPage),
+      },
+      {
+        path: 'notifications/:id',
+        loadComponent: () => import('./pages/notification-detail/notification-detail').then(m => m.NotificationDetailPage),
       },
     ],
   },
@@ -53,12 +57,16 @@ export const routes: Routes = [
             loadComponent: () => import('./pages/mobile/bookings/bookings').then(m => m.Bookings),
           },
           {
-            path: 'booking/:id',
-            loadComponent: () => import('./pages/mobile/booking-detail/booking-detail').then(m => m.BookingDetail),
-          },
-          {
             path: 'profile',
             loadComponent: () => import('./pages/mobile/profile/profile').then(m => m.Profile),
+          },
+          {
+            path: 'notifications',
+            loadComponent: () => import('./pages/notifications/notifications').then(m => m.NotificationsPage),
+          },
+          {
+            path: 'notifications/:id',
+            loadComponent: () => import('./pages/notification-detail/notification-detail').then(m => m.NotificationDetailPage),
           },
           {
             path: 'login',

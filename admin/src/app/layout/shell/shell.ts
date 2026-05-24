@@ -1,13 +1,24 @@
-import { Component, signal, inject } from '@angular/core'; import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router'; import { NgClass } from '@angular/common'; import { AuthService } from '../../core/services/auth/auth.service';
+import { Component, signal, inject, OnInit, OnDestroy } from '@angular/core'; import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router'; import { NgClass } from '@angular/common'; import { AuthService } from '../../core/services/auth/auth.service';
 import { LucideLayoutDashboard, LucideUsers, LucideWallet, LucideUser, LucideSun, LucideMoon, LucideLogOut, LucideMenu, LucideX, LucideBus, LucideChevronDown, LucidePhone } from '@lucide/angular';
+import { NotificationBellComponent } from '../../shared/notification-bell/notification-bell.component';
+import { NotificationsService } from '../../core/services/notifications/notifications.service';
 
 @Component({
   selector: 'app-shell', standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, NgClass, LucideLayoutDashboard, LucideUsers, LucideWallet, LucideUser, LucideSun, LucideMoon, LucideLogOut, LucideMenu, LucideX, LucideBus, LucideChevronDown, LucidePhone],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, NgClass, LucideLayoutDashboard, LucideUsers, LucideWallet, LucideUser, LucideSun, LucideMoon, LucideLogOut, LucideMenu, LucideX, LucideBus, LucideChevronDown, LucidePhone, NotificationBellComponent],
   templateUrl: './shell.html',
 })
-export class ShellComponent {
+export class ShellComponent implements OnInit, OnDestroy {
   auth = inject(AuthService); sidebarOpen = signal(true); isDark = signal(false); showUserMenu = signal(false);
+  private notifSvc = inject(NotificationsService);
+
+  ngOnInit(): void {
+    this.notifSvc.connect();
+  }
+
+  ngOnDestroy(): void {
+    this.notifSvc.disconnect();
+  }
   navItems = [
     { path: '/dashboard', label: 'الرئيسية', icon: 'layout-dashboard' },
     { path: '/users', label: 'المستخدمون', icon: 'users' },

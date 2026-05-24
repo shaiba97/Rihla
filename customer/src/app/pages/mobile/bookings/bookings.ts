@@ -55,10 +55,6 @@ export class Bookings implements OnInit, OnDestroy {
     });
   }
 
-  openDetail(booking: any): void {
-    this.router.navigate(['/m/booking', booking.id], { state: { booking } });
-  }
-
   goToLogin(): void {
     this.router.navigate(['/m/login']);
   }

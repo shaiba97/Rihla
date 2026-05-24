@@ -1,4 +1,4 @@
-import { Component, signal, inject, computed } from '@angular/core';
+import { Component, signal, inject, computed, OnInit, OnDestroy } from '@angular/core';
 import { RouterOutlet, RouterLink, Router, NavigationEnd } from '@angular/router';
 import { NgClass } from '@angular/common';
 import { filter } from 'rxjs/operators';
@@ -16,9 +16,12 @@ import {
   LucideHome,
   LucideCalendarClock,
   LucideUser,
+  LucideBell,
 } from '@lucide/angular';
 import { ThemeService } from '../../core/services/theme.service';
 import { AuthStoreService } from '../../services/auth-store/auth-store.service';
+import { NotificationBellComponent } from '../../shared/notification-bell/notification-bell.component';
+import { NotificationsService } from '../../core/services/notifications/notifications.service';
 
 @Component({
   selector: 'app-web-shell',
@@ -39,13 +42,16 @@ import { AuthStoreService } from '../../services/auth-store/auth-store.service';
     LucideHome,
     LucideCalendarClock,
     LucideUser,
+    LucideBell,
+    NotificationBellComponent,
   ],
   templateUrl: './webshell.html',
   host: {
     '(document:click)': 'onDocumentClick($event)',
   },
 })
-export class WebShell {
+export class WebShell implements OnInit, OnDestroy {
+  private notifSvc = inject(NotificationsService);
   themeService = inject(ThemeService);
   authStore = inject(AuthStoreService);
   private router = inject(Router);
@@ -63,6 +69,16 @@ export class WebShell {
     });
   }
 
+  ngOnInit(): void {
+    if (this.authStore.isLoggedIn()) {
+      this.notifSvc.connect();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.notifSvc.disconnect();
+  }
+
   isLoggedIn = computed(() => this.authStore.isLoggedIn());
   userName = computed(() => this.authStore.customerName() || 'المستخدم');
 
@@ -72,12 +88,30 @@ export class WebShell {
   });
   isBookingsActive = computed(() => {
     const url = this.currentUrl();
-    return url.startsWith('/bookings') || url.startsWith('/booking');
+    return url.startsWith('/bookings');
   });
   isProfileActive = computed(() => {
     const url = this.currentUrl();
     return url.startsWith('/profile') || url.startsWith('/login') || url.startsWith('/register');
   });
+  isNotifsActive = computed(() => {
+    const url = this.currentUrl();
+    return url.startsWith('/notifications');
+  });
+
+  unreadCount = this.notifSvc.unreadCount;
+
+  toArabicNum(n: number): string {
+    return String(n).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[+d]);
+  }
+
+  goToNotifs(): void {
+    if (this.authStore.isLoggedIn()) {
+      this.router.navigate(['/notifications']);
+    } else {
+      this.router.navigate(['/login']);
+    }
+  }
 
   toggleUserMenu(): void {
     this.showUserMenu.update(v => !v);

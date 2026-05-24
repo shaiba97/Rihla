@@ -14,6 +14,7 @@ import {
 import { BookingStatus, PaymentStatus } from '@prisma/client';
 import { RihlaWsGateway, WS_EVENTS } from '@app/websocket';
 import { RedisService } from '@app/redis';
+import { NotificationsService } from '../../notifications/notifications.service';
 
 const SEAT_LOCK_TTL = 420;
 
@@ -24,6 +25,7 @@ export class BookingService {
     private readonly prisma: PrismaService,
     private readonly wsGateway: RihlaWsGateway,
     private readonly redis: RedisService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   async create(createBookingDto: CreateBookingDto, customerId: string) {
@@ -260,6 +262,28 @@ export class BookingService {
         action: 'held',
         bookingId: result.booking.id,
       });
+
+      const admins = await this.prisma.users.findMany({
+        where: { role: 'ADMIN' as any },
+        select: { id: true },
+      });
+
+      for (const admin of admins) {
+        await this.notifications.create({
+          userId: admin.id,
+          type: 'BOOKING_CREATED',
+          title: 'حجز جديد يحتاج تأكيدك',
+          body: `قام عميل بحجز مقعد رقم ${sanitizedSeats.join('، ')} في رحلة`,
+          data: {
+            bookingId: result.booking.id,
+            seatNumber: sanitizedSeats,
+            tripId: dto.tripId,
+            customerId,
+            route: '/financial',
+          },
+          emitTo: 'admin',
+        });
+      }
 
       const ticket = await this.paymentService.generateTicket(
         result.booking,
