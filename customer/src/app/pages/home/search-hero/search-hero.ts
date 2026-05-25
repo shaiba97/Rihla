@@ -112,10 +112,7 @@ export class SearchHeroComponent implements OnInit {
       );
       return;
     }else if (!this.date()) {
-      this.error.set(
-        'يرجى اختيار تاريخ السفر'
-      );
-      return;
+      this.date.set(this.today);
     }else if (this.date() < this.today) {
       this.error.set(
         'تاريخ السفر يجب أن يكون بعد تاريخ اليوم'

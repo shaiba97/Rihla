@@ -164,10 +164,8 @@ export class TripsService {
     if (searchCriteria.departureDate) {
       const parsedDate = new Date(searchCriteria.departureDate);
       if (!isNaN(parsedDate.getTime())) {
-        where.departureDate = {
-          gte: parsedDate,
-          lt: new Date(parsedDate.getTime() + 24 * 60 * 60 * 1000),
-        };
+        parsedDate.setHours(0, 0, 0, 0);
+        where.departureDate = { gte: parsedDate };
       }
     }
 

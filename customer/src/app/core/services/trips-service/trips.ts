@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
@@ -76,14 +76,9 @@ export class Trips {
   searchTrips(
     params: TripSearchParams
   ): Observable<{ data: Trip[] }> {
-    const httpParams = new HttpParams()
-      .set('fromCity', params.fromCity)
-      .set('toCity',   params.toCity)
-      .set('departureDate', params.departureDate);
-
     return this.http.post<{ data: Trip[] }>(
       `${this.apiUrl}/trips/search-trips`,
-      { params: httpParams }
+      { fromCity: params.fromCity, toCity: params.toCity, departureDate: params.departureDate }
     );
   }
 

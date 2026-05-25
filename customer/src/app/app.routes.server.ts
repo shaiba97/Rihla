@@ -14,6 +14,18 @@ export const serverRoutes: ServerRoute[] = [
     renderMode: RenderMode.Prerender
   },
   {
+    path: 'seat/:tripId',
+    renderMode: RenderMode.Client
+  },
+  {
+    path: 'passenger',
+    renderMode: RenderMode.Client
+  },
+  {
+    path: 'payment',
+    renderMode: RenderMode.Client
+  },
+  {
     path: 'm',
     renderMode: RenderMode.Client
   },

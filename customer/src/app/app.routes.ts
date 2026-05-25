@@ -8,27 +8,27 @@ export const routes: Routes = [
       { path: '', redirectTo: 'home', pathMatch: 'full' },
       {
         path: 'home',
-        loadComponent: () => import('./pages/home/main/main').then(m => m.Main),
+        loadComponent: () => import('./pages/responsive/home').then(m => m.ResponsiveHome),
       },
       {
         path: 'search-results',
-        loadComponent: () => import('./pages/search-results/search-results').then(m => m.SearchResultsComponent),
+        loadComponent: () => import('./pages/responsive/search-results').then(m => m.ResponsiveSearchResults),
       },
       {
         path: 'login',
-        loadComponent: () => import('./pages/auth/login/login').then(m => m.Login),
+        loadComponent: () => import('./pages/responsive/login').then(m => m.ResponsiveLogin),
       },
       {
         path: 'register',
-        loadComponent: () => import('./pages/auth/register/register').then(m => m.Register),
+        loadComponent: () => import('./pages/responsive/register').then(m => m.ResponsiveRegister),
       },
       {
         path: 'bookings',
-        loadComponent: () => import('./pages/bookings/bookings').then(m => m.BookingsComponent),
+        loadComponent: () => import('./pages/responsive/bookings').then(m => m.ResponsiveBookings),
       },
       {
         path: 'profile',
-        loadComponent: () => import('./pages/profile/profile').then(m => m.ProfileComponent),
+        loadComponent: () => import('./pages/responsive/profile').then(m => m.ResponsiveProfile),
       },
       {
         path: 'notifications',
@@ -39,12 +39,24 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/notification-detail/notification-detail').then(m => m.NotificationDetailPage),
       },
       {
-        path: 'blog',
+        path: 'blogs',
         loadComponent: () => import('./pages/blog/blog').then(m => m.BlogComponent),
       },
       {
-        path: 'blog/:slug',
+        path: 'blogs/blog/:slug',
         loadComponent: () => import('./pages/blog-detail/blog-detail').then(m => m.BlogDetailComponent),
+      },
+      {
+        path: 'seat/:tripId',
+        loadComponent: () => import('./pages/mobile/select-seat').then(m => m.SelectSeat),
+      },
+      {
+        path: 'passenger',
+        loadComponent: () => import('./pages/mobile/passenger-details').then(m => m.PassengerDetails),
+      },
+      {
+        path: 'payment',
+        loadComponent: () => import('./pages/mobile/payment-details').then(m => m.PaymentDetails),
       },
     ],
   },

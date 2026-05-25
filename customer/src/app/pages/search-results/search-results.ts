@@ -188,13 +188,12 @@ export class SearchResultsComponent implements OnInit {
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
       this.from.set(params['from'] ?? '');
-      this.to.set(params['to']     ?? '');
-      this.date.set(params['date'] ?? '');
-      if (this.from() && this.to() && this.date()) {
+      this.to.set(params['to'] ?? '');
+      this.date.set(params['date'] || this.today);
+      if (this.from() && this.to()) {
         this.loadTrips();
       }
     });
-
   }
 
   loadTrips(): void {
@@ -252,10 +251,7 @@ export class SearchResultsComponent implements OnInit {
       );
       return;
     }else if (!this.date()) {
-      this.error.set(
-        'يرجى اختيار تاريخ السفر'
-      );
-      return;
+      this.date.set(this.today);
     }else if (this.date() < this.today) {
       this.error.set(
         'تاريخ السفر يجب أن يكون بعد تاريخ اليوم'

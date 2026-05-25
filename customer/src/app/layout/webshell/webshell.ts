@@ -102,7 +102,7 @@ export class WebShell implements OnInit, OnDestroy {
   });
   isBlogActive = computed(() => {
     const url = this.currentUrl();
-    return url.startsWith('/blog') || url.startsWith('/m/blogs');
+    return url.startsWith('/blogs') || url.startsWith('/m/blogs');
   });
 
   unreadCount = this.notifSvc.unreadCount;
@@ -120,7 +120,7 @@ export class WebShell implements OnInit, OnDestroy {
   }
 
   goToBlog(): void {
-    this.router.navigate(['/blog']);
+    this.router.navigate(['/blogs']);
   }
 
   toggleUserMenu(): void {
