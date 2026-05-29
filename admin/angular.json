@@ -29,9 +29,16 @@
               "src/styles.css"
             ],
             "server": "src/main.server.ts",
+            "allowedCommonJsDependencies": [
+              "debug",
+              "xmlhttprequest-ssl"
+            ],
             "outputMode": "server",
             "security": {
-              "allowedHosts": []
+              "allowedHosts": [
+                "rihla-admin-frontend.onrender.com",
+                "localhost"
+              ]
             },
             "ssr": {
               "entry": "src/server.ts"
@@ -39,6 +46,12 @@
           },
           "configurations": {
             "production": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ],
               "budgets": [
                 {
                   "type": "initial",

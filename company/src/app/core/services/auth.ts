@@ -103,9 +103,10 @@ export class AuthService {
   }
 
   login(identifier: string, password: string): Observable<LoginResponse> {
+    const body = identifier.includes('@') ? { email: identifier, password } : { phone: identifier, password };
     return this.http.post<LoginResponse>(
       `${this.apiUrl}/users/post-login`,
-      { phone: identifier, password }
+      body
     );
   }
 

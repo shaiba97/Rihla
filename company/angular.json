@@ -28,12 +28,30 @@
             "styles": [
               "src/styles.css"
             ],
+            "server": "src/main.server.ts",
+            "outputMode": "server",
             "security": {
-              "allowedHosts": []
-            }
+              "allowedHosts": [
+                "rihla-company-frontend.onrender.com",
+                "localhost"
+              ]
+            },
+            "ssr": {
+              "entry": "src/server.ts"
+            },
+            "allowedCommonJsDependencies": [
+              "debug",
+              "xmlhttprequest-ssl"
+            ]
           },
           "configurations": {
             "production": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ],
               "budgets": [
                 {
                   "type": "initial",
@@ -49,6 +67,7 @@
               "outputHashing": "all"
             },
             "development": {
+              "outputMode": "static",
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true

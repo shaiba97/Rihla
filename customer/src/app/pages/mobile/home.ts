@@ -1,4 +1,4 @@
-import { Component, signal, computed, inject, OnInit } from '@angular/core';
+import { Component, signal, computed, inject, OnInit, ElementRef, AfterViewInit, DestroyRef, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { NgClass, DatePipe } from '@angular/common';
@@ -12,9 +12,12 @@ import { MobileTripCardComponent } from '../../shared/mobile-trip-card';
   imports: [FormsModule, NgClass, DatePipe, LucideBus, LucideMapPin, LucideSearch, LucidePencil, LucideX, LucideArrowUp, LucideArrowDown, LucideChevronLeft, LucideChevronRight, MobileTripCardComponent],
   templateUrl: './home.html',
 })
-export class Home implements OnInit {
+export class Home implements OnInit, AfterViewInit {
   private router = inject(Router);
   private tripSvc = inject(TripSearchService);
+  private hostElement = inject(ElementRef<HTMLElement>);
+  private destroyRef = inject(DestroyRef);
+  private zone = inject(NgZone);
 
   from = signal<string>('');
   to = signal<string>('');
@@ -83,7 +86,15 @@ export class Home implements OnInit {
     this.date.set(this.today);
   }
 
-  onScroll(e: Event): void { const el = e.target as HTMLElement; this.scrollY.set(el.scrollTop); }
+  ngAfterViewInit(): void {
+    const el = this.hostElement.nativeElement.closest('.overflow-y-auto') as HTMLElement | null;
+    if (el) {
+      const handler = () => this.zone.run(() => this.scrollY.set(el.scrollTop));
+      el.addEventListener('scroll', handler, { passive: true });
+      this.destroyRef.onDestroy(() => el.removeEventListener('scroll', handler));
+    }
+  }
+
   swap(): void { const t = this.from(); this.from.set(this.to()); this.to.set(t); this.swapped.set(!this.swapped()); }
   selectDate(val: string): void { this.date.set(val); }
   prevMonth(): void {

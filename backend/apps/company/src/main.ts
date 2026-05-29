@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { Logger } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { CompanyModule } from './company.module';
 import { RedisIoAdapter } from '@app/websocket';
 import * as path from 'path';
@@ -26,6 +26,14 @@ async function bootstrap() {
     .split(',')
     .map(s => s.trim())
     .filter(s => s.startsWith('http://') || s.startsWith('https://'));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
+
   app.enableCors({
     origin: corsOrigins.length > 0 ? corsOrigins : ['http://localhost:4200', 'http://localhost:4100', 'http://localhost:4000'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
@@ -46,8 +54,12 @@ async function bootstrap() {
   await app.listen(process.env.COMPANY_PORT ?? 3001);
   new Logger('Bootstrap').log(`Company service started on port ${process.env.COMPANY_PORT ?? 3001}`);
 
-  getWhatsAppSock().catch((err: any) => {
-    new Logger('WhatsApp').error('WhatsApp init failed: ' + err.message);
-  });
+  if (process.env.WHATSAPP_ENABLED === 'true') {
+    getWhatsAppSock().catch((err: any) => {
+      new Logger('WhatsApp').error('WhatsApp init failed: ' + err.message);
+    });
+  } else {
+    new Logger('WhatsApp').log('WhatsApp not enabled (set WHATSAPP_ENABLED=true to enable)');
+  }
 }
 bootstrap();

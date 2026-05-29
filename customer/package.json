@@ -4,10 +4,13 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve --host 0.0.0.0 --allowed-hosts",
-    "build": "ng build",
+    "build": "node tools/set-env.js && ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:customer": "node dist/customer/server/server.mjs"
+    "serve:ssr:customer": "node dist/customer/server/server.mjs",
+    "build:mobile": "ng build --configuration mobile && cp dist/customer/browser/index.csr.html dist/customer/browser/index.html",
+    "cap:sync": "npx cap sync",
+    "apk": "npm run build:mobile && npx cap sync android && cd android && ./gradlew assembleDebug"
   },
   "private": true,
   "packageManager": "npm@^11.12.0",

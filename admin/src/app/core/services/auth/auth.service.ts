@@ -80,7 +80,8 @@ export class AuthService {
   }
 
   login(identifier: string, password: string): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.api}/users/post-login`, { phone: identifier, password });
+    const body = identifier.includes('@') ? { email: identifier, password } : { phone: identifier, password };
+    return this.http.post<LoginResponse>(`${this.api}/users/post-login`, body);
   }
 
   register(payload: RegisterPayload): Observable<RegisterResponse> {

@@ -111,8 +111,7 @@ export class UsersService {
           email: normalizedEmail,
           phone: normalizedPhone,
           password: hashedPassword,
-          role: (createUserDto.role as any) ?? 'USER',
-          updatedAt: new Date(),
+          role: (createUserDto.role?.toString().toUpperCase() as any) ?? 'USER',
         },
       });
 
@@ -124,7 +123,7 @@ export class UsersService {
         data: userEntity.toJSON(),
       };
     } catch (error: any) {
-      this.logger.error('Error creating user:', error.message);
+      this.logger.error('Error creating user:', error.message, error.stack);
       if (error.code === 'P2002') {
         return {
           success: false,

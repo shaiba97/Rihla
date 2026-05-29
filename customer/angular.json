@@ -27,10 +27,31 @@
             ],
             "styles": [
               "src/styles.css"
+            ],
+            "server": "src/main.server.ts",
+            "outputMode": "server",
+            "security": {
+              "allowedHosts": [
+                "rihla-customer-frontend.onrender.com",
+                "localhost"
+              ]
+            },
+            "ssr": {
+              "entry": "src/server.ts"
+            },
+            "allowedCommonJsDependencies": [
+              "debug",
+              "xmlhttprequest-ssl"
             ]
           },
           "configurations": {
             "production": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ],
               "budgets": [
                 {
                   "type": "initial",
@@ -44,6 +65,22 @@
                 }
               ],
               "outputHashing": "all"
+            },
+            "mobile": {
+              "outputMode": "static",
+              "outputHashing": "all",
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kB",
+                  "maximumError": "1MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "4kB",
+                  "maximumError": "8kB"
+                }
+              ]
             },
             "development": {
               "outputMode": "static",

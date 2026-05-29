@@ -1,9 +1,10 @@
 import { NestFactory } from '@nestjs/core';
-import { Logger } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { AdminModule } from './admin.module';
 import { RedisIoAdapter } from '@app/websocket';
 import * as path from 'path';
 import * as express from 'express';
+import { createProxyMiddleware } from 'http-proxy-middleware';
 
 function validateEnv(): void {
   const required = ['DATABASE_URL', 'JWT_SECRET'];
@@ -27,6 +28,14 @@ async function bootstrap() {
     .split(',')
     .map(s => s.trim())
     .filter(s => s.startsWith('http://') || s.startsWith('https://'));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
+
   app.enableCors({
     origin: corsOrigins.length > 0 ? corsOrigins : ['http://localhost:4200', 'http://localhost:4100', 'http://localhost:4000'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
@@ -44,6 +53,24 @@ async function bootstrap() {
   };
   app.use('/upload', serveSafe(path.join(__dirname, '../../../upload')));
   app.use('/uploads', serveSafe(path.join(__dirname, '../../../uploads')));
+
+  app.use(
+    '/api-customer',
+    createProxyMiddleware({
+      target: 'http://127.0.0.1:3002',
+      pathRewrite: { '^/': '/api/' },
+      changeOrigin: true,
+    }),
+  );
+
+  app.use(
+    '/api-company',
+    createProxyMiddleware({
+      target: 'http://127.0.0.1:3001',
+      pathRewrite: { '^/': '/api/' },
+      changeOrigin: true,
+    }),
+  );
 
   await app.listen(process.env.ADMIN_PORT ?? 3000);
   logger.log(`Admin service started on port ${process.env.ADMIN_PORT ?? 3000}`);

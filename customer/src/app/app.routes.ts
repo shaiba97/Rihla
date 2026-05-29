@@ -104,23 +104,23 @@ export const routes: Routes = [
             path: 'register',
             loadComponent: () => import('./pages/mobile/register/register').then(m => m.Register),
           },
+          {
+            path: 'results',
+            loadComponent: () => import('./pages/mobile/search-results').then(m => m.SearchResults),
+          },
+          {
+            path: 'seat/:tripId',
+            loadComponent: () => import('./pages/mobile/select-seat').then(m => m.SelectSeat),
+          },
+          {
+            path: 'passenger',
+            loadComponent: () => import('./pages/mobile/passenger-details').then(m => m.PassengerDetails),
+          },
+          {
+            path: 'payment',
+            loadComponent: () => import('./pages/mobile/payment-details').then(m => m.PaymentDetails),
+          },
         ],
-      },
-      {
-        path: 'results',
-        loadComponent: () => import('./pages/mobile/search-results').then(m => m.SearchResults),
-      },
-      {
-        path: 'seat/:tripId',
-        loadComponent: () => import('./pages/mobile/select-seat').then(m => m.SelectSeat),
-      },
-      {
-        path: 'passenger',
-        loadComponent: () => import('./pages/mobile/passenger-details').then(m => m.PassengerDetails),
-      },
-      {
-        path: 'payment',
-        loadComponent: () => import('./pages/mobile/payment-details').then(m => m.PaymentDetails),
       },
     ],
   },

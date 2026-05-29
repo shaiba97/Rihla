@@ -2,6 +2,7 @@ import { Component, signal, inject, computed, OnInit, OnDestroy } from '@angular
 import { RouterOutlet, RouterLink, Router, NavigationEnd } from '@angular/router';
 import { NgClass } from '@angular/common';
 import { filter } from 'rxjs/operators';
+import { useIsMobile } from '../../shared/is-mobile';
 import {
   LucideBus,
   LucideSun,
@@ -57,6 +58,8 @@ export class WebShell implements OnInit, OnDestroy {
   themeService = inject(ThemeService);
   authStore = inject(AuthStoreService);
   private router = inject(Router);
+
+  isMobile = useIsMobile();
 
   showUserMenu = signal<boolean>(false);
   showMobileMenu = signal<boolean>(false);

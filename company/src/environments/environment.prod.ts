@@ -1,5 +1,8 @@
 export const environment = {
   production: true,
-  apiUrl:     'https://your-api-domain.com/api',
-  wsUrl: '',
+  apiUrl: {
+    company:  'https://rihla-backend-rbh7.onrender.com/api-company',
+    customer: 'https://rihla-backend-rbh7.onrender.com/api-customer',
+  },
+  wsUrl: 'https://rihla-backend-rbh7.onrender.com',
 };

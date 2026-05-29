@@ -5,6 +5,8 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-FROM nginx:alpine
-COPY --from=build /app/dist/company/browser /usr/share/nginx/html
-EXPOSE 80
+FROM node:22-alpine
+WORKDIR /app
+COPY --from=build /app/dist ./dist
+EXPOSE 4000
+CMD node dist/company/server/server.mjs
