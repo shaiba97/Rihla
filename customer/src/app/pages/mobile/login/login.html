@@ -1,12 +1,12 @@
-<div dir="rtl" class="min-h-screen bg-[var(--bg-base)] flex flex-col">
-  <div class="bg-[var(--bg-card)] px-4 py-3 border-b border-[var(--border)] flex items-center gap-3">
+<div dir="rtl" class="h-screen overflow-hidden bg-[var(--bg-base)] flex flex-col">
+  <div class="bg-[var(--bg-card)] px-4 py-3 border-b border-[var(--border)] flex items-center justify-center gap-3 flex-shrink-0">
     <button (click)="goBack()" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[var(--bg-base)]">
       <svg lucideArrowRight class="w-5 h-5 text-[var(--text-primary)]"></svg>
     </button>
     <span class="text-[16px] font-bold text-[var(--text-primary)]">تسجيل الدخول</span>
   </div>
 
-  <div class="flex-1 flex flex-col justify-center px-6 gap-6">
+  <div class="flex-1 flex flex-col items-center justify-center px-6 gap-6">
     <div class="flex flex-col items-center gap-3">
       <div class="w-14 h-14 rounded-full bg-[var(--primary-light)] flex items-center justify-center">
         <svg lucidePhone class="w-7 h-7 text-[var(--primary)]"></svg>
@@ -15,7 +15,7 @@
       <p class="text-sm text-[var(--text-muted)] text-center">سجل دخولك لمتابعة حجوزاتك</p>
     </div>
 
-    <div class="flex flex-col gap-4">
+    <div class="flex flex-col gap-4 w-full max-w-sm">
       <div class="flex items-center gap-3 px-4 py-3.5 rounded-2xl border border-[var(--border)] bg-[var(--bg-card)]">
         <svg lucidePhone class="w-5 h-5 text-[var(--text-muted)] flex-shrink-0"></svg>
         <input type="text" [ngModel]="identifier()" (ngModelChange)="identifier.set($event)" placeholder="رقم الهاتف أو البريد الإلكتروني" class="flex-1 bg-transparent outline-none text-[15px] font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:font-normal">
