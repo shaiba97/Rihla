@@ -10,7 +10,7 @@ import { LucideCalendar, LucideArrowRight, LucideLoaderCircle, LucideUser, Lucid
   template: `
     <div dir="rtl" class="p-4 md:p-6 max-w-3xl mx-auto">
       <!-- BACK -->
-      <a routerLink="/blog" class="inline-flex items-center gap-1.5 text-sm text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors no-underline mb-4">
+      <a routerLink="/blogs" class="inline-flex items-center gap-1.5 text-sm text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors no-underline mb-4">
         <svg lucideArrowRight class="w-4 h-4"></svg>
         <span>العودة إلى المدونة</span>
       </a>
@@ -23,7 +23,7 @@ import { LucideCalendar, LucideArrowRight, LucideLoaderCircle, LucideUser, Lucid
         <div class="text-center py-20">
           <svg lucideFileText class="w-16 h-16 text-[var(--text-muted)] mx-auto mb-4"></svg>
           <p class="text-[var(--text-secondary)]">المقال غير موجود</p>
-          <a routerLink="/blog" class="inline-block mt-4 text-sm font-semibold text-[var(--primary)]">العودة إلى المدونة</a>
+          <a routerLink="/blogs" class="inline-block mt-4 text-sm font-semibold text-[var(--primary)]">العودة إلى المدونة</a>
         </div>
       } @else {
         <article>

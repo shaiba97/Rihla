@@ -2,13 +2,19 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { BlogService, BlogPost } from '../../core/services/blog/blog.service';
-import { LucideCalendar, LucideArrowLeft, LucideLoaderCircle, LucideFileText } from '@lucide/angular';
+import { LucideCalendar, LucideArrowRight, LucideArrowLeft, LucideLoaderCircle, LucideFileText } from '@lucide/angular';
 
 @Component({
   selector: 'app-blog',
-  imports: [RouterLink, DatePipe, LucideCalendar, LucideArrowLeft, LucideLoaderCircle, LucideFileText],
+  imports: [RouterLink, DatePipe, LucideCalendar, LucideArrowRight, LucideArrowLeft, LucideLoaderCircle, LucideFileText],
   template: `
     <div dir="rtl" class="p-4 md:p-6 max-w-4xl mx-auto">
+      <!-- BACK -->
+      <a routerLink="/home" class="inline-flex items-center gap-1.5 text-sm text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors no-underline mb-4">
+        <svg lucideArrowRight class="w-4 h-4"></svg>
+        <span>العودة إلى الرئيسية</span>
+      </a>
+
       <!-- HEADER -->
       <div class="mb-6">
         <div class="flex items-center gap-3 mb-1">
@@ -34,7 +40,7 @@ import { LucideCalendar, LucideArrowLeft, LucideLoaderCircle, LucideFileText } f
       } @else {
         <div class="grid gap-4 md:grid-cols-2">
           @for (post of posts(); track post.id) {
-            <a [routerLink]="['/blog', post.slug]"
+            <a [routerLink]="['/blogs/blog', post.slug]"
               class="block bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-5 hover:shadow-md hover:border-[var(--primary)]/30 transition-all no-underline group">
               <div class="flex items-center gap-1.5 text-xs text-[var(--text-muted)] mb-3">
                 <svg lucideCalendar class="w-3.5 h-3.5"></svg>
