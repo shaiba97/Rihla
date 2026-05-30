@@ -47,10 +47,6 @@
           <svg lucideNewspaper class="w-[18px] h-[18px]"></svg>
         </button>
 
-        @if (isLoggedIn()) {
-          <app-notification-bell></app-notification-bell>
-        }
-
         <!-- NOT LOGGED IN -->
         @if (!isLoggedIn()) {
           <div class="w-px h-6 bg-[var(--border)] mx-1"></div>
@@ -170,9 +166,6 @@
     </a>
 
     <div class="flex items-center gap-1">
-      @if (isLoggedIn()) {
-        <app-notification-bell></app-notification-bell>
-      }
       <button (click)="goToBlog()"
         class="w-9 h-9 rounded-xl flex items-center justify-center
                text-[var(--text-secondary)]

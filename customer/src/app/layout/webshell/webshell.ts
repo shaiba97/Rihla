@@ -22,7 +22,6 @@ import {
 } from '@lucide/angular';
 import { ThemeService } from '../../core/services/theme.service';
 import { AuthStoreService } from '../../services/auth-store/auth-store.service';
-import { NotificationBellComponent } from '../../shared/notification-bell/notification-bell.component';
 import { NotificationsService } from '../../core/services/notifications/notifications.service';
 
 @Component({
@@ -46,7 +45,6 @@ import { NotificationsService } from '../../core/services/notifications/notifica
     LucideUser,
     LucideBell,
   LucideNewspaper,
-    NotificationBellComponent,
   ],
   templateUrl: './webshell.html',
   host: {
