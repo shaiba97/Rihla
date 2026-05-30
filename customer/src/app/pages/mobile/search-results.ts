@@ -87,7 +87,7 @@ export class SearchResults implements OnInit {
   swapEdit(): void { const t = this.editFrom(); this.editFrom.set(this.editTo()); this.editTo.set(t); this.editSwapped.set(!this.editSwapped()); }
   prevEditMonth(): void { const [y, m] = this.editMonth().split('-').map(Number); const d = new Date(y, m - 2, 1); this.editMonth.set(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`); }
   nextEditMonth(): void { const [y, m] = this.editMonth().split('-').map(Number); const d = new Date(y, m, 1); this.editMonth.set(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`); }
-  applyEdit(): void { if (!this.editFrom() || !this.editTo() || !this.editDate()) return; this.showEdit.set(false); this.router.navigate(['/m/results'], { queryParams: { from: this.editFrom(), to: this.editTo(), date: this.editDate() } }); }
-  goBack(): void { this.router.navigate(['/m']); }
-  onTripSelected(trip: any): void { this.router.navigate(['/m/seat', trip.id], { state: { trip } }); }
+  applyEdit(): void { if (!this.editFrom() || !this.editTo() || !this.editDate()) return; this.showEdit.set(false); this.router.navigate(['../results'], { relativeTo: this.route, queryParams: { from: this.editFrom(), to: this.editTo(), date: this.editDate() } }); }
+  goBack(): void { history.back(); }
+  onTripSelected(trip: any): void { this.router.navigate(['../seat', trip.id], { relativeTo: this.route, state: { trip } }); }
 }

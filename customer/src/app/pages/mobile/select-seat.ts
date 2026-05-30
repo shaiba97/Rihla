@@ -69,7 +69,7 @@ export class SelectSeat implements OnInit, OnDestroy {
     this.loadBookedSeats();
     this.sessionSvc.restoreFromStorage().then(state => {
       if (state && state.step !== 'seat') {
-        this.router.navigate([`/m/${state.step}/${this._tripId}`]);
+        this.router.navigate(['../' + state.step], { relativeTo: this.route });
       }
     });
     this.wsCleanups.push(this.ws.on('seat:updated', (data: any) => {
@@ -110,15 +110,13 @@ export class SelectSeat implements OnInit, OnDestroy {
 
   onNext(): void {
     if (!this.selectedSeats().length) return;
-    this.router.navigate(['/m/passenger'], {
-      state: {
-        trip: this.trip(),
-        selectedSeats: this.selectedSeats(),
-        baseAmount: this.baseAmount(),
-        platformFee: this.platformFeeAmount(),
-        totalAmount: this.totalAmount(),
-      },
-    });
+    this.router.navigate(['../passenger'], { relativeTo: this.route, state: {
+      trip: this.trip(),
+      selectedSeats: this.selectedSeats(),
+      baseAmount: this.baseAmount(),
+      platformFee: this.platformFeeAmount(),
+      totalAmount: this.totalAmount(),
+    }});
   }
   goBack(): void { history.back(); }
 }

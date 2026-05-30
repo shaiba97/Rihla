@@ -59,7 +59,7 @@ export class PassengerDetails implements OnInit {
     this.passengersGroup.markAllAsTouched();
     if (!this.canProceed()) return;
     await this.sessionSvc.updateStep('payment');
-    this.router.navigate(['/m/payment'], { state: { trip: this.trip(), selectedSeats: this.selectedSeats(), baseAmount: this.baseAmount(), platformFee: this.platformFee(), totalAmount: this.totalAmount(), contact: this.contactGroup.value, passengers: this.passengersArray.value } });
+    this.router.navigate(['../payment'], { relativeTo: this.route, state: { trip: this.trip(), selectedSeats: this.selectedSeats(), baseAmount: this.baseAmount(), platformFee: this.platformFee(), totalAmount: this.totalAmount(), contact: this.contactGroup.value, passengers: this.passengersArray.value } });
   }
 
   goBack(): void { history.back(); }

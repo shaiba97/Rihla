@@ -1,5 +1,5 @@
 import { Component, signal, computed, inject, OnInit, ElementRef, AfterViewInit, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { NgClass, DatePipe } from '@angular/common';
 import { LucideBus, LucideMapPin, LucideSearch, LucidePencil, LucideX, LucideArrowUp, LucideArrowDown, LucideChevronLeft, LucideChevronRight } from '@lucide/angular';
@@ -15,6 +15,7 @@ import { MobileTripCardComponent } from '../../shared/mobile-trip-card';
 })
 export class Home implements OnInit, AfterViewInit {
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private tripSvc = inject(TripSearchService);
   private hostElement = inject(ElementRef<HTMLElement>);
   private destroyRef = inject(DestroyRef);
@@ -108,12 +109,12 @@ export class Home implements OnInit, AfterViewInit {
     this.currentMonth.set(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
   }
 
-  goToSeat(trip: any): void { if (trip?.id) this.router.navigate(['/m/seat', trip.id], { state: { trip } }); }
+  goToSeat(trip: any): void { if (trip?.id) this.router.navigate(['../seat', trip.id], { relativeTo: this.route, state: { trip } }); }
 
   onSearch(): void {
     if (!this.from() || !this.to() || !this.date()) { this.error.set('يرجى تعبئة جميع الحقول'); return; }
     this.error.set('');
-    this.router.navigate(['/m/results'], { queryParams: { from: this.from(), to: this.to(), date: this.date() } });
+    this.router.navigate(['../results'], { relativeTo: this.route, queryParams: { from: this.from(), to: this.to(), date: this.date() } });
   }
 
   openSearchModal(): void { this.showSearchModal.set(true); }

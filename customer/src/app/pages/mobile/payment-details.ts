@@ -1,6 +1,6 @@
 import { Component, signal, inject, OnInit, computed } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { LucideArrowRight, LucideClock, LucideUpload, LucideCreditCard, LucideCopy, LucideCheck } from '@lucide/angular';
 import { BookingService } from '../../services/booking/booking.service';
@@ -15,6 +15,7 @@ import { formatArabicDateTime, formatArabicTime } from '../../pipes/arabic-numbe
 })
 export class PaymentDetails implements OnInit {
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private fb = inject(FormBuilder);
   private bookingSvc = inject(BookingService);
   private sessionSvc = inject(SessionService);
@@ -81,7 +82,7 @@ export class PaymentDetails implements OnInit {
   ngOnInit(): void {
     const s = history.state;
     if (!s?.trip || !s?.selectedSeats) {
-      this.router.navigate(['/m']);
+      this.router.navigate(['../home'], { relativeTo: this.route });
       return;
     }
     this.trip.set(s.trip);
@@ -92,7 +93,7 @@ export class PaymentDetails implements OnInit {
     this.contact.set(s.contact ?? null);
     this.passengers.set(s.passengers ?? []);
     this.sessionSvc.onExpire = () => {
-      this.router.navigate([`/m/seat/${s.trip.id}`]);
+      this.router.navigate(['../seat', s.trip.id], { relativeTo: this.route });
     };
     this.bookingSvc.getActivePaymentAccounts().subscribe({
       next: (accounts: any[]) => {
