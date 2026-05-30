@@ -108,8 +108,9 @@ export class SelectSeat implements OnInit, OnDestroy {
     }
   }
 
-  onNext(): void {
+  async onNext(): Promise<void> {
     if (!this.selectedSeats().length) return;
+    await this.sessionSvc.updateStep('passenger');
     this.router.navigate(['../passenger'], { relativeTo: this.route, state: {
       trip: this.trip(),
       selectedSeats: this.selectedSeats(),
