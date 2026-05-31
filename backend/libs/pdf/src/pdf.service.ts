@@ -44,8 +44,10 @@ export class PDFService {
 
     try {
       const puppeteer = await import('puppeteer');
+      const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || undefined;
       const browser = await puppeteer.launch({
         headless: true,
+        executablePath,
         args: [
           '--no-sandbox',
           '--disable-setuid-sandbox',
@@ -72,8 +74,8 @@ export class PDFService {
         await browser.close();
       }
     } catch (error) {
-      this.logger.warn('PDF generation failed', error);
-      fs.writeFileSync(outputPath, 'PDF placeholder');
+      this.logger.error('PDF generation failed', error);
+      throw error;
     }
 
     return { publicUrl, filePath: outputPath };
@@ -199,8 +201,10 @@ export class PDFService {
 
     try {
       const puppeteer = await import('puppeteer');
+      const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || undefined;
       const browser = await puppeteer.launch({
         headless: true,
+        executablePath,
         args: [
           '--no-sandbox',
           '--disable-setuid-sandbox',
@@ -219,8 +223,8 @@ export class PDFService {
         await browser.close();
       }
     } catch (error) {
-      this.logger.warn('Passenger list PDF generation failed', error);
-      fs.writeFileSync(outputPath, 'PDF placeholder');
+      this.logger.error('Passenger list PDF generation failed', error);
+      throw error;
     }
 
     return { publicUrl, filePath: outputPath };
@@ -401,14 +405,13 @@ export class PDFService {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;600;700;800&display=swap');
     *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
     body {
-      font-family: 'Tajawal', sans-serif;
+      font-family: 'Noto Naskh Arabic', 'DejaVu Sans', sans-serif;
       background: #F0FDFA;
       direction: rtl;
       color: #134E4A;
