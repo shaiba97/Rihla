@@ -1,4 +1,4 @@
-import { Component, signal, inject, computed, OnInit, OnDestroy } from '@angular/core';
+import { Component, signal, inject, computed, effect, OnInit, OnDestroy } from '@angular/core';
 import { RouterOutlet, RouterLink, Router, NavigationEnd } from '@angular/router';
 import { NgClass } from '@angular/common';
 import { filter } from 'rxjs/operators';
@@ -69,6 +69,14 @@ export class WebShell implements OnInit, OnDestroy {
       filter(e => e instanceof NavigationEnd)
     ).subscribe(e => {
       this.currentUrl.set((e as NavigationEnd).urlAfterRedirects);
+    });
+    // Automatically connect notification WS when user logs in
+    effect(() => {
+      if (this.authStore.isLoggedIn()) {
+        this.notifSvc.connect();
+      } else if (!this.authStore.isLoggedIn() && this.notifSvc.connected) {
+        this.notifSvc.disconnect();
+      }
     });
   }
 

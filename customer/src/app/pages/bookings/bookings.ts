@@ -34,14 +34,23 @@ export class BookingsComponent implements OnInit, OnDestroy {
       this.loadBookings();
     }
 
-    this.wsCleanups.push(this.ws.on('booking:created', () => this.loadBookings()));
-    this.wsCleanups.push(this.ws.on('booking:cancelled', () => this.loadBookings()));
-    this.wsCleanups.push(this.ws.on('payment:confirmed', () => this.loadBookings()));
-    this.wsCleanups.push(this.ws.on('payment:rejected', () => this.loadBookings()));
+    this.wsCleanups.push(this.ws.on('booking:created', () => this.silentRefresh()));
+    this.wsCleanups.push(this.ws.on('booking:cancelled', () => this.silentRefresh()));
+    this.wsCleanups.push(this.ws.on('payment:confirmed', () => this.silentRefresh()));
+    this.wsCleanups.push(this.ws.on('payment:rejected', () => this.silentRefresh()));
   }
 
   ngOnDestroy(): void {
     this.wsCleanups.forEach(fn => fn());
+  }
+
+  private silentRefresh(): void {
+    const customerId = this.authStore.customerData()?.id;
+    if (!customerId) return;
+    this.bookingSvc.getMyBookings('customerId', customerId).subscribe({
+      next: r => this.bookings.set(r.data ?? []),
+      error: () => {},
+    });
   }
 
   loadBookings(): void {

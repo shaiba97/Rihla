@@ -35,8 +35,10 @@ export class NotificationsService {
   private api = environment.apiUrl.customer;
   private wsUrl = environment.wsUrl;
 
-  private socket: Socket | null = null;
+  private   socket: Socket | null = null;
+  get connected(): boolean { return this.socket?.connected ?? false; }
   private readonly SETTINGS_KEY = 'rihla_notif_settings';
+  private audioUnlocked = false;
 
   notifications = signal<AppNotification[]>([]);
   settings = signal<NotificationSettings>(this.loadSettings());
@@ -48,7 +50,19 @@ export class NotificationsService {
     if (!this.audioCtx) {
       this.audioCtx = new AudioContext();
     }
+    if (this.audioCtx.state === 'suspended') {
+      this.audioCtx.resume().catch(() => {});
+    }
     return this.audioCtx;
+  }
+
+  unlockAudio(): void {
+    if (this.audioUnlocked) return;
+    try {
+      const ctx = this.getAudioCtx();
+      if (ctx.state === 'suspended') ctx.resume();
+      this.audioUnlocked = true;
+    } catch {}
   }
 
   playBookingSound(): void {
@@ -157,12 +171,12 @@ export class NotificationsService {
   connect(): void {
     if (this.socket?.connected) return;
 
+    const user = this.auth.customerData();
+    if (!user) return;
+
     this.socket = io(this.wsUrl, {
       transports: ['websocket', 'polling'],
     });
-
-    const user = this.auth.customerData();
-    if (!user) return;
 
     this.socket.on('connect', () => {
       this.socket!.emit('join:room', { room: `customer:${user.id}` });
@@ -183,6 +197,15 @@ export class NotificationsService {
       }
       this.showBrowserNotification(data);
     });
+
+    // Unlock audio on first user gesture
+    const unlock = () => {
+      this.unlockAudio();
+      document.removeEventListener('click', unlock, true);
+      document.removeEventListener('touchstart', unlock, true);
+    };
+    document.addEventListener('click', unlock, true);
+    document.addEventListener('touchstart', unlock, true);
   }
 
   disconnect(): void {
