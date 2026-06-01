@@ -69,19 +69,24 @@
               </div>
             }
             <div class="flex items-center justify-between pt-3 border-t border-[var(--border)]">
-              <span class="text-xs text-[var(--text-secondary)]">
-                <span class="font-semibold text-[var(--text-primary)]">{{ (b.seatNumbers ?? []).length | arabicNumber }}</span>
-                مقعد: <span class="font-semibold">{{ b.seatNumbers?.join('، ') | arabicNumber }}</span>
-              </span>
+              <div class="flex flex-col gap-1">
+                <span class="text-[11px] text-[var(--text-muted)]">
+                  {{ b.createdAt | date:'EEE d MMM':'':'ar' | arabicNumber }} · {{ bookingTime(b.createdAt) | arabicNumber }}
+                </span>
+                <span class="text-xs text-[var(--text-secondary)]">
+                  <span class="font-semibold text-[var(--text-primary)]">{{ (b.seatNumbers ?? []).length | arabicNumber }}</span>
+                  مقعد: <span class="font-semibold">{{ b.seatNumbers?.join('، ') | arabicNumber }}</span>
+                </span>
+              </div>
               @if (b.TicketPDF?.ticketUrl && b.status === 'CONFIRMED') {
-                <div class="flex items-center gap-1.5">
-                  <button (click)="viewTicket($event, b.TicketPDF?.ticketUrl)" class="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[var(--primary)] text-[var(--primary)] text-[11px] font-bold hover:bg-[var(--primary-light)] active:scale-95 transition-all">
-                    <svg lucideEye class="w-3.5 h-3.5"></svg>
-                    عرض
-                  </button>
+                <div class="flex items-center gap-2">
                   <button (click)="downloadTicket($event, b.TicketPDF?.ticketUrl)" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--primary)] text-white text-[11px] font-bold hover:bg-[var(--primary-hover)] active:scale-95 transition-all">
                     <svg lucideDownload class="w-3.5 h-3.5"></svg>
                     تذكرة
+                  </button>
+                  <button (click)="showTicketView($event, b)" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[var(--primary)] text-[var(--primary)] text-[11px] font-bold hover:bg-[var(--primary-light)] active:scale-95 transition-all">
+                    <svg lucideEye class="w-3.5 h-3.5"></svg>
+                    عرض
                   </button>
                 </div>
               }
@@ -93,18 +98,9 @@
   </div>
 </div>
 
-@if (showTicketModal()) {
-  <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" (click)="closeTicketModal()">
-    <div class="bg-[var(--bg-card)] rounded-3xl overflow-hidden max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl" (click)="$event.stopPropagation()">
-      <div class="flex items-center justify-between px-6 py-4 border-b border-[var(--border)]">
-        <span class="text-base font-bold text-[var(--text-primary)]">التذكرة</span>
-        <button (click)="closeTicketModal()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[var(--bg-base)] transition-colors">
-          <svg lucideX class="w-5 h-5 text-[var(--text-muted)]"></svg>
-        </button>
-      </div>
-      <div class="flex-1 p-4">
-        <iframe [src]="safeTicketUrl()" class="w-full h-[75vh] rounded-xl border border-[var(--border)]" frameborder="0"></iframe>
-      </div>
-    </div>
-  </div>
-}
+<app-ticket-preview
+  [ticketUrl]="selectedBooking()?.TicketPDF?.ticketUrl"
+  [visible]="!!selectedBooking()"
+  (closed)="closeTicketView()"
+/>
+

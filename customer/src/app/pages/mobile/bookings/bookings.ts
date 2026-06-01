@@ -1,7 +1,6 @@
 import { Component, signal, inject, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { LucideCalendarClock, LucideBus, LucideLoaderCircle, LucideLogIn, LucideArrowLeft, LucideDownload, LucideEye, LucideX } from '@lucide/angular';
+import { LucideCalendarClock, LucideBus, LucideLoaderCircle, LucideLogIn, LucideArrowLeft, LucideDownload, LucideEye } from '@lucide/angular';
 import { ArabicNumberPipe } from '../../../pipes/arabic-number/arabic-number-pipe';
 import { TimeFormatPipe } from '../../../pipes/time-format/time-format-pipe';
 import { BookingService } from '../../../services/booking/booking.service';
@@ -9,24 +8,23 @@ import { AuthStoreService } from '../../../services/auth-store/auth-store.servic
 import { WsService } from '../../../services/ws.service';
 import { NgClass, DatePipe } from '@angular/common';
 import { environment } from '../../../../environments/environment';
+import { TicketPreviewComponent } from '../../../shared/ticket-preview/ticket-preview';
 
 @Component({
   selector: 'app-bookings',
-  imports: [LucideCalendarClock, LucideBus, LucideLoaderCircle, LucideLogIn, LucideArrowLeft, LucideDownload, LucideEye, LucideX, ArabicNumberPipe, TimeFormatPipe, NgClass, DatePipe],
+  imports: [LucideCalendarClock, LucideBus, LucideLoaderCircle, LucideLogIn, LucideArrowLeft, LucideDownload, LucideEye, ArabicNumberPipe, TimeFormatPipe, NgClass, DatePipe, TicketPreviewComponent],
   templateUrl: './bookings.html',
 })
 export class Bookings implements OnInit, OnDestroy {
   private router = inject(Router);
   private bookingSvc = inject(BookingService);
-  private sanitizer = inject(DomSanitizer);
   private ws = inject(WsService);
   authStore = inject(AuthStoreService);
 
   bookings = signal<any[]>([]);
   isLoading = signal<boolean>(false);
   error = signal<string>('');
-  showTicketModal = signal<boolean>(false);
-  activeTicketUrl = signal<string>('');
+  selectedBooking = signal<any | null>(null);
   private wsCleanups: (() => void)[] = [];
 
   ngOnInit(): void {
@@ -87,19 +85,21 @@ export class Bookings implements OnInit, OnDestroy {
     window.open(environment.fileUrl + url, '_blank');
   }
 
-  viewTicket(e: Event, url: string): void {
+  showTicketView(e: Event, booking: any): void {
     e.stopPropagation();
-    if (!url) return;
-    this.activeTicketUrl.set(environment.fileUrl + url);
-    this.showTicketModal.set(true);
+    this.selectedBooking.set(booking);
   }
 
-  closeTicketModal(): void {
-    this.showTicketModal.set(false);
-    this.activeTicketUrl.set('');
+  closeTicketView(): void {
+    this.selectedBooking.set(null);
   }
 
-  safeTicketUrl(): SafeResourceUrl {
-    return this.sanitizer.bypassSecurityTrustResourceUrl(this.activeTicketUrl());
+  bookingTime(date: string): string {
+    if (!date) return '';
+    const d = new Date(date);
+    const hours = d.getHours().toString().padStart(2, '0');
+    const minutes = d.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
   }
+
 }
