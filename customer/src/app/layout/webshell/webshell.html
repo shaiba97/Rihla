@@ -47,6 +47,9 @@
           <svg lucideNewspaper class="w-[18px] h-[18px]"></svg>
         </button>
 
+        <!-- Notification bell -->
+        <app-notification-bell />
+
         <!-- NOT LOGGED IN -->
         @if (!isLoggedIn()) {
           <div class="w-px h-6 bg-[var(--border)] mx-1"></div>
@@ -123,15 +126,6 @@
                     <svg lucideSettings class="w-4 h-4 flex-shrink-0 text-[var(--text-muted)]
                                               group-hover:text-[var(--primary)] transition-colors"></svg>
                     <span>الملف الشخصي</span>
-                  </a>
-                  <a routerLink="/blogs" (click)="showUserMenu.set(false)"
-                     class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
-                            text-[var(--text-secondary)]
-                            hover:bg-[var(--primary-light)] hover:text-[var(--primary)]
-                            transition-all duration-150 no-underline group">
-                    <svg lucideNewspaper class="w-4 h-4 flex-shrink-0 text-[var(--text-muted)]
-                                              group-hover:text-[var(--primary)] transition-colors"></svg>
-                    <span>المدونة</span>
                   </a>
                   <div class="h-px bg-[var(--border)] my-1"></div>
                   <button (click)="logout()"

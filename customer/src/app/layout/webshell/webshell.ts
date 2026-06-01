@@ -19,6 +19,7 @@ import {
 import { ThemeService } from '../../core/services/theme.service';
 import { AuthStoreService } from '../../services/auth-store/auth-store.service';
 import { NotificationsService } from '../../core/services/notifications/notifications.service';
+import { NotificationBellComponent } from '../../shared/notification-bell/notification-bell.component';
 
 @Component({
   selector: 'app-web-shell',
@@ -37,6 +38,7 @@ import { NotificationsService } from '../../core/services/notifications/notifica
     LucideLogIn,
     LucideUserPlus,
     LucideNewspaper,
+    NotificationBellComponent,
   ],
   templateUrl: './webshell.html',
   host: {
