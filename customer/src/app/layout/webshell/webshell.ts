@@ -14,10 +14,6 @@ import {
   LucideLogOut,
   LucideLogIn,
   LucideUserPlus,
-  LucideHome,
-  LucideCalendarClock,
-  LucideUser,
-  LucideBell,
   LucideNewspaper,
 } from '@lucide/angular';
 import { ThemeService } from '../../core/services/theme.service';
@@ -40,11 +36,7 @@ import { NotificationsService } from '../../core/services/notifications/notifica
     LucideLogOut,
     LucideLogIn,
     LucideUserPlus,
-    LucideHome,
-    LucideCalendarClock,
-    LucideUser,
-    LucideBell,
-  LucideNewspaper,
+    LucideNewspaper,
   ],
   templateUrl: './webshell.html',
   host: {
