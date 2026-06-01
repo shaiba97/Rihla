@@ -180,8 +180,62 @@
   </header>
 
   <!-- ==================== CONTENT (shared) ==================== -->
-  <main class="flex-1 overflow-y-auto" style="overscroll-behavior:contain" >
+  <main class="flex-1 overflow-y-auto pb-[60px] md:pb-0" style="overscroll-behavior:contain" >
     <router-outlet />
   </main>
 
 </div>
+
+<!-- ==================== MOBILE BOTTOM NAV ==================== -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 z-[99999]
+            flex items-center justify-around px-2 py-1
+            bg-[var(--bg-card)] border-t border-[var(--border)]
+            shadow-[0_-2px_12px_rgba(0,0,0,0.05)]">
+
+  <a routerLink="/home"
+    class="flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-xl transition-all duration-200 no-underline"
+    [class.bg-[var(--primary-light)]]="isHomeActive()"
+    [class.text-[var(--primary)]]="isHomeActive()"
+    [class.text-[var(--text-muted)]]="!isHomeActive()">
+    <svg lucideHome class="w-5 h-5 transition-colors duration-200"></svg>
+    <span class="text-[10px] font-bold transition-colors duration-200">الرئيسية</span>
+  </a>
+
+  <a (click)="goToBookings()"
+    class="flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-xl transition-all duration-200 no-underline cursor-pointer"
+    [class.bg-[var(--primary-light)]]="isBookingsActive()"
+    [class.text-[var(--primary)]]="isBookingsActive()"
+    [class.text-[var(--text-muted)]]="!isBookingsActive()">
+    <svg lucideCalendarClock class="w-5 h-5 transition-colors duration-200"></svg>
+    <span class="text-[10px] font-bold transition-colors duration-200">حجوزاتي</span>
+  </a>
+
+  <a (click)="goToNotifs()"
+    class="flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-xl transition-all duration-200 no-underline cursor-pointer relative"
+    [class.bg-[var(--primary-light)]]="isNotifsActive()"
+    [class.text-[var(--primary)]]="isNotifsActive()"
+    [class.text-[var(--text-muted)]]="!isNotifsActive()">
+    <div class="relative">
+      <svg lucideBell class="w-5 h-5 transition-colors duration-200"></svg>
+      @if (isLoggedIn() && unreadCount() > 0) {
+        <span class="absolute -top-1.5 -right-1.5 min-w-[16px] h-[16px] rounded-full
+                     bg-red-500 text-white text-[8px] font-extrabold
+                     flex items-center justify-center px-0.5">
+          @if (unreadCount() > 99) { +99 } @else {
+            {{ toArabicNum(unreadCount()) }}
+          }
+        </span>
+      }
+    </div>
+    <span class="text-[10px] font-bold transition-colors duration-200">الإشعارات</span>
+  </a>
+
+  <a routerLink="/profile"
+    class="flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-xl transition-all duration-200 no-underline"
+    [class.bg-[var(--primary-light)]]="isProfileActive()"
+    [class.text-[var(--primary)]]="isProfileActive()"
+    [class.text-[var(--text-muted)]]="!isProfileActive()">
+    <svg lucideUser class="w-5 h-5 transition-colors duration-200"></svg>
+    <span class="text-[10px] font-bold transition-colors duration-200">حسابي</span>
+  </a>
+</nav>

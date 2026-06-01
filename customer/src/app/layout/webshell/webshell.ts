@@ -13,6 +13,10 @@ import {
   LucideLogIn,
   LucideUserPlus,
   LucideNewspaper,
+  LucideHome,
+  LucideCalendarClock,
+  LucideBell,
+  LucideUser,
 } from '@lucide/angular';
 import { ThemeService } from '../../core/services/theme.service';
 import { AuthStoreService } from '../../services/auth-store/auth-store.service';
@@ -35,6 +39,10 @@ import { NotificationBellComponent } from '../../shared/notification-bell/notifi
     LucideUserPlus,
     LucideNewspaper,
     NotificationBellComponent,
+    LucideHome,
+    LucideCalendarClock,
+    LucideBell,
+    LucideUser,
   ],
   templateUrl: './webshell.html',
   host: {
