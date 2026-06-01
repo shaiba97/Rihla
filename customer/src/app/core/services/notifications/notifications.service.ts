@@ -224,7 +224,7 @@ export class NotificationsService {
   private showBrowserNotification(n: AppNotification): void {
     if (!('Notification' in window)) return;
     if (Notification.permission !== 'granted') return;
-    new Notification(n.title, { body: n.body, icon: '/favicon.ico', tag: n.id });
+    new Notification(n.title, { body: n.body, icon: '/customerLogo.svg', tag: n.id });
   }
 
   requestBrowserPermission(): void {
