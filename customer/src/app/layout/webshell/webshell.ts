@@ -1,10 +1,8 @@
 import { Component, signal, inject, computed, effect, OnInit, OnDestroy } from '@angular/core';
 import { RouterOutlet, RouterLink, Router, NavigationEnd } from '@angular/router';
-import { NgClass } from '@angular/common';
 import { filter } from 'rxjs/operators';
 import { useIsMobile } from '../../shared/is-mobile';
 import {
-  LucideBus,
   LucideSun,
   LucideMoon,
   LucideUserRound,
@@ -26,8 +24,6 @@ import { NotificationBellComponent } from '../../shared/notification-bell/notifi
   imports: [
     RouterOutlet,
     RouterLink,
-    NgClass,
-    LucideBus,
     LucideSun,
     LucideMoon,
     LucideUserRound,
