@@ -7,6 +7,7 @@ import { BookingService } from '../../services/booking/booking.service';
 import { SessionService } from '../../services/session/session.service';
 import { ArabicNumberPipe } from '../../pipes/arabic-number/arabic-number-pipe';
 import { formatArabicDateTime, formatArabicTime } from '../../pipes/arabic-number/arabic-number.util';
+import { AuthStoreService } from '../../services/auth-store/auth-store.service';
 
 @Component({
   selector: 'app-payment-details',
@@ -19,6 +20,7 @@ export class PaymentDetails implements OnInit {
   private fb = inject(FormBuilder);
   private bookingSvc = inject(BookingService);
   private sessionSvc = inject(SessionService);
+  private authStore = inject(AuthStoreService);
 
   trip = signal<any>(null);
   selectedSeats = signal<number[]>([]);
@@ -80,6 +82,11 @@ export class PaymentDetails implements OnInit {
   isExpired = computed(() => this.sessionSvc.isExpired());
 
   ngOnInit(): void {
+    if (!this.authStore.isLoggedIn()) {
+      const prefix = this.router.url.startsWith('/m') ? '/m' : '';
+      this.router.navigate([prefix + '/login']);
+      return;
+    }
     const s = history.state;
     if (!s?.trip || !s?.selectedSeats) {
       this.router.navigate(['../home'], { relativeTo: this.route });

@@ -3,21 +3,23 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
-import { LucideArrowRight, LucideSearch, LucidePencil, LucideX, LucideLoaderCircle, LucideSearchX, LucideBus, LucideMapPin, LucideArrowUp, LucideArrowDown, LucideChevronLeft, LucideChevronRight } from '@lucide/angular';
+import { LucideArrowRight, LucideSearch, LucidePencil, LucideX, LucideLoaderCircle, LucideSearchX, LucideBus, LucideMapPin, LucideArrowUp, LucideArrowDown, LucideChevronLeft, LucideChevronRight, LucideLogIn } from '@lucide/angular';
 import { TripSearchService } from '../../services/trip-search/trip-search.service';
 import { MobileTripCardComponent } from '../../shared/mobile-trip-card';
 import { ArabicNumberPipe } from '../../pipes/arabic-number/arabic-number-pipe';
+import { AuthStoreService } from '../../services/auth-store/auth-store.service';
 
 @Component({
   selector: 'app-search-results',
   standalone: true,
-  imports: [FormsModule, NgClass, MobileTripCardComponent, ArabicNumberPipe, LucideArrowRight, LucideSearch, LucidePencil, LucideX, LucideLoaderCircle, LucideSearchX, LucideBus, LucideMapPin, LucideArrowUp, LucideArrowDown, LucideChevronLeft, LucideChevronRight],
+  imports: [FormsModule, NgClass, MobileTripCardComponent, ArabicNumberPipe, LucideArrowRight, LucideSearch, LucidePencil, LucideX, LucideLoaderCircle, LucideSearchX, LucideBus, LucideMapPin, LucideArrowUp, LucideArrowDown, LucideChevronLeft, LucideChevronRight, LucideLogIn],
   templateUrl: './search-results.html',
 })
 export class SearchResults implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private tripSvc = inject(TripSearchService);
+  private authStore = inject(AuthStoreService);
   private destroyRef = inject(DestroyRef);
 
   from = signal<string>('');
@@ -26,6 +28,7 @@ export class SearchResults implements OnInit {
   trips = signal<any[]>([]);
   isLoading = signal<boolean>(false);
   error = signal<string>('');
+  authError = signal<boolean>(false);
   cities = signal<string[]>([]);
   showEdit = signal<boolean>(false);
   editSwapped = signal<boolean>(false);
@@ -89,5 +92,13 @@ export class SearchResults implements OnInit {
   nextEditMonth(): void { const [y, m] = this.editMonth().split('-').map(Number); const d = new Date(y, m, 1); this.editMonth.set(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`); }
   applyEdit(): void { if (!this.editFrom() || !this.editTo() || !this.editDate()) return; this.showEdit.set(false); this.router.navigate(['../results'], { relativeTo: this.route, queryParams: { from: this.editFrom(), to: this.editTo(), date: this.editDate() } }); }
   goBack(): void { history.back(); }
-  onTripSelected(trip: any): void { this.router.navigate(['../seat', trip.id], { relativeTo: this.route, state: { trip } }); }
+  onTripSelected(trip: any): void {
+    if (!this.authStore.isLoggedIn()) {
+      this.authError.set(true);
+      return;
+    }
+    this.router.navigate(['../seat', trip.id], { relativeTo: this.route, state: { trip } });
+  }
+  dismissAuthError(): void { this.authError.set(false); }
+  goToLogin(): void { this.authError.set(false); this.router.navigate(['/m/login']); }
 }

@@ -156,26 +156,39 @@
         </span>
       </div>
 
-      <button
-        type="button"
-        (click)="openModal(); $event.stopPropagation()"
-        class="flex items-center gap-2
-               px-5 py-2.5 rounded-xl cursor-pointer
-               bg-[var(--primary)]
-               hover:bg-[var(--primary-hover)]
-               text-white text-sm font-bold
-               transition-all duration-150
-               active:scale-95
-               whitespace-nowrap
-               shadow-sm
-               group-hover:shadow-md">
-        <span>اختر مقعدك</span>
-        <svg lucideChevronLeft
-             class="w-4 h-4 flex-shrink-0
-                    transition-transform duration-150
-                    group-hover:-translate-x-0.5">
-        </svg>
-      </button>
+      @if (!authError()) {
+        <button
+          type="button"
+          (click)="openModal(); $event.stopPropagation()"
+          class="flex items-center gap-2
+                 px-5 py-2.5 rounded-xl cursor-pointer
+                 bg-[var(--primary)]
+                 hover:bg-[var(--primary-hover)]
+                 text-white text-sm font-bold
+                 transition-all duration-150
+                 active:scale-95
+                 whitespace-nowrap
+                 shadow-sm
+                 group-hover:shadow-md">
+          <span>اختر مقعدك</span>
+          <svg lucideChevronLeft
+               class="w-4 h-4 flex-shrink-0
+                      transition-transform duration-150
+                      group-hover:-translate-x-0.5">
+          </svg>
+        </button>
+      } @else {
+        <div class="flex flex-col items-center gap-3">
+          <p class="text-sm font-bold text-[var(--text-primary)] text-center">يجب تسجيل الدخول أولاً لحجز مقعد</p>
+          <button
+            type="button"
+            (click)="goToLogin(); $event.stopPropagation()"
+            class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white text-sm font-bold transition-all duration-150 active:scale-95 whitespace-nowrap shadow-sm">
+            <svg lucideLogIn class="w-4 h-4"></svg>
+            <span>تسجيل الدخول</span>
+          </button>
+        </div>
+      }
 
     </div>
   </div>

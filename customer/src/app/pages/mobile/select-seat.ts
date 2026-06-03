@@ -7,6 +7,7 @@ import { SessionService } from '../../services/session/session.service';
 import { TimeFormatPipe } from '../../pipes/time-format/time-format-pipe';
 import { ArabicNumberPipe } from '../../pipes/arabic-number/arabic-number-pipe';
 import { WsService } from '../../services/ws.service';
+import { AuthStoreService } from '../../services/auth-store/auth-store.service';
 
 type SeatStatus = 'available' | 'reserved' | 'booked';
 interface Seat { number: number; status: SeatStatus; }
@@ -23,6 +24,7 @@ export class SelectSeat implements OnInit, OnDestroy {
   private bookingSvc = inject(BookingService);
   private sessionSvc = inject(SessionService);
   private ws = inject(WsService);
+  private authStore = inject(AuthStoreService);
 
   private _tripId = '';
   private wsCleanups: (() => void)[] = [];
@@ -60,6 +62,11 @@ export class SelectSeat implements OnInit, OnDestroy {
   backSeats = computed(() => this.seatMap().slice(-5));
 
   ngOnInit(): void {
+    if (!this.authStore.isLoggedIn()) {
+      const prefix = this.router.url.startsWith('/m') ? '/m' : '';
+      this.router.navigate([prefix + '/login']);
+      return;
+    }
     this._tripId = this.route.snapshot.paramMap.get('tripId') ?? '';
     const nav = history.state?.trip;
     if (nav) this.trip.set(nav);

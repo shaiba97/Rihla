@@ -6,6 +6,7 @@ import { NgClass } from '@angular/common';
 import { LucideArrowRight, LucideUser, LucideSmartphone, LucideAlertCircle } from '@lucide/angular';
 import { ArabicNumberPipe } from '../../pipes/arabic-number/arabic-number-pipe';
 import { SessionService } from '../../services/session/session.service';
+import { AuthStoreService } from '../../services/auth-store/auth-store.service';
 
 @Component({
   selector: 'app-passenger-details',
@@ -18,6 +19,7 @@ export class PassengerDetails implements OnInit {
   private route = inject(ActivatedRoute);
   private fb = inject(FormBuilder);
   private sessionSvc = inject(SessionService);
+  private authStore = inject(AuthStoreService);
 
   trip = signal<any>(null);
   selectedSeats = signal<number[]>([]);
@@ -36,6 +38,11 @@ export class PassengerDetails implements OnInit {
   canProceed = computed(() => this.contactStatus() === 'VALID' && this.passengerStatus() === 'VALID' && this.selectedSeats().length > 0);
 
   ngOnInit(): void {
+    if (!this.authStore.isLoggedIn()) {
+      const prefix = this.router.url.startsWith('/m') ? '/m' : '';
+      this.router.navigate([prefix + '/login']);
+      return;
+    }
     const s = history.state;
     this.trip.set(s?.trip);
     this.selectedSeats.set(s?.selectedSeats ?? []);

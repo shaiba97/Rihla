@@ -30,6 +30,7 @@ import { BookingService, BackendTrip } from '../../../services/booking/booking.s
 import { SessionService } from '../../../services/session/session.service';
 import { TimeFormatPipe } from '../../../pipes/time-format/time-format-pipe';
 import { ArabicNumberPipe } from '../../../pipes/arabic-number/arabic-number-pipe';
+import { AuthStoreService } from '../../../services/auth-store/auth-store.service';
 
 @Component({
   selector: 'app-booking-modal',
@@ -74,6 +75,7 @@ export class BookingModalComponent implements OnInit, OnDestroy {
   sessionSvc = inject(SessionService);
   private fb = inject(FormBuilder);
   private ws = inject(WsService);
+  private authStore = inject(AuthStoreService);
 
   private wsCleanups: (() => void)[] = [];
 
@@ -189,6 +191,10 @@ export class BookingModalComponent implements OnInit, OnDestroy {
   });
 
   ngOnInit(): void {
+    if (!this.authStore.isLoggedIn()) {
+      this.closed.emit();
+      return;
+    }
     this.sessionSvc.init(this.tripId(), this.ticketId(), this.price(), this.currency());
     this.loadTrip();
     this.loadPaymentAccounts();

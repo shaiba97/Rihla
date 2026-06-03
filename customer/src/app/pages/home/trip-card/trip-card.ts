@@ -3,12 +3,14 @@ import {
   inject,
 } from '@angular/core';
 import { NgClass, DatePipe } from '@angular/common';
+import { Router } from '@angular/router';
 import {
   LucideBus,
   LucideClock,
   LucideArmchair,
   LucideArrowLeft,
   LucideChevronLeft,
+  LucideLogIn,
 } from '@lucide/angular';
 import { TimeFormatPipe }
   from '../../../pipes/time-format/time-format-pipe';
@@ -18,6 +20,7 @@ import { BookingModalComponent }
   from '../../../shared/booking-modal/booking-modal/booking-modal';
 import { BookingService } from '../../../core/services/booking/booking';
 import { ArabicNumberPipe } from '../../../pipes/arabic-number/arabic-number-pipe';
+import { AuthStoreService } from '../../../services/auth-store/auth-store.service';
 
 export interface Trip {
   id: string;
@@ -71,6 +74,7 @@ export interface Booking {
     LucideArmchair,
     LucideArrowLeft,
     LucideChevronLeft,
+    LucideLogIn,
     TimeFormatPipe,
     DurationPipe,
     DatePipe,
@@ -82,11 +86,14 @@ export interface Booking {
 export class TripCardComponent {
 
   private bookingService = inject(BookingService);
+  private authStore = inject(AuthStoreService);
+  private router = inject(Router);
 
   trip     = input.required<Trip>();
 
   currency = 'ج. س';
   showModal = signal<boolean>(false);
+  authError = signal<boolean>(false);
 
   seatsClasses = computed((): string[] => {
     const s = this.trip().bus!.chairs;
@@ -117,9 +124,14 @@ export class TripCardComponent {
   }
 
   openModal(): void { 
+    if (!this.authStore.isLoggedIn()) {
+      this.authError.set(true);
+      return;
+    }
     this.showModal.set(true);
   }
   closeModal(): void { this.showModal.set(false); }
+  goToLogin(): void { this.router.navigate(['/login']); }
 
   getActiveFee(){
     this.bookingService.getActiveFee().subscribe({

@@ -13,6 +13,20 @@
     </button>
   </div>
 
+  @if (authError()) {
+    <div class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" (click)="dismissAuthError()"></div>
+    <div class="fixed top-0 right-0 left-0 z-50 bg-[var(--bg-card)] rounded-b-3xl shadow-2xl border-b border-[var(--border)] overflow-hidden">
+      <div class="flex flex-col items-center gap-4 px-6 py-8 text-center">
+        <p class="text-sm font-bold text-[var(--text-primary)]">يجب تسجيل الدخول أولاً لحجز مقعد</p>
+        <button (click)="goToLogin()" class="w-full flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-[var(--primary)] text-white font-bold text-[14px] active:scale-[0.98] transition-all duration-150">
+          <svg lucideLogIn class="w-4 h-4"></svg>
+          <span>تسجيل الدخول</span>
+        </button>
+        <button (click)="dismissAuthError()" class="text-[13px] font-semibold text-[var(--text-muted)] active:scale-[0.98] transition-all">إلغاء</button>
+      </div>
+    </div>
+  }
+
   @if (showEdit()) {
     <div class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" (click)="closeEdit()"></div>
     <div class="fixed top-0 right-0 left-0 z-50 bg-[var(--bg-card)] rounded-b-3xl shadow-2xl border-b border-[var(--border)] overflow-hidden">
