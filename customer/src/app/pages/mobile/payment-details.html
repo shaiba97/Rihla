@@ -1,4 +1,17 @@
-@if (submitSuccess()) {
+@if (showLoginPrompt()) {
+  <div dir="rtl" class="min-h-screen bg-[var(--bg-base)] flex flex-col items-center justify-center px-6 gap-5 text-center">
+    <div class="w-16 h-16 rounded-full bg-[var(--primary-light)] flex items-center justify-center">
+      <svg lucideLogIn class="w-8 h-8 text-[var(--primary)]"></svg>
+    </div>
+    <h1 class="text-xl font-extrabold text-[var(--text-primary)]">يجب تسجيل الدخول أولاً لحجز مقعد</h1>
+    <p class="text-sm text-[var(--text-secondary)]">يرجى تسجيل الدخول للمتابعة</p>
+    <button (click)="goToLogin()" class="flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-bold text-[15px] active:scale-95 transition-all shadow-lg">
+      <svg lucideLogIn class="w-5 h-5"></svg>
+      <span>تسجيل الدخول</span>
+    </button>
+  </div>
+} @else {
+  @if (submitSuccess()) {
   <div dir="rtl" class="min-h-screen bg-[var(--bg-base)] flex flex-col items-center justify-center px-6 gap-5 text-center">
     <div class="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center">
       <svg lucideCheckCircle class="w-8 h-8 text-emerald-600"></svg>
@@ -164,4 +177,5 @@
       </div>
     }
   </div>
+  }
 }

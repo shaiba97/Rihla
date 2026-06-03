@@ -1,5 +1,21 @@
-<!-- Success screen -->
-@if (submitSuccess()) {
+<!-- Auth required -->
+@if (showAuthRequired()) {
+  <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" dir="rtl">
+    <div class="bg-[var(--bg-card)] rounded-3xl w-full max-w-md mx-4 overflow-hidden shadow-2xl p-8 flex flex-col items-center gap-5 text-center">
+      <div class="w-16 h-16 rounded-full bg-[var(--primary-light)] flex items-center justify-center">
+        <svg lucideLogIn class="w-8 h-8 text-[var(--primary)]"></svg>
+      </div>
+      <h2 class="text-xl font-extrabold text-[var(--text-primary)]">يجب تسجيل الدخول أولاً لحجز مقعد</h2>
+      <p class="text-sm text-[var(--text-secondary)]">يرجى تسجيل الدخول للمتابعة</p>
+      <div class="flex gap-3 w-full">
+        <button (click)="onClose()" class="flex-1 py-3.5 rounded-2xl border-2 border-[var(--border)] text-[var(--text-primary)] font-bold text-sm transition-all active:scale-95">إغلاق</button>
+        <button (click)="goToLogin()" class="flex-1 py-3.5 rounded-2xl bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-bold text-sm transition-all active:scale-95">تسجيل الدخول</button>
+      </div>
+    </div>
+  </div>
+} @else {
+  <!-- Success screen -->
+  @if (submitSuccess()) {
   <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" dir="rtl">
     <div class="bg-[var(--bg-card)] rounded-3xl w-full max-w-md mx-4 overflow-hidden shadow-2xl">
       <div class="p-6 md:p-8 flex flex-col items-center gap-4 text-center">
@@ -523,4 +539,5 @@
       }
     </div>
   </div>
+  }
 }

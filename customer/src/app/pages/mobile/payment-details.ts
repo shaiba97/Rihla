@@ -2,7 +2,7 @@ import { Component, signal, inject, OnInit, computed } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { LucideArrowRight, LucideClock, LucideUpload, LucideCreditCard, LucideCopy, LucideCheck } from '@lucide/angular';
+import { LucideArrowRight, LucideClock, LucideUpload, LucideCreditCard, LucideCopy, LucideCheck, LucideLogIn } from '@lucide/angular';
 import { BookingService } from '../../services/booking/booking.service';
 import { SessionService } from '../../services/session/session.service';
 import { ArabicNumberPipe } from '../../pipes/arabic-number/arabic-number-pipe';
@@ -11,7 +11,7 @@ import { AuthStoreService } from '../../services/auth-store/auth-store.service';
 
 @Component({
   selector: 'app-payment-details',
-  imports: [ReactiveFormsModule, ArabicNumberPipe, LucideArrowRight, LucideClock, LucideUpload, LucideCreditCard, LucideCopy, LucideCheck],
+  imports: [ReactiveFormsModule, ArabicNumberPipe, LucideArrowRight, LucideClock, LucideUpload, LucideCreditCard, LucideCopy, LucideCheck, LucideLogIn],
   templateUrl: './payment-details.html',
 })
 export class PaymentDetails implements OnInit {
@@ -36,6 +36,7 @@ export class PaymentDetails implements OnInit {
   receiptFileName = signal<string>('');
   copied = signal<string | null>(null);
   copySuccess = signal<boolean>(false);
+  showLoginPrompt = signal<boolean>(false);
 
   paymentAccounts = signal<any[]>([]);
 
@@ -83,8 +84,7 @@ export class PaymentDetails implements OnInit {
 
   ngOnInit(): void {
     if (!this.authStore.isLoggedIn()) {
-      const prefix = this.router.url.startsWith('/m') ? '/m' : '';
-      this.router.navigate([prefix + '/login']);
+      this.showLoginPrompt.set(true);
       return;
     }
     const s = history.state;
@@ -167,6 +167,10 @@ export class PaymentDetails implements OnInit {
     });
   }
 
+  goToLogin(): void {
+    const prefix = this.router.url.startsWith('/m') ? '/m' : '';
+    this.router.navigate([prefix + '/login']);
+  }
   goHome(): void {
     this.router.navigate(['/m']);
   }

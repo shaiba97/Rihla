@@ -3,7 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormArray, ReactiveFormsModule, Validators, AbstractControl } from '@angular/forms';
 import { NgClass } from '@angular/common';
-import { LucideArrowRight, LucideUser, LucideSmartphone, LucideAlertCircle } from '@lucide/angular';
+import { LucideArrowRight, LucideUser, LucideSmartphone, LucideAlertCircle, LucideLogIn } from '@lucide/angular';
 import { ArabicNumberPipe } from '../../pipes/arabic-number/arabic-number-pipe';
 import { SessionService } from '../../services/session/session.service';
 import { AuthStoreService } from '../../services/auth-store/auth-store.service';
@@ -11,7 +11,7 @@ import { AuthStoreService } from '../../services/auth-store/auth-store.service';
 @Component({
   selector: 'app-passenger-details',
   standalone: true,
-  imports: [ReactiveFormsModule, NgClass, ArabicNumberPipe, LucideArrowRight, LucideUser, LucideSmartphone, LucideAlertCircle],
+  imports: [ReactiveFormsModule, NgClass, ArabicNumberPipe, LucideArrowRight, LucideUser, LucideSmartphone, LucideAlertCircle, LucideLogIn],
   templateUrl: './passenger-details.html',
 })
 export class PassengerDetails implements OnInit {
@@ -26,6 +26,7 @@ export class PassengerDetails implements OnInit {
   baseAmount = signal<number>(0);
   platformFee = signal<number>(0);
   totalAmount = signal<number>(0);
+  showLoginPrompt = signal<boolean>(false);
 
   countryCodes = [{ code: '+249', label: 'SD +249' }, { code: '+20', label: 'EG +20' }, { code: '+966', label: 'SA +966' }, { code: '+971', label: 'AE +971' }];
 
@@ -39,8 +40,7 @@ export class PassengerDetails implements OnInit {
 
   ngOnInit(): void {
     if (!this.authStore.isLoggedIn()) {
-      const prefix = this.router.url.startsWith('/m') ? '/m' : '';
-      this.router.navigate([prefix + '/login']);
+      this.showLoginPrompt.set(true);
       return;
     }
     const s = history.state;
@@ -69,5 +69,9 @@ export class PassengerDetails implements OnInit {
     this.router.navigate(['../payment'], { relativeTo: this.route, state: { trip: this.trip(), selectedSeats: this.selectedSeats(), baseAmount: this.baseAmount(), platformFee: this.platformFee(), totalAmount: this.totalAmount(), contact: this.contactGroup.value, passengers: this.passengersArray.value } });
   }
 
+  goToLogin(): void {
+    const prefix = this.router.url.startsWith('/m') ? '/m' : '';
+    this.router.navigate([prefix + '/login']);
+  }
   goBack(): void { history.back(); }
 }

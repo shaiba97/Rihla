@@ -23,7 +23,9 @@ import {
   LucideLandmark,
   LucideUpload,
   LucideCheck,
+  LucideLogIn,
 } from '@lucide/angular';
+import { Router } from '@angular/router';
 import { BookingStep, SeatMap, PassengerForm, ContactForm } from './booking.interfaces';
 import { WsService } from '../../../services/ws.service';
 import { BookingService, BackendTrip } from '../../../services/booking/booking.service';
@@ -60,6 +62,7 @@ import { AuthStoreService } from '../../../services/auth-store/auth-store.servic
     LucideLandmark,
     LucideUpload,
     LucideCheck,
+    LucideLogIn,
   ],
   templateUrl: './booking-modal.component.html',
 })
@@ -76,6 +79,7 @@ export class BookingModalComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private ws = inject(WsService);
   private authStore = inject(AuthStoreService);
+  private router = inject(Router);
 
   private wsCleanups: (() => void)[] = [];
 
@@ -91,6 +95,7 @@ export class BookingModalComponent implements OnInit, OnDestroy {
   receiptFile = signal<File | null>(null);
   copied = signal<boolean>(false);
   bookingId = signal<string>('');
+  showAuthRequired = signal<boolean>(false);
 
   seatMap = computed((): SeatMap[] => {
     const trip = this.trip();
@@ -192,7 +197,7 @@ export class BookingModalComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     if (!this.authStore.isLoggedIn()) {
-      this.closed.emit();
+      this.showAuthRequired.set(true);
       return;
     }
     this.sessionSvc.init(this.tripId(), this.ticketId(), this.price(), this.currency());
@@ -342,6 +347,10 @@ export class BookingModalComponent implements OnInit, OnDestroy {
   onClose(): void {
     this.sessionSvc.clear();
     this.closed.emit();
+  }
+
+  goToLogin(): void {
+    this.router.navigate(['/login']);
   }
 
   onSubmit(): void {

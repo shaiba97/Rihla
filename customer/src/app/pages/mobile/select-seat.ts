@@ -1,7 +1,7 @@
 import { Component, signal, inject, OnInit, OnDestroy, computed } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgClass, DatePipe } from '@angular/common';
-import { LucideArrowRight, LucideArmchair } from '@lucide/angular';
+import { LucideArrowRight, LucideArmchair, LucideLogIn } from '@lucide/angular';
 import { BookingService } from '../../services/booking/booking.service';
 import { SessionService } from '../../services/session/session.service';
 import { TimeFormatPipe } from '../../pipes/time-format/time-format-pipe';
@@ -15,7 +15,7 @@ interface Seat { number: number; status: SeatStatus; }
 @Component({
   selector: 'app-select-seat',
   standalone: true,
-  imports: [NgClass, DatePipe, TimeFormatPipe, ArabicNumberPipe, LucideArrowRight, LucideArmchair],
+  imports: [NgClass, DatePipe, TimeFormatPipe, ArabicNumberPipe, LucideArrowRight, LucideArmchair, LucideLogIn],
   templateUrl: './select-seat.html',
 })
 export class SelectSeat implements OnInit, OnDestroy {
@@ -34,6 +34,7 @@ export class SelectSeat implements OnInit, OnDestroy {
   selectedSeats = signal<number[]>([]);
   isLoading = signal<boolean>(true);
   platformFee = signal<number>(0);
+  showLoginPrompt = signal<boolean>(false);
 
   platformFeeAmount = computed(() => this.platformFee());
   baseAmount = computed(() => this.platformFeeAmount() + (this.trip()?.price ?? 0));
@@ -63,8 +64,7 @@ export class SelectSeat implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     if (!this.authStore.isLoggedIn()) {
-      const prefix = this.router.url.startsWith('/m') ? '/m' : '';
-      this.router.navigate([prefix + '/login']);
+      this.showLoginPrompt.set(true);
       return;
     }
     this._tripId = this.route.snapshot.paramMap.get('tripId') ?? '';
@@ -126,6 +126,10 @@ export class SelectSeat implements OnInit, OnDestroy {
       platformFee: this.platformFeeAmount(),
       totalAmount: this.totalAmount(),
     }});
+  }
+  goToLogin(): void {
+    const prefix = this.router.url.startsWith('/m') ? '/m' : '';
+    this.router.navigate([prefix + '/login']);
   }
   goBack(): void { history.back(); }
 }
