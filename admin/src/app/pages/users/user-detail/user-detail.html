@@ -43,6 +43,7 @@
                 <th class="text-right px-4 py-3 text-xs font-bold text-[var(--text-muted)]">الراكب</th>
                 <th class="text-right px-4 py-3 text-xs font-bold text-[var(--text-muted)]">العمر</th>
                 <th class="text-right px-4 py-3 text-xs font-bold text-[var(--text-muted)]">الجنس</th>
+                <th class="text-right px-4 py-3 text-xs font-bold text-[var(--text-muted)]">المسار</th>
                 <th class="text-right px-4 py-3 text-xs font-bold text-[var(--text-muted)]">المقاعد</th>
                 <th class="text-right px-4 py-3 text-xs font-bold text-[var(--text-muted)]">المبلغ</th>
                 <th class="text-right px-4 py-3 text-xs font-bold text-[var(--text-muted)]">طريقة الدفع</th>
@@ -51,14 +52,15 @@
               </tr></thead>
               <tbody>
                 @for (b of paginatedBookings(); track $index; let bi = $index) {
-                  @for (p of (b.passenger ?? []); track $index; let pi = $index) {
+                  @for (p of passengers(b); track $index; let pi = $index) {
                     <tr class="border-b border-[var(--border)] hover:bg-[var(--bg-base)] transition-colors">
                       <td class="px-4 py-3 text-[var(--text-primary)] font-medium">{{ toArabic(bi + 1)  }}</td>
                       <td class="px-4 py-3 text-[var(--text-primary)] font-medium">{{ p.name }}</td>
                       <td class="px-4 py-3 text-[var(--text-primary)]">{{ toArabic(p.age) }}</td>
                       <td class="px-4 py-3 text-[var(--text-primary)]">{{ genderLabel(p.gender) }}</td>
+                      <td class="px-4 py-3 text-[var(--text-primary)] whitespace-nowrap">{{ b.Trip?.fromCity ?? '—' }} ← {{ b.Trip?.toCity ?? '—' }}</td>
                       <td class="px-4 py-3 text-[var(--text-primary)]">{{ toArabic(b.seatNumbers[pi]) }}</td>
-                      <td class="px-4 py-3 text-[var(--text-primary)] font-semibold tabular-nums">{{ toArabic(b.Payment.price ?? 0) }}</td>
+                      <td class="px-4 py-3 text-[var(--text-primary)] font-semibold tabular-nums">{{ toArabic(b.Payment?.totalAmount ?? 0) }}</td>
                       <td class="px-4 py-3"><span class="px-2 py-0.5 rounded-full text-xs font-bold bg-[var(--primary-light)] text-[var(--text-primary)]">{{ methodLabel(b.Payment?.paymentMethod) }}</span></td>
                       <td class="px-4 py-3 text-[var(--text-muted)]">{{ b.createdAt | date:'yyyy-MM-dd' }}</td>
                       <td class="px-4 py-3">

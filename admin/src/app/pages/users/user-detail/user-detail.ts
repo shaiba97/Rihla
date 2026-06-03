@@ -72,4 +72,9 @@ export class UserDetailComponent implements OnInit {
   statusLabel(s: string): string { return { CONFIRMED: 'مؤكد', PENDING: 'قيد الانتظار', CANCELLED: 'ملغي' }[s] ?? s; }
 
   toArabic(n: number): string { return String(n).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[+d]); }
+  passengers(b: any): any[] {
+    const p = b?.passenger;
+    if (!p) return [];
+    return Array.isArray(p) ? p : [p];
+  }
 }

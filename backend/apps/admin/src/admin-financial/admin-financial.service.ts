@@ -76,6 +76,7 @@ type PendingPaymentDetail = {
   createdAt: Date;
   Booking: {
     seatNumbers: number[];
+    passenger: any;
     Customer: { id: string; name: string; phone: string | null } | null;
     Trip: {
       fromCity: string;
@@ -245,6 +246,7 @@ export class AdminFinancialService {
       paymentMethod: p.paymentMethod, transactionId: p.transactionId, recieptFile: p.receiptFile,
       createdAt: p.createdAt, bookingId: p.bookingId,
       seatNumbers: p.Booking?.seatNumbers,
+      passenger: p.Booking?.passenger,
       customer: { name: p.Booking?.Customer?.name, phone: p.Booking?.Customer?.phone },
       trip: { from: p.Booking?.Trip?.fromCity, to: p.Booking?.Trip?.toCity, date: p.Booking?.Trip?.departureDate, time: p.Booking?.Trip?.departureTime },
     }));

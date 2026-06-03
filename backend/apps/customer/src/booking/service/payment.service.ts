@@ -82,14 +82,18 @@ export class PaymentService {
     const serverCompanyAmount = baseAmount;
     const serverTotalAmount = baseAmount + platformFeeAmount;
 
-    if (createPaymentDto.companyAmount !== undefined &&
-        createPaymentDto.companyAmount !== serverCompanyAmount) {
+    if (
+      createPaymentDto.companyAmount !== undefined &&
+      createPaymentDto.companyAmount !== serverCompanyAmount
+    ) {
       this.logger.warn(
         `companyAmount mismatch: DTO sent ${createPaymentDto.companyAmount}, server calculated ${serverCompanyAmount}`,
       );
     }
-    if (createPaymentDto.totalAmount !== undefined &&
-        createPaymentDto.totalAmount !== serverTotalAmount) {
+    if (
+      createPaymentDto.totalAmount !== undefined &&
+      createPaymentDto.totalAmount !== serverTotalAmount
+    ) {
       this.logger.warn(
         `totalAmount mismatch: DTO sent ${createPaymentDto.totalAmount}, server calculated ${serverTotalAmount}`,
       );
@@ -113,7 +117,7 @@ export class PaymentService {
       include: { Booking: { include: { Trip: true } } },
     });
 
-    const ticket = await this.generateTicket(booking);
+    const ticket = await this.generateTicket(booking, payment);
 
     this.wsGateway.emitToAdmin(WS_EVENTS.PAYMENT_CREATED, {
       paymentId: payment.id,
@@ -280,10 +284,12 @@ export class PaymentService {
     return { message: 'تم حذف الدفعة بنجاح' };
   }
 
-  async generateTicket(booking: any) {
+  async generateTicket(booking: any, paymentData?: any) {
     const ticketResult = await this.pdfService.generateTicket(
       booking.id as string,
+      paymentData,
     );
+
     const existingTicket = await this.prisma.ticketPDF.findUnique({
       where: { bookingId: booking.id },
     });

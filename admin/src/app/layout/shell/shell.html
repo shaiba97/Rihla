@@ -5,8 +5,8 @@
     <!-- DESKTOP SIDEBAR (hidden on mobile) -->
     <aside class="max-md:hidden flex flex-col flex-shrink-0 bg-[var(--bg-sidebar)] transition-all duration-300 overflow-hidden z-40" [ngClass]="sidebarOpen() ? 'w-64' : 'w-16'">
       <div class="flex items-center justify-between px-4 py-5 border-b border-white/10 flex-shrink-0">
-        @if (sidebarOpen()) { <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center"><svg lucideBus class="w-4 h-4 text-[var(--primary)]"></svg></div><div class="flex flex-col leading-none"><span class="text-white font-extrabold text-[15px]">رحلة</span><span class="text-[var(--sidebar-muted)] text-[9px] font-medium uppercase tracking-wider">Admin</span></div></div> }
-        @else { <div class="w-8 h-8 rounded-lg bg-white mx-auto flex items-center justify-center"><svg lucideBus class="w-4 h-4 text-[var(--primary)]"></svg></div> }
+        @if (sidebarOpen()) { <div class="flex items-center gap-3"><div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center"><img src="/adminLogo.png" class="w-5 h-5 object-contain"></div><div class="flex flex-col leading-none"><span class="text-white font-extrabold text-[15px]">رحلة</span><span class="text-[var(--sidebar-muted)] text-[9px] font-medium uppercase tracking-wider">Admin</span></div></div> }
+        @else { <div class="w-8 h-8 rounded-lg bg-white mx-auto flex items-center justify-center"><img src="/adminLogo.png" class="w-5 h-5 object-contain"></div> }
       </div>
       <nav class="flex-1 overflow-y-auto py-4 px-2 flex flex-col gap-1">
         @for (item of navItems; track item.path) {
