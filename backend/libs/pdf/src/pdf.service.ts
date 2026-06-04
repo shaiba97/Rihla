@@ -14,6 +14,7 @@ interface TFontDictionary {
 
 @Injectable()
 export class PDFService {
+
   private readonly logger = new Logger(PDFService.name);
   private outputDir = './upload';
   constructor(private readonly prisma: PrismaService) {
@@ -27,832 +28,206 @@ export class PDFService {
     pdfMake.fonts = fonts;
   }
 
-  // async generateTicket(
-  //   bookingId: string,
-  // ): Promise<{ publicUrl: string; filePath: string }> {
-  //   const outputDir = path.resolve(this.outputDir);
-  //   if (!fs.existsSync(outputDir)) {
-  //     fs.mkdirSync(outputDir, { recursive: true });
-  //   }
+  async generateTicket(
+    bookingId: string,
+    paymentData?: any,
+  ): Promise<{ publicUrl: string; filePath: string }> {
+    const outputDir = path.resolve(this.outputDir);
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir, { recursive: true });
+    }
 
-  //   const filename = `ticket_${bookingId}.pdf`;
-  //   const outputPath = path.join(outputDir, filename);
-  //   const publicUrl = `/upload/${filename}`;
+    const filename = `ticket_${bookingId}.pdf`;
+    const outputPath = path.join(outputDir, filename);
+    const publicUrl = `/upload/${filename}`;
 
-  //   const payment = await this.prisma.payment.findUnique({
-  //     where: { bookingId: bookingId },
-  //     include: {
-  //       Booking: {
-  //         include: {
-  //           Trip: { include: { Bus: true } },
-  //         },
-  //       },
-  //     },
-  //   });
+    const payment = await this.prisma.payment.findUnique({
+      where: { bookingId },
+      include: {
+        Booking: {
+          include: {
+            Trip: { include: { Bus: true } },
+          },
+        },
+      },
+    });
 
-  //   if (!payment) {
-  //     throw new Error('الحجز غير موجود');
-  //   }
+    if (!payment) {
+      throw new Error('الحجز غير موجود');
+    }
 
-  //   try {
-  //     const docDefinition = await this.buildTicketDefinition(payment);
-  //     const pdfDoc = pdfMake.createPdf(docDefinition);
-  //     const buffer = await pdfDoc.getBuffer();
-  //     fs.writeFileSync(outputPath, buffer);
-  //   } catch (error: any) {
-  //     const errStack = error?.stack || error?.message || String(error);
-  //     this.logger.error(`فشل في إنشاء ملف PDF للتذكرة ${bookingId}`, errStack);
-  //     fs.writeFileSync(outputPath, errStack);
-  //   }
+    try {
+      const trip = payment.Booking.Trip;
+      const bus = trip?.Bus;
+      const seatNumbers = (payment.Booking.seatNumbers ?? []) as number[];
+      const passengers = (payment.Booking.passenger ?? []) as any[];
 
-  //   return { publicUrl, filePath: outputPath };
-  // }
+      const passengerData = passengers.map((p: any, i: number) => ({
+        name: p.name || '',
+        age: p.age || 0,
+        gender: p.gender || 'MALE',
+        seatNumber: seatNumbers[i] || i + 1,
+      }));
 
-  // async generatePassengerList(
-  //   trip: any,
-  //   bookings: any[],
-  // ): Promise<{ publicUrl: string; filePath: string }> {
-  //   const outputDir = path.resolve(this.outputDir);
-  //   if (!fs.existsSync(outputDir)) {
-  //     fs.mkdirSync(outputDir, { recursive: true });
-  //   }
+      const ticketData: any = {
+        bookingId,
+        bus: bus
+          ? { name: bus.name, plateNumbers: bus.plate, chairs: bus.chairs }
+          : undefined,
+        trip: trip
+          ? {
+              departureDate: trip.departureDate,
+              departureTime: trip.departureTime,
+              arrivalDate: trip.arrivalDate,
+              arrivalTime: trip.arrivalTime,
+              fromState: trip.fromState,
+              fromCity: trip.fromCity,
+              fromStation: trip.fromStation,
+              toState: trip.toState,
+              toCity: trip.toCity,
+              toStation: trip.toStation,
+              price: trip.price,
+              status: trip.status,
+            }
+          : undefined,
+        passengers: passengerData,
+        payment: {
+          platformFeeAmount: payment.platformFeeAmount ?? 0,
+          companyAmount: payment.companyAmount ?? 0,
+          totalAmount: payment.totalAmount ?? 0,
+        },
+      };
 
-  //   const filename = `passengers_${trip.id}.pdf`;
-  //   const outputPath = path.join(outputDir, filename);
-  //   const publicUrl = `/upload/${filename}`;
+      const buf = await generateTicketBuffer(ticketData);
+      fs.writeFileSync(outputPath, buf);
+      this.logger.log(`Ticket saved -> ${outputPath} (${(buf.length / 1024).toFixed(1)} KB)`);
+    } catch (error: any) {
+      const errStack = error?.stack || error?.message || String(error);
+      this.logger.error(`فشل في إنشاء ملف PDF للتذكرة ${bookingId}`, errStack);
+      fs.writeFileSync(outputPath, errStack);
+    }
 
-  //   try {
-  //     const docDefinition = this.buildPassengerListDefinition(trip, bookings);
-  //     const pdfDoc = pdfMake.createPdf(docDefinition);
-  //     const buffer = await pdfDoc.getBuffer();
-  //     fs.writeFileSync(outputPath, buffer);
-  //   } catch (error: any) {
-  //     this.logger.error(
-  //       `فشل في إنشاء ملف PDF لقائمة الركاب للرحلة ${trip.id}`,
-  //       error?.stack || error?.message || error,
-  //     );
-  //     fs.writeFileSync(outputPath, 'PDF placeholder');
-  //   }
+    return { publicUrl, filePath: outputPath };
+  }
 
-  //   return { publicUrl, filePath: outputPath };
-  // }
+  async generatePassengerList(
+    trip: any,
+    bookings: any[],
+  ): Promise<{ publicUrl: string; filePath: string }> {
+    const outputDir = path.resolve(this.outputDir);
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir, { recursive: true });
+    }
 
-  // private async buildTicketDefinition(payment: any): Promise<any> {
-  //   const booking = payment.Booking;
-  //   const trip = booking.Trip;
-  //   const bus = trip?.Bus;
+    const filename = `passengers_${trip.id}.pdf`;
+    const outputPath = path.join(outputDir, filename);
+    const publicUrl = `/upload/${filename}`;
 
-  //   // Format Arabic date
-  //   const formatArabicDate = (date: Date | string): string => {
-  //     const d = new Date(date);
-  //     return d.toLocaleDateString('ar-EG', {
-  //       weekday: 'long',
-  //       year: 'numeric',
-  //       month: 'long',
-  //       day: 'numeric',
-  //     });
-  //   };
+    try {
+      const logoBase64 = loadLogoBase64();
 
-  //   // Format Arabic time
-  //   const formatArabicTime = (time: string): string => {
-  //     if (!time) return '—';
-  //     const [hours, minutes] = time.split(':');
-  //     const date = new Date();
-  //     date.setHours(parseInt(hours), parseInt(minutes));
-  //     return date.toLocaleTimeString('ar-EG', {
-  //       hour: '2-digit',
-  //       minute: '2-digit',
-  //       hour12: false,
-  //     });
-  //   };
+      const passengerRows = bookings.flatMap((b: any) => {
+        const seats = (b.seatNumbers ?? []) as number[];
+        const passengers = (b.passenger ?? []) as any[];
+        return passengers.map((p: any, i: number) => ({
+          name: p.name || '',
+          age: p.age || 0,
+          gender: p.gender || '',
+          seatNumber: seats[i] || '',
+          contact: b.passengerContact || '',
+        }));
+      });
 
-  //   // Format Arabic price
-  //   const formatArabicPrice = (price: number): string => {
-  //     return new Intl.NumberFormat('ar-EG', {
-  //       style: 'currency',
-  //       currency: 'SDG',
-  //       minimumFractionDigits: 0,
-  //     }).format(price);
-  //   };
+      const header = [
+        { text: '#', font: 'Tajawal', bold: true, fontSize: 9, color: C.white, fillColor: C.primary, alignment: 'center', margin: [0, 4, 0, 4] },
+        { text: 'المقعد', font: 'Tajawal', bold: true, fontSize: 9, color: C.white, fillColor: C.primary, alignment: 'center', margin: [0, 4, 0, 4] },
+        { text: 'الجنس', font: 'Tajawal', bold: true, fontSize: 9, color: C.white, fillColor: C.primary, alignment: 'center', margin: [0, 4, 0, 4] },
+        { text: 'العمر', font: 'Tajawal', bold: true, fontSize: 9, color: C.white, fillColor: C.primary, alignment: 'center', margin: [0, 4, 0, 4] },
+        { text: 'جهة الاتصال', font: 'Tajawal', bold: true, fontSize: 9, color: C.white, fillColor: C.primary, alignment: 'center', margin: [0, 4, 0, 4] },
+        { text: 'اسم الراكب', font: 'Tajawal', bold: true, fontSize: 9, color: C.white, fillColor: C.primary, alignment: 'right', margin: [0, 4, 4, 4] },
+      ];
 
-  //   // Parse bus plate JSON
-  //   const plateData = bus?.plate
-  //     ? typeof bus.plate === 'string'
-  //       ? JSON.parse(bus.plate)
-  //       : bus.plate
-  //     : { arabic: '---', english: '---', numbers: '---' };
+      const rows = passengerRows.map((p: any, i: number) => {
+        const isEven = i % 2 === 0;
+        const fill = isEven ? C.bgCard : C.bgBase;
+        const cell = (txt: string, align = 'center') => ({
+          text: String(txt ?? '—'),
+          font: 'Tajawal' as any,
+          fontSize: 9,
+          color: C.textPrimary,
+          fillColor: fill,
+          alignment: align as any,
+          margin: [0, 4, 0, 4],
+        });
+        return [
+          cell(toAr(i + 1)),
+          { ...cell(toAr(p.seatNumber)), bold: true, color: C.primary },
+          cell(genderLabel(p.gender)),
+          cell(toAr(p.age)),
+          cell(p.contact),
+          { ...cell(p.name, 'right'), bold: true, margin: [0, 4, 4, 4] },
+        ];
+      });
 
-  //   // Get passengers array
-  //   const passengers = Array.isArray(booking.passenger)
-  //     ? booking.passenger
-  //     : [booking.passenger || {}];
+      const docDefinition: any = {
+        pageSize: 'A4',
+        pageOrientation: 'landscape',
+        pageMargins: [24, 24, 24, 24],
+        defaultStyle: {
+          font: 'Tajawal',
+          fontSize: 10,
+          color: C.textPrimary,
+          alignment: 'right',
+        },
+        background: (currentPage: any, pageSize: any) => ({
+          canvas: [{
+            type: 'rect', x: 0, y: 0,
+            w: pageSize.width, h: pageSize.height,
+            color: C.bgBase,
+          }],
+        }),
+        content: [
+          buildHeader(logoBase64),
+          {
+            text: `قائمة الركاب — ${trip.fromCity || ''} → ${trip.toCity || ''}`,
+            font: 'Tajawal', bold: true, fontSize: 14,
+            color: C.textPrimary, alignment: 'right',
+            margin: [0, 0, 0, 12],
+          },
+          {
+            table: {
+              widths: [20, 40, 40, 36, '*', '*'],
+              headerRows: 1,
+              body: [header, ...rows],
+            },
+            layout: {
+              hLineWidth: (i: number) => i <= 1 ? 1 : 0.5,
+              vLineWidth: () => 0.5,
+              hLineColor: () => C.border,
+              vLineColor: () => C.border,
+              paddingTop: () => 0,
+              paddingBottom: () => 0,
+              paddingLeft: () => 4,
+              paddingRight: () => 4,
+            },
+          },
+          buildFooter(trip.id),
+        ],
+      };
 
-  //   const seatNumbers = booking.seatNumbers || [booking.seatNumber];
+      const pdfDoc = pdfMake.createPdf(docDefinition as any);
+      const buf = await pdfDoc.getBuffer();
+      fs.writeFileSync(outputPath, buf);
+      this.logger.log(`Passenger list saved -> ${outputPath} (${(buf.length / 1024).toFixed(1)} KB)`);
+    } catch (error: any) {
+      const errStack = error?.stack || error?.message || String(error);
+      this.logger.error(`فشل في إنشاء ملف PDF لقائمة الركاب ${trip.id}`, errStack);
+      fs.writeFileSync(outputPath, 'PDF placeholder');
+    }
 
-  //   // Read logo as base64
-  //   let logoBase64 = '';
-  //   try {
-  //     const logoPath = path.join(
-  //       process.cwd(),
-  //       'backend/assets/companyLogo.png',
-  //     );
-  //     if (fs.existsSync(logoPath)) {
-  //       const logoBuffer = fs.readFileSync(logoPath);
-  //       logoBase64 = logoBuffer.toString('base64');
-  //     }
-  //   } catch (error) {
-  //     this.logger.warn('Logo not found, using text fallback');
-  //   }
-
-  //   // Passenger table rows
-  //   const passengerBody = [
-  //     [
-  //       { text: 'الاسم', style: 'tableHeader', alignment: 'center' },
-  //       { text: 'العمر', style: 'tableHeader', alignment: 'center' },
-  //       { text: 'الجنس', style: 'tableHeader', alignment: 'center' },
-  //       { text: 'رقم المقعد', style: 'tableHeader', alignment: 'center' },
-  //     ],
-  //   ];
-
-  //   passengers.forEach((passenger: any, idx: number) => {
-  //     passengerBody.push([
-  //       {
-  //         text: passenger.name || '—',
-  //         style: 'tableCell',
-  //         alignment: 'center',
-  //       },
-  //       {
-  //         text: passenger.age?.toString() || '—',
-  //         style: 'tableCell',
-  //         alignment: 'center',
-  //       },
-  //       {
-  //         text: passenger.gender === 'MALE' ? 'ذكر' : 'أنثى',
-  //         style: 'tableCell',
-  //         alignment: 'center',
-  //       },
-  //       {
-  //         text: seatNumbers[idx]?.toString() || '—',
-  //         style: 'tableCell',
-  //         alignment: 'center',
-  //       },
-  //     ]);
-  //   });
-
-  //   // Payment details table
-  //   const platformFee = Number(payment.platformFeeAmount) || 0;
-  //   const totalAmount = Number(payment.totalAmount);
-  //   const companyAmount = Number(payment.companyAmount);
-  //   const ticketPrice = Number(trip.price);
-
-  //   const paymentBody = [
-  //     [
-  //       { text: 'البيان', style: 'tableHeader', alignment: 'center' },
-  //       { text: 'المبلغ', style: 'tableHeader', alignment: 'center' },
-  //     ],
-  //     [
-  //       { text: 'سعر التذكرة', style: 'tableCell', alignment: 'center' },
-  //       {
-  //         text: formatArabicPrice(ticketPrice),
-  //         style: 'tableCell',
-  //         alignment: 'center',
-  //       },
-  //     ],
-  //     [
-  //       { text: 'رسوم المنصة', style: 'tableCell', alignment: 'center' },
-  //       {
-  //         text: formatArabicPrice(platformFee),
-  //         style: 'tableCell',
-  //         alignment: 'center',
-  //       },
-  //     ],
-  //     [
-  //       {
-  //         text: 'المدفوع (لشركة الحافلات)',
-  //         style: 'tableCell',
-  //         alignment: 'center',
-  //       },
-  //       {
-  //         text: formatArabicPrice(companyAmount),
-  //         style: 'tableCell',
-  //         alignment: 'center',
-  //       },
-  //     ],
-  //     [
-  //       { text: 'الإجمالي المدفوع', style: 'totalCell', alignment: 'center' },
-  //       {
-  //         text: formatArabicPrice(totalAmount),
-  //         style: 'totalCell',
-  //         alignment: 'center',
-  //       },
-  //     ],
-  //   ];
-
-  //   return {
-  //     pageSize: 'A5',
-  //     pageMargins: [20, 20, 20, 20],
-  //     defaultStyle: {
-  //       font: 'Tajawal',
-  //       fontSize: 9,
-  //       alignment: 'right',
-  //     },
-  //     content: [
-  //       // Header with Logo and Title
-  //       {
-  //         columns: [
-  //           {
-  //             width: 'auto',
-  //             stack: logoBase64
-  //               ? [
-  //                   {
-  //                     image: `data:image/png;base64,${logoBase64}`,
-  //                     width: 50,
-  //                     height: 50,
-  //                     alignment: 'right',
-  //                   },
-  //                 ]
-  //               : [{ text: '', width: 50 }],
-  //           },
-  //           {
-  //             width: '*',
-  //             text: 'رحلة',
-  //             style: 'headerTitle',
-  //             alignment: 'center',
-  //           },
-  //           {
-  //             width: 'auto',
-  //             text: '',
-  //           },
-  //         ],
-  //         margin: [0, 0, 0, 15],
-  //       },
-
-  //       // Divider
-  //       {
-  //         canvas: [
-  //           {
-  //             type: 'line',
-  //             x1: 0,
-  //             y1: 0,
-  //             x2: 515,
-  //             y2: 0,
-  //             lineWidth: 2,
-  //             lineColor: '#0D9488',
-  //           },
-  //         ],
-  //         margin: [0, 0, 0, 10],
-  //       },
-
-  //       // Bus Details Section
-  //       {
-  //         text: 'تفاصيل الحافلة',
-  //         style: 'sectionTitle',
-  //         margin: [0, 10, 0, 8],
-  //       },
-  //       {
-  //         stack: [
-  //           {
-  //             text: bus?.name || '—',
-  //             style: 'busName',
-  //             alignment: 'center',
-  //           },
-  //           {
-  //             margin: [0, 10, 0, 10],
-  //             columns: [
-  //               {
-  //                 width: '*',
-  //                 stack: [
-  //                   { text: 'رقم اللوحة', style: 'label', alignment: 'center' },
-  //                   {
-  //                     table: {
-  //                       widths: ['*', 'auto', '*'],
-  //                       body: [
-  //                         [
-  //                           {
-  //                             text: plateData.arabic || '—',
-  //                             style: 'plateText',
-  //                             alignment: 'center',
-  //                           },
-  //                           {
-  //                             text: '|',
-  //                             style: 'plateText',
-  //                             alignment: 'center',
-  //                           },
-  //                           {
-  //                             text: plateData.english || '—',
-  //                             style: 'plateText',
-  //                             alignment: 'center',
-  //                           },
-  //                         ],
-  //                         [
-  //                           {
-  //                             text: 'عربي',
-  //                             style: 'plateLabel',
-  //                             alignment: 'center',
-  //                           },
-  //                           {},
-  //                           {
-  //                             text: 'إنجليزي',
-  //                             style: 'plateLabel',
-  //                             alignment: 'center',
-  //                           },
-  //                         ],
-  //                       ],
-  //                     },
-  //                     layout: 'noBorders',
-  //                   },
-  //                   {
-  //                     text: plateData.numbers || '—',
-  //                     style: 'plateNumbers',
-  //                     alignment: 'center',
-  //                     margin: [0, 8, 0, 0],
-  //                   },
-  //                 ],
-  //               },
-  //             ],
-  //           },
-  //         ],
-  //       },
-
-  //       // Trip Details Section
-  //       {
-  //         text: 'تفاصيل الرحلة',
-  //         style: 'sectionTitle',
-  //         margin: [0, 15, 0, 8],
-  //       },
-  //       {
-  //         table: {
-  //           widths: ['*', '*'],
-  //           body: [
-  //             [
-  //               {
-  //                 stack: [
-  //                   {
-  //                     text: 'المغادرة',
-  //                     style: 'subSectionTitle',
-  //                     alignment: 'center',
-  //                   },
-  //                   {
-  //                     text: trip?.fromState || '—',
-  //                     style: 'infoText',
-  //                     alignment: 'center',
-  //                   },
-  //                   {
-  //                     text: trip?.fromCity || '—',
-  //                     style: 'infoTextBold',
-  //                     alignment: 'center',
-  //                   },
-  //                   {
-  //                     text: trip?.fromStation || '—',
-  //                     style: 'infoText',
-  //                     alignment: 'center',
-  //                   },
-  //                   {
-  //                     text: formatArabicDate(trip?.departureDate),
-  //                     style: 'infoText',
-  //                     alignment: 'center',
-  //                   },
-  //                   {
-  //                     text: formatArabicTime(trip?.departureTime),
-  //                     style: 'infoText',
-  //                     alignment: 'center',
-  //                   },
-  //                 ],
-  //                 margin: [0, 0, 0, 10],
-  //               },
-  //               {
-  //                 stack: [
-  //                   {
-  //                     text: 'الوصول',
-  //                     style: 'subSectionTitle',
-  //                     alignment: 'center',
-  //                   },
-  //                   {
-  //                     text: trip?.toState || '—',
-  //                     style: 'infoText',
-  //                     alignment: 'center',
-  //                   },
-  //                   {
-  //                     text: trip?.toCity || '—',
-  //                     style: 'infoTextBold',
-  //                     alignment: 'center',
-  //                   },
-  //                   {
-  //                     text: trip?.toStation || '—',
-  //                     style: 'infoText',
-  //                     alignment: 'center',
-  //                   },
-  //                   {
-  //                     text: formatArabicDate(trip?.arrivalDate),
-  //                     style: 'infoText',
-  //                     alignment: 'center',
-  //                   },
-  //                   {
-  //                     text: formatArabicTime(trip?.arrivalTime),
-  //                     style: 'infoText',
-  //                     alignment: 'center',
-  //                   },
-  //                 ],
-  //                 margin: [0, 0, 0, 10],
-  //               },
-  //             ],
-  //             [
-  //               {
-  //                 stack: [
-  //                   {
-  //                     text: 'السعر',
-  //                     style: 'subSectionTitle',
-  //                     alignment: 'center',
-  //                   },
-  //                   {
-  //                     text: formatArabicPrice(trip?.price),
-  //                     style: 'priceText',
-  //                     alignment: 'center',
-  //                   },
-  //                 ],
-  //               },
-  //               {
-  //                 stack: [
-  //                   {
-  //                     text: 'الحالة',
-  //                     style: 'subSectionTitle',
-  //                     alignment: 'center',
-  //                   },
-  //                   {
-  //                     text:
-  //                       trip?.status === 'SCHEDULED'
-  //                         ? 'مجدولة'
-  //                         : trip?.status === 'IN_PROGRESS'
-  //                           ? 'قيد التنفيذ'
-  //                           : trip?.status === 'COMPLETED'
-  //                             ? 'مكتملة'
-  //                             : 'ملغاة',
-  //                     style: 'infoText',
-  //                     alignment: 'center',
-  //                   },
-  //                 ],
-  //               },
-  //             ],
-  //           ],
-  //         },
-  //         layout: {
-  //           hLineWidth: () => 0,
-  //           vLineWidth: () => 1,
-  //           vLineColor: () => '#99F6E4',
-  //           paddingLeft: () => 8,
-  //           paddingRight: () => 8,
-  //           paddingTop: () => 6,
-  //           paddingBottom: () => 6,
-  //         },
-  //       },
-
-  //       // Passenger Details Section
-  //       {
-  //         text: 'بيانات الركاب',
-  //         style: 'sectionTitle',
-  //         margin: [0, 20, 0, 8],
-  //       },
-  //       {
-  //         table: {
-  //           headerRows: 1,
-  //           widths: ['*', '*', '*', '*'],
-  //           body: passengerBody,
-  //         },
-  //         layout: {
-  //           hLineWidth: () => 1,
-  //           hLineColor: () => '#99F6E4',
-  //           vLineWidth: () => 1,
-  //           vLineColor: () => '#99F6E4',
-  //           paddingTop: () => 8,
-  //           paddingBottom: () => 8,
-  //         },
-  //       },
-
-  //       // Payment Details Section
-  //       {
-  //         text: 'تفاصيل الدفع',
-  //         style: 'sectionTitle',
-  //         margin: [0, 20, 0, 8],
-  //       },
-  //       {
-  //         table: {
-  //           widths: ['*', '*'],
-  //           body: paymentBody,
-  //         },
-  //         layout: {
-  //           hLineWidth: () => 1,
-  //           hLineColor: () => '#99F6E4',
-  //           vLineWidth: () => 1,
-  //           vLineColor: () => '#99F6E4',
-  //           paddingTop: () => 8,
-  //           paddingBottom: () => 8,
-  //         },
-  //       },
-
-  //       // Footer
-  //       {
-  //         text: 'يُرجى الحضور قبل موعد الانطلاق بـ 30 دقيقة',
-  //         style: 'footer',
-  //         alignment: 'center',
-  //         margin: [0, 30, 0, 0],
-  //       },
-  //       {
-  //         text: `رقم الحجز: ${booking.id}`,
-  //         style: 'bookingId',
-  //         alignment: 'center',
-  //         margin: [0, 10, 0, 0],
-  //       },
-  //     ],
-  //     styles: {
-  //       headerTitle: {
-  //         fontSize: 24,
-  //         bold: true,
-  //         color: '#0D9488',
-  //       },
-  //       sectionTitle: {
-  //         fontSize: 12,
-  //         bold: true,
-  //         color: '#0D9488',
-  //         margin: [0, 0, 0, 5],
-  //       },
-  //       subSectionTitle: {
-  //         fontSize: 10,
-  //         bold: true,
-  //         color: '#0F766E',
-  //         margin: [0, 0, 0, 8],
-  //       },
-  //       busName: {
-  //         fontSize: 14,
-  //         bold: true,
-  //         color: '#134E4A',
-  //       },
-  //       label: {
-  //         fontSize: 8,
-  //         color: '#5EEAD4',
-  //         margin: [0, 0, 0, 5],
-  //       },
-  //       plateText: {
-  //         fontSize: 16,
-  //         bold: true,
-  //         color: '#134E4A',
-  //       },
-  //       plateLabel: {
-  //         fontSize: 7,
-  //         color: '#5EEAD4',
-  //       },
-  //       plateNumbers: {
-  //         fontSize: 18,
-  //         bold: true,
-  //         color: '#0D9488',
-  //         fillColor: '#CCFBF1',
-  //         margin: [0, 4, 0, 4],
-  //         padding: 4,
-  //       },
-  //       infoText: {
-  //         fontSize: 9,
-  //         color: '#0F766E',
-  //         margin: [0, 2, 0, 2],
-  //       },
-  //       infoTextBold: {
-  //         fontSize: 11,
-  //         bold: true,
-  //         color: '#134E4A',
-  //         margin: [0, 2, 0, 2],
-  //       },
-  //       priceText: {
-  //         fontSize: 14,
-  //         bold: true,
-  //         color: '#0D9488',
-  //         margin: [0, 5, 0, 5],
-  //       },
-  //       tableHeader: {
-  //         fontSize: 9,
-  //         bold: true,
-  //         color: '#FFFFFF',
-  //         fillColor: '#0D9488',
-  //       },
-  //       tableCell: {
-  //         fontSize: 9,
-  //         color: '#134E4A',
-  //       },
-  //       totalCell: {
-  //         fontSize: 11,
-  //         bold: true,
-  //         color: '#FFFFFF',
-  //         fillColor: '#0D9488',
-  //       },
-  //       footer: {
-  //         fontSize: 8,
-  //         color: '#0F766E',
-  //       },
-  //       bookingId: {
-  //         fontSize: 7,
-  //         color: '#5EEAD4',
-  //       },
-  //     },
-  //   };
-  // }
-
-  // private buildPassengerListDefinition(trip: any, bookings: any[]): any {
-  //   const arabicDigits: Record<string, string> = {
-  //     '0': '٠',
-  //     '1': '١',
-  //     '2': '٢',
-  //     '3': '٣',
-  //     '4': '٤',
-  //     '5': '٥',
-  //     '6': '٦',
-  //     '7': '٧',
-  //     '8': '٨',
-  //     '9': '٩',
-  //   };
-  //   const toArabicNum = (n: any): string =>
-  //     String(n).replace(/[0-9]/g, (d) => arabicDigits[d]);
-
-  //   const arabicMonths = [
-  //     'يناير',
-  //     'فبراير',
-  //     'مارس',
-  //     'أبريل',
-  //     'مايو',
-  //     'يونيو',
-  //     'يوليو',
-  //     'أغسطس',
-  //     'سبتمبر',
-  //     'أكتوبر',
-  //     'نوفمبر',
-  //     'ديسمبر',
-  //   ];
-
-  //   const fmtDate = (val: any): string => {
-  //     if (!val) return '—';
-  //     const d = new Date(val);
-  //     if (isNaN(d.getTime())) return String(val);
-  //     return `${toArabicNum(d.getDate())} ${arabicMonths[d.getMonth()]} ${toArabicNum(d.getFullYear())}`;
-  //   };
-
-  //   const fmtTime = (val: any): string => {
-  //     if (!val) return '—';
-  //     if (val instanceof Date && !isNaN(val.getTime())) {
-  //       return `${toArabicNum(val.getHours())}:${toArabicNum(val.getMinutes())}`;
-  //     }
-  //     const str = String(val);
-  //     if (/^\d{1,2}:\d{2}/.test(str)) {
-  //       const [h, m] = str.split(':');
-  //       return `${toArabicNum(h)}:${toArabicNum(m)}`;
-  //     }
-  //     return str;
-  //   };
-
-  //   const rows = bookings.flatMap((b: any) => {
-  //     const passengers = Array.isArray(b.passenger)
-  //       ? b.passenger
-  //       : [b.passenger].filter(Boolean);
-  //     return passengers.map((p: any, i: number) => {
-  //       const seatNumber = Array.isArray(b.seatNumbers)
-  //         ? toArabicNum(b.seatNumbers[i])
-  //         : toArabicNum(b.seatNumbers);
-  //       const genderLabel =
-  //         p.gender === 'MALE' ? 'ذكر' : p.gender === 'FEMALE' ? 'أنثى' : '—';
-  //       return {
-  //         seatNumber,
-  //         name: p.name || '—',
-  //         age: p.age != null ? toArabicNum(p.age) : '—',
-  //         gender: genderLabel,
-  //       };
-  //     });
-  //   });
-
-  //   const primaryColor = '#8B5E3C';
-  //   const primaryBg = '#F5EDE3';
-
-  //   return {
-  //     defaultStyle: { font: 'Tajawal', fontSize: 11, direction: 'rtl' },
-  //     pageMargins: [20, 20, 20, 20],
-  //     content: [
-  //       {
-  //         text: 'قائمة الركاب',
-  //         fontSize: 18,
-  //         bold: true,
-  //         color: primaryColor,
-  //         alignment: 'center',
-  //         margin: [0, 0, 0, 8],
-  //       },
-  //       {
-  //         text: `${trip.fromCity || ''} ← ${trip.toCity || ''} — ${fmtDate(trip.departureDate)} ${fmtTime(trip.departureTime)}`,
-  //         alignment: 'center',
-  //         fontSize: 12,
-  //         color: '#374151',
-  //         margin: [0, 0, 0, 16],
-  //       },
-  //       {
-  //         table: {
-  //           headerRows: 1,
-  //           widths: ['*', '*', 'auto', 'auto'],
-  //           body: [
-  //             [
-  //               {
-  //                 text: 'رقم المقعد',
-  //                 fillColor: primaryColor,
-  //                 color: '#fff',
-  //                 bold: true,
-  //                 fontSize: 11,
-  //                 alignment: 'center',
-  //                 margin: [6, 6],
-  //               },
-  //               {
-  //                 text: 'الاسم',
-  //                 fillColor: primaryColor,
-  //                 color: '#fff',
-  //                 bold: true,
-  //                 fontSize: 11,
-  //                 alignment: 'center',
-  //                 margin: [6, 6],
-  //               },
-  //               {
-  //                 text: 'العمر',
-  //                 fillColor: primaryColor,
-  //                 color: '#fff',
-  //                 bold: true,
-  //                 fontSize: 11,
-  //                 alignment: 'center',
-  //                 margin: [6, 6],
-  //               },
-  //               {
-  //                 text: 'الجنس',
-  //                 fillColor: primaryColor,
-  //                 color: '#fff',
-  //                 bold: true,
-  //                 fontSize: 11,
-  //                 alignment: 'center',
-  //                 margin: [6, 6],
-  //               },
-  //             ],
-  //             ...(rows.length > 0
-  //               ? rows.map((r) => [
-  //                   {
-  //                     text: r.seatNumber,
-  //                     alignment: 'center',
-  //                     fontSize: 11,
-  //                     margin: [6, 4],
-  //                   },
-  //                   {
-  //                     text: r.name,
-  //                     alignment: 'center',
-  //                     fontSize: 11,
-  //                     margin: [6, 4],
-  //                   },
-  //                   {
-  //                     text: r.age,
-  //                     alignment: 'center',
-  //                     fontSize: 11,
-  //                     margin: [6, 4],
-  //                   },
-  //                   {
-  //                     text: r.gender,
-  //                     alignment: 'center',
-  //                     fontSize: 11,
-  //                     margin: [6, 4],
-  //                   },
-  //                 ])
-  //               : [
-  //                   [
-  //                     {
-  //                       text: 'لا يوجد ركاب',
-  //                       alignment: 'center',
-  //                       fontSize: 11,
-  //                       color: '#9CA3AF',
-  //                       colSpan: 4,
-  //                       margin: [6, 10],
-  //                     },
-  //                     {},
-  //                     {},
-  //                     {},
-  //                   ],
-  //                 ]),
-  //           ],
-  //         },
-  //         layout: {
-  //           hLineWidth: () => 1,
-  //           hLineColor: () => '#D1D5DB',
-  //           vLineWidth: () => 1,
-  //           vLineColor: () => '#D1D5DB',
-  //           fillColor: (i: number) => (i > 0 && i % 2 === 0 ? primaryBg : null),
-  //         },
-  //       },
-  //       {
-  //         text: `إجمالي الركاب: ${toArabicNum(rows.length)}`,
-  //         alignment: 'center',
-  //         fontSize: 11,
-  //         color: '#6B7280',
-  //         margin: [0, 12, 0, 0],
-  //       },
-  //     ],
-  //   };
-  // }
-
-
-
+    return { publicUrl, filePath: outputPath };
+  }
+}
 
 /**
  * Rihla (رحلة) — Ticket Generator
@@ -896,9 +271,12 @@ const C = {
 // FONT LOADER  — loads from /backend/fonts OR local fallback
 // ─────────────────────────────────────────────────────────────
 function loadFontsVfs() {
+  const cwd = process.cwd();
   const candidates = [
-    path.join(__dirname, '..', 'fonts'),            // /backend/fonts
-    path.join(__dirname, 'fonts'),                  // local fonts/
+    path.join(__dirname, '..', '..', '..', 'fonts'),
+    path.join(__dirname, '..', 'fonts'),
+    path.join(__dirname, 'fonts'),
+    path.join(cwd, 'fonts'),
   ];
 
   for (const dir of candidates) {
@@ -915,9 +293,12 @@ function loadFontsVfs() {
 }
 
 function loadLogoBase64() {
+  const cwd = process.cwd();
   const candidates = [
+    path.join(__dirname, '..', '..', '..', 'assets', 'companyLogo.png'),
     path.join(__dirname, '..', 'assets', 'companyLogo.png'),
     path.join(__dirname, 'assets', 'companyLogo.png'),
+    path.join(cwd, 'assets', 'companyLogo.png'),
   ];
   for (const p of candidates) {
     if (fs.existsSync(p)) {
@@ -930,15 +311,15 @@ function loadLogoBase64() {
 // ─────────────────────────────────────────────────────────────
 // ARABIC FORMATTERS
 // ─────────────────────────────────────────────────────────────
-function toAr(n) {
-  return String(n ?? '').replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[+d]);
+function toAr(n: any) {
+  return String(n ?? '').replace(/[0-9]/g, (d: string) => '٠١٢٣٤٥٦٧٨٩'[+d]);
 }
 
 /** "2026-01-15" → "الخميس، ١٥ يناير ٢٠٢٦" */
-function formatDate(val) {
+function formatDate(val: any) {
   if (!val) return '—';
   const d = (val instanceof Date) ? val : new Date(val);
-  if (isNaN(d)) return String(val);
+  if (isNaN(d as any)) return String(val);
 
   const weekDays = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
   const months   = ['يناير','فبراير','مارس','أبريل','مايو','يونيو',
@@ -953,7 +334,7 @@ function formatDate(val) {
 }
 
 /** "07:30" or Date → "٠٧:٣٠ ص" */
-function formatTime(val) {
+function formatTime(val: any) {
   if (!val) return '—';
   let h, m;
   if (typeof val === 'string' && /^\d{1,2}:\d{2}/.test(val)) {
@@ -969,28 +350,28 @@ function formatTime(val) {
 }
 
 /** 2500 → "٢٬٥٠٠ جنيه" */
-function formatPrice(amount, currency = 'جنيه') {
+function formatPrice(amount: any, currency = 'جنيه') {
   if (amount == null || amount === '') return '—';
   const n  = Number(amount);
   const formatted = n.toLocaleString('en');
   return `${toAr(formatted)} ${currency}`;
 }
 
-function genderLabel(g) {
-  const map = { MALE:'ذكر', FEMALE:'أنثى', male:'ذكر', female:'أنثى', M:'ذكر', F:'أنثى' };
+function genderLabel(g: any) {
+  const map: Record<string, string> = { MALE:'ذكر', FEMALE:'أنثى', male:'ذكر', female:'أنثى', M:'ذكر', F:'أنثى' };
   return map[g] || g || '—';
 }
 
-function statusLabel(s) {
-  const map = {
+function statusLabel(s: any) {
+  const map: Record<string, string> = {
     ACTIVE:'نشطة', COMPLETED:'مكتملة', CANCELLED:'ملغاة',
     PENDING:'معلقة', CONFIRMED:'مؤكدة', DELAYED:'متأخرة',
   };
   return map[s] || s || '—';
 }
 
-function statusColor(s) {
-  const map = {
+function statusColor(s: any) {
+  const map: Record<string, string> = {
     ACTIVE: C.primary, CONFIRMED: C.primary, COMPLETED: C.success,
     CANCELLED: C.danger, PENDING: C.warning, DELAYED: C.warning,
   };
@@ -1012,7 +393,7 @@ function rule(mt = 8, mb = 8) {
 }
 
 /** Section title with left accent bar */
-function sectionTitle(label) {
+function sectionTitle(label: any) {
   return {
     columns: [
       { text:'', width: 4 },
@@ -1035,7 +416,7 @@ function sectionTitle(label) {
 }
 
 /** Card with light-teal bg and border */
-function card(stack, mbottom = 10) {
+function card(stack: any, mbottom = 10) {
   return {
     table: {
       widths: ['*'],
@@ -1051,7 +432,7 @@ function card(stack, mbottom = 10) {
 }
 
 /** Key / Value row — RTL: value right, key label left */
-function kv(keyLabel, value, opts = {}) {
+function kv(keyLabel: any, value: any, opts: any = {}) {
   return {
     columns: [
       {
@@ -1078,7 +459,7 @@ function kv(keyLabel, value, opts = {}) {
 }
 
 /** Status badge pill */
-function badge(text, bgColor) {
+function badge(text: any, bgColor: any) {
   return {
     table: {
       widths: ['auto'],
@@ -1100,7 +481,7 @@ function badge(text, bgColor) {
 // SECTION BUILDERS
 // ─────────────────────────────────────────────────────────────
 
-function buildHeader(logoBase64) {
+function buildHeader(logoBase64: any) {
   const logoCol = logoBase64
     ? { image: logoBase64, width: 52, height: 52, margin:[0,0,0,0] }
     : { canvas:[{type:'ellipse', x:26, y:26, r1:26, r2:26, color: C.primaryLight}], width:52 };
@@ -1161,7 +542,7 @@ function buildHeader(logoBase64) {
   };
 }
 
-function buildBusSection(bus) {
+function buildBusSection(bus: any) {
   if (!bus) return { text:'' };
   const plate  = bus.plateNumbers || bus.plate || {};
   const nums   = toAr(plate.numbers  || '');
@@ -1289,7 +670,7 @@ function buildTripSection(trip: any) {
   ]);
 }
 
-function buildPassengersSection(passengers) {
+function buildPassengersSection(passengers: any) {
   if (!passengers || !passengers.length) return { text:'' };
 
   const header = [
@@ -1300,10 +681,10 @@ function buildPassengersSection(passengers) {
     { text:'اسم الراكب', font:'Tajawal', bold:true, fontSize:9, color:C.white, fillColor:C.primary, alignment:'right',  margin:[0,4,4,4] },
   ];
 
-  const rows = passengers.map((p, i) => {
+  const rows = passengers.map((p: any, i: number) => {
     const isEven = i % 2 === 0;
     const fill   = isEven ? C.bgCard : C.bgBase;
-    const cell   = (txt, align='center') => ({
+    const cell   = (txt: any, align = 'center') => ({
       text: String(txt ?? '—'), font:'Tajawal', fontSize:9,
       color:C.textPrimary, fillColor:fill,
       alignment: align, margin:[0,4,0,4],
@@ -1326,7 +707,7 @@ function buildPassengersSection(passengers) {
         body: [header, ...rows],
       },
       layout: {
-        hLineWidth: (i)  => i <= 1 ? 1 : 0.5,
+        hLineWidth: (i: number)  => i <= 1 ? 1 : 0.5,
         vLineWidth: ()   => 0.5,
         hLineColor: ()   => C.border,
         vLineColor: ()   => C.border,
@@ -1339,7 +720,7 @@ function buildPassengersSection(passengers) {
   ]);
 }
 
-function buildPaymentSection(payment, trip) {
+function buildPaymentSection(payment: any, trip: any) {
   if (!payment) return { text:'' };
 
   const singlePrice = trip?.price ?? 0;
@@ -1379,7 +760,7 @@ function buildPaymentSection(payment, trip) {
   ]);
 }
 
-function buildFooter(bookingId) {
+function buildFooter(bookingId: any) {
   return {
     stack: [
       rule(6, 6),
@@ -1424,20 +805,10 @@ function buildFooter(bookingId) {
  * @param {{ bus, trip, passengers, payment, bookingId }} ticketData
  * @returns {Promise<Buffer>}  PDF as a Node.js Buffer
  */
-async function generateTicketBuffer(ticketData) {
+async function generateTicketBuffer(ticketData: any) {
   const { bus, trip, passengers, payment, bookingId } = ticketData;
 
-  // Load fonts into pdfmake VFS
-  const vfs = loadFontsVfs();
-  pdfMake.addVirtualFileSystem(vfs);
-  pdfMake.fonts = {
-    Tajawal: {
-      normal:  'Tajawal-Regular.ttf',
-      bold:    'Tajawal-Bold.ttf',
-      italics: 'Tajawal-Regular.ttf',
-    },
-  };
-
+  // Fonts are already set by the PDFService constructor using absolute file paths
   const logoBase64 = loadLogoBase64();
 
   const docDefinition = {
@@ -1453,7 +824,7 @@ async function generateTicketBuffer(ticketData) {
     },
 
     // Light teal page background
-    background: (currentPage, pageSize) => ({
+    background: (currentPage: any, pageSize: any) => ({
       canvas: [{
         type:'rect', x:0, y:0,
         w: pageSize.width, h: pageSize.height,
@@ -1471,11 +842,11 @@ async function generateTicketBuffer(ticketData) {
     ],
   };
 
-  const pdfDoc = pdfMake.createPdf(docDefinition);
+  const pdfDoc = pdfMake.createPdf(docDefinition as any);
   return pdfDoc.getBuffer();
 }
 
-module.exports = { generateTicketBuffer };
+module.exports.generateTicketBuffer = generateTicketBuffer;
 
 // ─────────────────────────────────────────────────────────────
 // DEMO — node generateTicket.js
@@ -1522,12 +893,9 @@ if (require.main === module) {
     const outPath = path.join(__dirname, 'rihla-ticket.pdf');
     fs.writeFileSync(outPath, buf);
     console.log('✅  Ticket saved →', outPath, `(${(buf.length/1024).toFixed(1)} KB)`);
-  }).catch(e => {
+  }).catch((e: any) => {
     console.error('❌  Error:', e.message);
     process.exit(1);
   });
 }
 
-
-
-}
