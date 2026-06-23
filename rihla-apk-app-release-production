@@ -1,0 +1,6 @@
+Signed APK	 : customer/android/app/build/outputs/apk/release/app-release.apk (3.4MB)
+Install	     : Copy to phone → open file manager → tap to install
+Keystore	   : customer/android/release-key.jks (password: Rihla123!)
+Commit	     :1635fe8 — pushed to main
+Note	       :The keystore password is in build.gradle. For sharing with friends, the APK alone is enough — they just install it directly.
+Opencode Session: opencode -s ses_1640d21b1ffeHBBlBem3sY6yMP
