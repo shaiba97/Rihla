@@ -30,7 +30,7 @@ export class Profile {
   deleteError = signal<string>('');
 
   login(): void {
-    this.router.navigate(['/m/login']);
+    this.router.navigate(['/login']);
   }
 
   logout(): void {
@@ -97,7 +97,7 @@ export class Profile {
         this.authStore.logout();
         this.isDeleting.set(false);
         this.showConfirmDelete.set(false);
-        this.router.navigate(['/m/home']);
+        this.router.navigate(['/home']);
       },
       error: (err: any) => {
         this.isDeleting.set(false);

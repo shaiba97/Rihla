@@ -17,6 +17,7 @@ export class Register {
   name = signal<string>('');
   identifier = signal<string>('');
   password = signal<string>('');
+  agreedToTerms = signal<boolean>(false);
   error = signal<string>('');
   isLoading = signal<boolean>(false);
 
@@ -34,6 +35,10 @@ export class Register {
     }
     if (!pw || pw.length < 6) {
       this.error.set('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+      return;
+    }
+    if (!this.agreedToTerms()) {
+      this.error.set('يجب الموافقة على الشروط والأحكام وسياسة الخصوصية');
       return;
     }
     this.error.set('');

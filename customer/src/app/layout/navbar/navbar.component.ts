@@ -2,9 +2,8 @@ import {
   Component, signal, inject,
   HostListener, computed,
 } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import {
-  LucideBus,
   LucideSun,
   LucideMoon,
   LucideUserRound,
@@ -19,14 +18,13 @@ import {
 } from '@lucide/angular';
 import { ThemeService } from '../../core/services/theme.service';
 import { AuthStoreService } from '../../services/auth-store/auth-store.service';
+import { NotificationBellComponent } from '../../shared/notification-bell/notification-bell.component';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
   imports: [
     RouterLink,
-    RouterOutlet,
-    LucideBus,
     LucideSun,
     LucideMoon,
     LucideUserRound,
@@ -38,6 +36,7 @@ import { AuthStoreService } from '../../services/auth-store/auth-store.service';
     LucideUserPlus,
     LucideX,
     LucideMenu,
+    NotificationBellComponent,
   ],
   templateUrl: './navbar.component.html',
 })

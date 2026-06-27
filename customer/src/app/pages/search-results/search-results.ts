@@ -32,7 +32,8 @@ import {
 } from '../home/trip-card/trip-card';
 import { Trips, Trip as TripResp } 
   from '../../core/services/trips-service/trips';
-import { Assets } from '../../core/services/assets-service/assets';
+import { CitiesService } from '../../services/cities/cities.service';
+import { CitySelectComponent } from '../../shared/city-select/city-select';
 import { ArabicNumberPipe } from '../../pipes/arabic-number/arabic-number-pipe';
 
 type SortOption = 'price-asc' | 'price-desc'
@@ -45,6 +46,7 @@ type SortOption = 'price-asc' | 'price-desc'
     FormsModule,
     // NgClass,
     TripCardComponent,
+    CitySelectComponent,
     ArabicNumberPipe,
     LucideBus,
     LucideArrowLeftRight,
@@ -64,7 +66,7 @@ export class SearchResultsComponent implements OnInit {
   private route             = inject(ActivatedRoute);
   private router            = inject(Router);
   private tripsService = inject(Trips);
-  private assetService = inject(Assets)
+  private citiesSvc    = inject(CitiesService);
 
   from = signal<string>('');
   to   = signal<string>('');
@@ -73,7 +75,7 @@ export class SearchResultsComponent implements OnInit {
   allTrips  = signal<Trip[]>([]);
   isLoading = signal<boolean>(false);
   error     = signal<string>('');
-  cities    = signal<[]>([]);
+  cities    = signal<string[]>([]);
 
   sortBy = signal<SortOption>('time-asc');
 
@@ -186,6 +188,9 @@ export class SearchResultsComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.citiesSvc.getAllCities().subscribe({
+      next: data => this.cities.set(data),
+    });
     this.route.queryParams.subscribe(params => {
       this.from.set(params['from'] ?? '');
       this.to.set(params['to'] ?? '');

@@ -32,7 +32,7 @@
     </div>
   </div>
   <div class="px-4 pb-4 pt-2 flex flex-col gap-1">
-    <span class="text-[11px] text-[var(--text-muted)]">{{ trip().seatsLeft | arabicNumber }} مقعد متاح</span>
+    <span class="text-[11px] text-[var(--text-muted)]">{{ ((trip().busChairs ?? trip().seatsLeft ?? 0) - bookedSeats().length) | arabicNumber }} مقعد متاح</span>
     <span class="text-[10px] text-[var(--text-muted)] flex items-center gap-1"><svg lucideClock class="w-2.5 h-2.5 flex-shrink-0"></svg>الحضور: قبل ساعة من المغادرة</span>
   </div>
 </div>

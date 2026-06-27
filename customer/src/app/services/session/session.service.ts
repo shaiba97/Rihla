@@ -3,7 +3,7 @@ import { environment } from '../../../environments/environment';
 import { BookingSession, ContactForm, PassengerForm } from '../../shared/booking-modal/booking-modal/booking.interfaces';
 
 const SESSION_KEY = 'rihla_booking_session';
-const TIMEOUT_MS = 7 * 60 * 1000;
+const TIMEOUT_MS = 270000; // 4:30
 
 @Injectable({ providedIn: 'root' })
 export class SessionService {

@@ -1,12 +1,12 @@
 import { Component, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { LucideArrowRight, LucidePhone, LucideLock, LucideLogIn } from '@lucide/angular';
 import { AuthStoreService } from '../../../services/auth-store/auth-store.service';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule, RouterLink, LucideArrowRight, LucidePhone, LucideLock, LucideLogIn],
+  imports: [FormsModule, LucideArrowRight, LucidePhone, LucideLock, LucideLogIn],
   templateUrl: './login.html',
 })
 export class Login {
@@ -54,5 +54,9 @@ export class Login {
 
   goBack(): void {
     history.back();
+  }
+
+  goToRegister(): void {
+    this.router.navigate(['/register']);
   }
 }

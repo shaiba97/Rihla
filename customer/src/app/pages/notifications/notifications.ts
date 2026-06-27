@@ -34,8 +34,7 @@ export class NotificationsPage implements OnInit, OnDestroy {
 
   onNotifClick(n: AppNotification): void {
     this.notifSvc.markRead(n.id);
-    const prefix = this.router.url.startsWith('/m') ? '/m/notifications' : '/notifications';
-    this.router.navigate([prefix, n.id]);
+    this.router.navigate(['/notifications', n.id]);
   }
 
   markAllRead(): void { this.notifSvc.markAllRead(); }

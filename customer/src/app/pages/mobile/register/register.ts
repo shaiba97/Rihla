@@ -17,6 +17,7 @@ export class Register {
   name = signal<string>('');
   identifier = signal<string>('');
   password = signal<string>('');
+  agreedToTerms = signal<boolean>(false);
   error = signal<string>('');
   isLoading = signal<boolean>(false);
 
@@ -36,6 +37,10 @@ export class Register {
       this.error.set('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
       return;
     }
+    if (!this.agreedToTerms()) {
+      this.error.set('يجب الموافقة على الشروط والأحكام وسياسة الخصوصية');
+      return;
+    }
     this.error.set('');
     this.isLoading.set(true);
     const isEmail = id.includes('@');
@@ -51,7 +56,7 @@ export class Register {
           this.authStore.setSession(token, user);
         }
         this.isLoading.set(false);
-        this.router.navigate(['/m/home']);
+        this.router.navigate(['/home']);
       },
       error: (err: any) => {
         this.isLoading.set(false);
@@ -59,7 +64,7 @@ export class Register {
         if (msg) {
           this.error.set(msg);
         } else {
-          this.router.navigate(['/m/login']);
+          this.router.navigate(['/login']);
         }
       },
     });
@@ -67,5 +72,9 @@ export class Register {
 
   goBack(): void {
     history.back();
+  }
+
+  goToLogin(): void {
+    this.router.navigate(['/login']);
   }
 }

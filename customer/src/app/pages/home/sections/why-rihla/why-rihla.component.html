@@ -1,0 +1,47 @@
+<section class="w-full py-20 px-16 bg-[var(--bg-card)]" dir="rtl">
+  <div class="max-w-6xl mx-auto">
+    <div class="grid grid-cols-5 gap-12 items-center">
+      <div class="col-span-2 flex flex-col gap-6">
+        <h2 class="text-3xl font-extrabold text-[var(--text-primary)] leading-tight">
+          لماذا تختار رحلة؟
+        </h2>
+        <p class="text-base text-[var(--primary)] leading-relaxed">
+          نحن نقدم تجربة سفر عصرية تتناسب مع احتياجاتك، مع التركيز على الموثوقية والراحة التامة.
+        </p>
+        <div class="mt-2 px-5 py-3 bg-[var(--warning)] text-white font-bold text-sm rounded-full text-center leading-snug max-w-xs">
+          انضم إلى أكثر من ٥٠٠٠ مسافر يثقون بنا يومياً!
+        </div>
+      </div>
+      <div class="col-span-3 grid grid-cols-3 gap-4">
+        @for (feat of features; track feat.title) {
+          <div class="flex flex-col gap-3 p-5 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl hover:shadow-[0_4px_12px_var(--shadow)] transition-shadow duration-200">
+            <div class="w-10 h-10 rounded-lg bg-[var(--primary-light)] flex items-center justify-center">
+              @switch (feat.icon) {
+                @case ('zap') {
+                  <svg lucideZap class="w-5 h-5 text-[var(--primary)]"></svg>
+                }
+                @case ('shield-check') {
+                  <svg lucideShieldCheck class="w-5 h-5 text-[var(--primary)]"></svg>
+                }
+                @case ('building-2') {
+                  <svg lucideBuilding2 class="w-5 h-5 text-[var(--primary)]"></svg>
+                }
+                @case ('headphones') {
+                  <svg lucideHeadphones class="w-5 h-5 text-[var(--primary)]"></svg>
+                }
+                @case ('qr-code') {
+                  <svg lucideQrCode class="w-5 h-5 text-[var(--primary)]"></svg>
+                }
+                @case ('bell') {
+                  <svg lucideBell class="w-5 h-5 text-[var(--primary)]"></svg>
+                }
+              }
+            </div>
+            <h4 class="text-sm font-bold text-[var(--text-primary)]">{{ feat.title }}</h4>
+            <p class="text-xs text-[var(--primary)] leading-relaxed">{{ feat.desc }}</p>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</section>

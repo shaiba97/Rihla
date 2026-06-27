@@ -70,8 +70,7 @@ export class PassengerDetails implements OnInit {
   }
 
   goToLogin(): void {
-    const prefix = this.router.url.startsWith('/m') ? '/m' : '';
-    this.router.navigate([prefix + '/login']);
+    this.router.navigate(['/login']);
   }
   goBack(): void { history.back(); }
 }

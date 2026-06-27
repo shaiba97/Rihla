@@ -62,6 +62,9 @@
                     {{ t?.arrivalDate | date:'EEE d MMM':'':'ar' | arabicNumber }}
                   }
                 </span>
+                @if (b.orderID) {
+                  <span class="text-[9px] text-[var(--text-muted)] block mt-0.5">رقم الحجز: {{ b.orderID }}</span>
+                }
               </div>
             </div>
             <span class="px-2.5 py-1 rounded-full text-[10px] font-bold flex-shrink-0 mt-0.5" [ngClass]="statusClass(b.status)">{{ statusLabel(b.status) }}</span>
@@ -81,9 +84,9 @@
                 مقعد: <span class="font-semibold">{{ b.seatNumbers?.join('، ') | arabicNumber }}</span>
               </span>
             </div>
-            @if (b.TicketPDF?.ticketUrl && b.status === 'CONFIRMED') {
+            @if (b.status === 'CONFIRMED') {
               <div class="flex items-center gap-1.5">
-                <button (click)="downloadTicket($event, b.TicketPDF?.ticketUrl)" class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[var(--primary)] text-white text-[10px] font-bold active:scale-95 transition-all">
+                <button (click)="downloadTicket($event, b)" class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[var(--primary)] text-white text-[10px] font-bold active:scale-95 transition-all">
                   <svg lucideDownload class="w-3 h-3"></svg>
                   تذكرة
                 </button>
@@ -91,6 +94,20 @@
                   <svg lucideEye class="w-3 h-3"></svg>
                   عرض
                 </button>
+              </div>
+            } @else if (['cancelled', 'failed', 'refunded'].includes(b.status?.toLowerCase())) {
+              <div class="text-[10px] text-[var(--text-muted)] flex items-center gap-1.5 flex-wrap">
+                <span>للاستفسار:</span>
+                @for (c of supportContacts(); track c.id) {
+                  @if (c.type === 'whatsapp') {
+                    <a href="https://wa.me/{{ c.value }}" target="_blank" class="text-[var(--primary)] font-bold" rel="noopener">{{ c.label || c.value }}</a>
+                  } @else if (c.type === 'email') {
+                    <a href="mailto:{{ c.value }}" class="text-[var(--primary)] font-bold">{{ c.label || c.value }}</a>
+                  }
+                }
+                @if (supportContacts().length === 0) {
+                  <span class="text-[var(--text-muted)]">لا توجد معلومات تواصل</span>
+                }
               </div>
             }
           </div>
@@ -101,7 +118,7 @@
 </div>
 
 <app-ticket-preview
-  [ticketUrl]="selectedBooking()?.TicketPDF?.ticketUrl"
+  [bookingId]="selectedBooking()?.id"
   [visible]="!!selectedBooking()"
   (closed)="closeTicketView()"
 />

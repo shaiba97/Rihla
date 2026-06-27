@@ -118,8 +118,7 @@ export class SelectSeat implements OnInit, OnDestroy {
   async onNext(): Promise<void> {
     if (!this.selectedSeats().length) return;
     try { await this.sessionSvc.updateStep('passenger'); } catch {}
-    const prefix = this.router.url.startsWith('/m') ? '/m' : '';
-    this.router.navigate([prefix + '/passenger'], { state: {
+    this.router.navigate(['/passenger'], { state: {
       trip: this.trip(),
       selectedSeats: this.selectedSeats(),
       baseAmount: this.baseAmount(),
@@ -128,8 +127,7 @@ export class SelectSeat implements OnInit, OnDestroy {
     }});
   }
   goToLogin(): void {
-    const prefix = this.router.url.startsWith('/m') ? '/m' : '';
-    this.router.navigate([prefix + '/login']);
+    this.router.navigate(['/login']);
   }
   goBack(): void { history.back(); }
 }

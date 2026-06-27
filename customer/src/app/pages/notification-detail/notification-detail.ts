@@ -57,8 +57,7 @@ export class NotificationDetailPage implements OnInit {
   }
 
   goBack(): void {
-    const prefix = this.router.url.startsWith('/m') ? '/m/notifications' : '/notifications';
-    this.router.navigate([prefix]);
+    this.router.navigate(['/notifications']);
   }
 
   notifIcon(type: string): string {

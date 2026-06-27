@@ -21,12 +21,11 @@ export class Bookings implements OnInit, OnDestroy {
   private ws = inject(WsService);
   authStore = inject(AuthStoreService);
 
-  private fileUrl = environment.apiUrl.customer.replace('/api-customer', '');
-
   bookings = signal<any[]>([]);
   isLoading = signal<boolean>(false);
   error = signal<string>('');
   selectedBooking = signal<any | null>(null);
+  supportContacts = signal<any[]>([]);
   private wsCleanups: (() => void)[] = [];
 
   ngOnInit(): void {
@@ -34,6 +33,7 @@ export class Bookings implements OnInit, OnDestroy {
     if (this.authStore.isLoggedIn()) {
       this.loadBookings();
     }
+    this.loadSupportContacts();
 
     this.wsCleanups.push(this.ws.on('booking:created', () => this.silentRefresh()));
     this.wsCleanups.push(this.ws.on('booking:cancelled', () => this.silentRefresh()));
@@ -65,12 +65,18 @@ export class Bookings implements OnInit, OnDestroy {
     });
   }
 
+  private loadSupportContacts(): void {
+    this.bookingSvc.getSupportContacts().subscribe({
+      next: r => this.supportContacts.set(r ?? []),
+    });
+  }
+
   goToLogin(): void {
-    this.router.navigate(['/m/login']);
+    this.router.navigate(['/login']);
   }
 
   goHome(): void {
-    this.router.navigate(['/m/home']);
+    this.router.navigate(['/home']);
   }
 
   statusClass(status: string): Record<string, boolean> {
@@ -90,14 +96,20 @@ export class Bookings implements OnInit, OnDestroy {
     return map[status?.toLowerCase()] ?? status;
   }
 
-  downloadTicket(e: Event, url: string): void {
+  async downloadTicket(e: Event, booking: any): Promise<void> {
     e.stopPropagation();
-    if (!url) return;
-    window.open(this.fileUrl + url, '_blank');
+    if (!booking?.id) return;
+
+    const token = this.authStore.token();
+    window.open(
+      environment.fileUrl + '/api-customer/tickets/view/' + booking.id + '?token=' + token,
+      '_blank',
+    );
   }
 
   showTicketView(e: Event, booking: any): void {
     e.stopPropagation();
+    if (!booking?.id) return;
     this.selectedBooking.set(booking);
   }
 

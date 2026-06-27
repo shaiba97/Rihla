@@ -12,7 +12,8 @@ import {
   LucideLoaderCircle,
 } from '@lucide/angular';
 import { Trips, TripSearchParams } from '../../../core/services/trips-service/trips';
-import { Assets } from '../../../core/services/assets-service/assets';
+import { CitiesService } from '../../../services/cities/cities.service';
+import { CitySelectComponent } from '../../../shared/city-select/city-select';
 
 interface DatePill {
   label: string;
@@ -30,13 +31,14 @@ interface DatePill {
     LucideSearch,
     LucideMapPin,
     LucideLoaderCircle,
+    CitySelectComponent,
   ],
   templateUrl: './search-hero.html',
 })
 export class SearchHeroComponent implements OnInit {
   private tripsService = inject(Trips);
-  private router            = inject(Router);
-  private assetsService = inject(Assets);
+  private router       = inject(Router);
+  private citiesSvc    = inject(CitiesService);
 
   from      = signal<string>('');
   to        = signal<string>('');
@@ -66,12 +68,12 @@ export class SearchHeroComponent implements OnInit {
     { from: 'الخرطوم', to: 'بورتسودان' },
     { from: 'الخرطوم', to: 'كسلا'      },
     { from: 'الخرطوم', to: 'عطبرة'     },
-    { from: 'أم درمان', to: 'الخرائط'  },
+    { from: 'أم درمان', to: 'الخرطوم'  },
   ];
 
   ngOnInit(): void {
-    this.assetsService.getAllCities().forEach(city => {
-      this.cities.update(cities => [...cities, city.city]);
+    this.citiesSvc.getAllCities().subscribe({
+      next: (data) => this.cities.set(data),
     });
   }
 

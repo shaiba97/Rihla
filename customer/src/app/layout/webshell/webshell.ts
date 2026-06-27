@@ -1,64 +1,37 @@
 import { Component, signal, inject, computed, effect, OnInit, OnDestroy } from '@angular/core';
 import { RouterOutlet, RouterLink, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
-import { useIsMobile } from '../../shared/is-mobile';
 import {
-  LucideSun,
-  LucideMoon,
-  LucideUserRound,
-  LucideChevronDown,
-  LucideCalendarCheck,
-  LucideSettings,
-  LucideLogOut,
-  LucideLogIn,
-  LucideUserPlus,
   LucideNewspaper,
   LucideHome,
   LucideCalendarClock,
   LucideBell,
   LucideUser,
 } from '@lucide/angular';
-import { ThemeService } from '../../core/services/theme.service';
 import { AuthStoreService } from '../../services/auth-store/auth-store.service';
+import { CapacitorService } from '../../core/services/capacitor/capacitor.service';
 import { NotificationsService } from '../../core/services/notifications/notifications.service';
-import { NotificationBellComponent } from '../../shared/notification-bell/notification-bell.component';
+import { NavbarComponent } from '../navbar/navbar.component';
 
 @Component({
   selector: 'app-web-shell',
   imports: [
     RouterOutlet,
     RouterLink,
-    LucideSun,
-    LucideMoon,
-    LucideUserRound,
-    LucideChevronDown,
-    LucideCalendarCheck,
-    LucideSettings,
-    LucideLogOut,
-    LucideLogIn,
-    LucideUserPlus,
     LucideNewspaper,
-    NotificationBellComponent,
     LucideHome,
     LucideCalendarClock,
     LucideBell,
     LucideUser,
+    NavbarComponent,
   ],
   templateUrl: './webshell.html',
-  host: {
-    '(document:click)': 'onDocumentClick($event)',
-  },
 })
 export class WebShell implements OnInit, OnDestroy {
+  capService = inject(CapacitorService);
   private notifSvc = inject(NotificationsService);
-  themeService = inject(ThemeService);
   authStore = inject(AuthStoreService);
   private router = inject(Router);
-
-  isMobile = useIsMobile();
-
-  showUserMenu = signal<boolean>(false);
-  showMobileMenu = signal<boolean>(false);
 
   currentUrl = signal<string>(this.router.url);
 
@@ -89,7 +62,6 @@ export class WebShell implements OnInit, OnDestroy {
   }
 
   isLoggedIn = computed(() => this.authStore.isLoggedIn());
-  userName = computed(() => this.authStore.customerName() || 'المستخدم');
 
   isHomeActive = computed(() => {
     const url = this.currentUrl();
@@ -109,7 +81,7 @@ export class WebShell implements OnInit, OnDestroy {
   });
   isBlogActive = computed(() => {
     const url = this.currentUrl();
-    return url.startsWith('/blogs') || url.startsWith('/m/blogs');
+    return url.startsWith('/blogs');
   });
 
   unreadCount = this.notifSvc.unreadCount;
@@ -136,26 +108,5 @@ export class WebShell implements OnInit, OnDestroy {
 
   goToBlog(): void {
     this.router.navigate(['/blogs']);
-  }
-
-  toggleUserMenu(): void {
-    this.showUserMenu.update(v => !v);
-  }
-
-  toggleMobileMenu(): void {
-    this.showMobileMenu.update(v => !v);
-  }
-
-  logout(): void {
-    this.showUserMenu.set(false);
-    this.showMobileMenu.set(false);
-    this.authStore.logout();
-  }
-
-  onDocumentClick(e: MouseEvent): void {
-    const t = e.target as HTMLElement;
-    if (!t.closest('[data-user-menu]')) {
-      this.showUserMenu.set(false);
-    }
   }
 }

@@ -1,0 +1,36 @@
+<section class="w-full py-20 px-16 bg-[var(--bg-card)]" dir="rtl">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center mb-14">
+      <h2 class="text-3xl font-extrabold text-[var(--text-primary)] mb-3">
+        كيف تعمل رحلة؟
+      </h2>
+      <p class="text-base text-[var(--primary)] max-w-md mx-auto">
+        خطوات بسيطة تفصلك عن وجهتك القادمة بكل راحة وأمان.
+      </p>
+    </div>
+    <div class="grid grid-cols-4 gap-6">
+      @for (step of steps; track step.num) {
+        <div class="flex flex-col items-center text-center p-6 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl hover:shadow-[0_4px_20px_var(--shadow)] transition-shadow duration-200">
+          <div class="w-14 h-14 rounded-xl bg-[var(--primary-light)] flex items-center justify-center mb-4">
+            @switch (step.icon) {
+              @case ('search') {
+                <svg lucideSearch class="w-6 h-6 text-[var(--primary)]"></svg>
+              }
+              @case ('armchair') {
+                <svg lucideArmchair class="w-6 h-6 text-[var(--primary)]"></svg>
+              }
+              @case ('credit-card') {
+                <svg lucideCreditCard class="w-6 h-6 text-[var(--primary)]"></svg>
+              }
+              @case ('ticket') {
+                <svg lucideTicket class="w-6 h-6 text-[var(--primary)]"></svg>
+              }
+            }
+          </div>
+          <h3 class="text-base font-bold text-[var(--text-primary)] mb-2">{{ step.title }}</h3>
+          <p class="text-sm text-[var(--primary)] leading-relaxed">{{ step.desc }}</p>
+        </div>
+      }
+    </div>
+  </div>
+</section>

@@ -1,24 +1,34 @@
-import { Component, signal, computed, inject, OnInit, ElementRef, AfterViewInit, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, signal, computed, inject, OnInit, ElementRef, AfterViewInit, OnDestroy, ViewChild, DestroyRef, ChangeDetectionStrategy } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { NgClass, DatePipe } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { LucideBus, LucideMapPin, LucideSearch, LucidePencil, LucideX, LucideArrowUp, LucideArrowDown, LucideChevronLeft, LucideChevronRight } from '@lucide/angular';
 import { TripSearchService } from '../../services/trip-search/trip-search.service';
 import { MobileTripCardComponent } from '../../shared/mobile-trip-card';
+import { CitiesService } from '../../services/cities/cities.service';
+import { CitySelectComponent } from '../../shared/city-select/city-select';
+import { AuthStoreService } from '../../services/auth-store/auth-store.service';
 
 @Component({
   selector: 'app-home',
-  standalone: true,
+
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, NgClass, DatePipe, LucideBus, LucideMapPin, LucideSearch, LucidePencil, LucideX, LucideArrowUp, LucideArrowDown, LucideChevronLeft, LucideChevronRight, MobileTripCardComponent],
+  imports: [FormsModule, NgClass, LucideBus, LucideMapPin, LucideSearch, LucidePencil, LucideX, LucideArrowUp, LucideArrowDown, LucideChevronLeft, LucideChevronRight, MobileTripCardComponent, CitySelectComponent],
   templateUrl: './home.html',
 })
-export class Home implements OnInit, AfterViewInit {
+export class Home implements OnInit, AfterViewInit, OnDestroy {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private tripSvc = inject(TripSearchService);
+  private citiesSvc = inject(CitiesService);
   private hostElement = inject(ElementRef<HTMLElement>);
   private destroyRef = inject(DestroyRef);
+  authStore = inject(AuthStoreService);
+
+  @ViewChild('mainSearchCard') mainSearchCard!: ElementRef<HTMLElement>;
+  private observer?: IntersectionObserver;
+
+
 
   from = signal<string>('');
   to = signal<string>('');
@@ -33,14 +43,21 @@ export class Home implements OnInit, AfterViewInit {
   scrollY = signal<number>(0);
   showSearchModal = signal<boolean>(false);
 
-  protected readonly Math = Math;
-
-  scrollProgress = computed(() => Math.min(1, this.scrollY() / 200));
-  toggleBarOpacity = computed(() => this.scrollProgress());
-  heroOpacity = computed(() => 1 - this.scrollProgress());
-  heroHeight = computed(() => Math.max(0, 280 * (1 - this.scrollProgress())));
-  heroOverlap = computed(() => this.heroHeight() * 0.25);
-  searchCardProgress = computed(() => this.scrollProgress());
+  scrollProgress = computed(() => Math.min(1, this.scrollY() / 600));
+  heroOpacity = computed(() => Math.max(0, 1 - this.scrollProgress() * 2));
+  showCompactSearchBar = signal(false);
+  userName = computed(() => this.authStore.customerName() || 'مستخدم رحلة');
+  compactSearchRouteLabel = computed(() => {
+    const f = this.from();
+    const t = this.to();
+    if (f && t) return `${f} ← ${t}`;
+    return 'إلى أين تريد السفر؟';
+  });
+  compactSearchDateLabel = computed(() => {
+    const d = this.date();
+    if (!d) return 'اختر التاريخ';
+    return new Date(d).toLocaleDateString('ar-SA', { weekday: 'short', day: 'numeric', month: 'short' });
+  });
   swapped = signal<boolean>(false);
 
   routeLabel = computed(() => {
@@ -78,7 +95,9 @@ export class Home implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    this.tripSvc.getAllCities().subscribe({ next: r => this.cities.set([...new Set(r.data ?? [])]), error: () => {} });
+    this.citiesSvc.getAllCities().subscribe({
+      next: data => this.cities.set(data),
+    });
     this.isLoadingTrips.set(true);
     this.tripSvc.getAllTrips().subscribe({
       next: r => { this.featuredTrips.set(r.data ?? []); this.isLoadingTrips.set(false); },
@@ -94,6 +113,23 @@ export class Home implements OnInit, AfterViewInit {
       el.addEventListener('scroll', handler, { passive: true });
       this.destroyRef.onDestroy(() => el.removeEventListener('scroll', handler));
     }
+
+    this.observer = new IntersectionObserver(
+      ([entry]) => {
+        this.showCompactSearchBar.set(
+          !entry.isIntersecting &&
+          (entry.boundingClientRect.top < 0)
+        );
+      },
+      { threshold: 0 }
+    );
+    if (this.mainSearchCard) {
+      this.observer.observe(this.mainSearchCard.nativeElement);
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.observer?.disconnect();
   }
 
   swap(): void { const t = this.from(); this.from.set(this.to()); this.to.set(t); this.swapped.set(!this.swapped()); }
@@ -114,7 +150,7 @@ export class Home implements OnInit, AfterViewInit {
   onSearch(): void {
     if (!this.from() || !this.to() || !this.date()) { this.error.set('يرجى تعبئة جميع الحقول'); return; }
     this.error.set('');
-    this.router.navigate(['../results'], { relativeTo: this.route, queryParams: { from: this.from(), to: this.to(), date: this.date() } });
+    this.router.navigate(['/search-results'], { queryParams: { from: this.from(), to: this.to(), date: this.date() } });
   }
 
   openSearchModal(): void { this.showSearchModal.set(true); }

@@ -1,196 +1,23 @@
-<div dir="rtl" class="h-dvh w-full bg-[var(--bg-base)] flex flex-col" style="height:100dvh;height:100vh">
+<div dir="rtl" class="h-dvh w-full bg-[var(--bg-base)] flex flex-col"
+     [style.paddingTop]="capService.isNative() ? 'var(--safe-top)' : undefined">
 
-  <!-- ==================== DESKTOP NAVBAR ==================== -->
-  <header
-    class="max-md:hidden w-full sticky top-0 z-50
-           bg-[var(--bg-card)]/95 backdrop-blur-md
-           border-b border-[var(--border)]
-           shadow-[0_1px_8px_var(--shadow)]">
-
-    <nav class="max-w-7xl mx-auto flex items-center justify-between px-4 md:px-6 h-16">
-
-      <!-- Logo -->
-      <a routerLink="/home"
-         class="flex items-center gap-2.5 no-underline flex-shrink-0 group">
-         <div class="w-9 h-9 rounded-xl flex items-center justify-center
-                     bg-[var(--bg-card)] shadow-sm">
-           <img src="/customerLogo.png" class="w-7 h-7" alt="رحلة">
-         </div>
-        <div class="flex flex-col leading-none">
-          <span class="text-lg font-extrabold text-[var(--primary)] leading-tight">رحلة</span>
-          <span class="text-[9px] font-medium text-[var(--text-muted)] tracking-wider">RIHLA</span>
-        </div>
-      </a>
-
-      <!-- Desktop actions -->
-      <div class="flex items-center gap-2">
-
-        <!-- Theme toggle -->
-        <button (click)="themeService.toggle()"
-          class="w-9 h-9 rounded-xl flex items-center justify-center
-                 text-[var(--text-secondary)]
-                 hover:bg-[var(--primary-light)] hover:text-[var(--primary)]
-                 transition-all duration-150">
-          @if (themeService.isDark()) {
-            <svg lucideSun class="w-[18px] h-[18px] text-warning"></svg>
-          } @else {
-            <svg lucideMoon class="w-[18px] h-[18px]"></svg>
-          }
-        </button>
-
-        <button (click)="goToBlog()"
-          class="w-9 h-9 rounded-xl flex items-center justify-center
-                 text-[var(--text-secondary)]
-                 hover:bg-[var(--primary-light)] hover:text-[var(--primary)]
-                 transition-all duration-150">
-          <svg lucideNewspaper class="w-[18px] h-[18px]"></svg>
-        </button>
-
-        <!-- Notification bell -->
-        <app-notification-bell />
-
-        <!-- NOT LOGGED IN -->
-        @if (!isLoggedIn()) {
-          <div class="w-px h-6 bg-[var(--border)] mx-1"></div>
-          <div class="flex items-center gap-2">
-            <a routerLink="/login"
-               class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold
-                      text-[var(--primary)] hover:bg-[var(--primary-light)]
-                      transition-all duration-150 no-underline">
-              <svg lucideLogIn class="w-4 h-4 flex-shrink-0"></svg>
-              <span>تسجيل الدخول</span>
-            </a>
-            <a routerLink="/register"
-               class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold
-                      bg-[var(--primary)] text-white
-                      hover:bg-[var(--primary-hover)] active:scale-95
-                      transition-all duration-150 no-underline shadow-sm hover:shadow-md">
-              <svg lucideUserPlus class="w-4 h-4 flex-shrink-0"></svg>
-              <span>إنشاء حساب</span>
-            </a>
-          </div>
-        }
-
-        <!-- LOGGED IN -->
-        @if (isLoggedIn()) {
-          <div class="w-px h-6 bg-[var(--border)] mx-1"></div>
-          <div class="relative" data-user-menu>
-            <button (click)="toggleUserMenu()"
-              class="flex items-center gap-2 px-2 py-1.5 rounded-xl
-                     hover:bg-[var(--primary-light)] transition-all duration-150 cursor-pointer">
-              <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
-                          bg-gradient-to-br from-[var(--primary)] to-[var(--primary-hover)] shadow-sm">
-                <svg lucideUserRound class="w-4 h-4" color="white"></svg>
-              </div>
-              <div class="flex flex-col items-end leading-none gap-0.5">
-                <span class="text-xs font-semibold text-[var(--text-primary)]">{{ userName() }}</span>
-                <span class="text-[9px] text-[var(--text-muted)]">مرحباً بك</span>
-              </div>
-              <svg lucideChevronDown
-                   class="w-3.5 h-3.5 text-[var(--text-muted)] transition-transform duration-200"
-                   [class.rotate-180]="showUserMenu()"></svg>
-            </button>
-
-            @if (showUserMenu()) {
-              <div class="absolute left-0 top-12 w-56
-                          bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl
-                          shadow-[0_8px_32px_var(--shadow)] overflow-hidden z-50">
-                <div class="px-4 py-3 bg-[var(--primary-light)] border-b border-[var(--border)]">
-                  <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0
-                                bg-gradient-to-br from-[var(--primary)] to-[var(--primary-hover)]">
-                      <svg lucideUserRound class="w-5 h-5" color="white"></svg>
-                    </div>
-                    <div class="flex flex-col min-w-0">
-                      <span class="text-sm font-bold text-[var(--text-primary)] truncate">{{ userName() }}</span>
-                      <span class="text-xs text-[var(--text-secondary)]">عميل</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="p-1.5 flex flex-col gap-0.5">
-                  <a routerLink="/bookings" (click)="showUserMenu.set(false)"
-                     class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
-                            text-[var(--text-secondary)]
-                            hover:bg-[var(--primary-light)] hover:text-[var(--primary)]
-                            transition-all duration-150 no-underline group">
-                    <svg lucideCalendarCheck class="w-4 h-4 flex-shrink-0 text-[var(--text-muted)]
-                                                    group-hover:text-[var(--primary)] transition-colors"></svg>
-                    <span>حجوزاتي</span>
-                  </a>
-                  <a routerLink="/profile" (click)="showUserMenu.set(false)"
-                     class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
-                            text-[var(--text-secondary)]
-                            hover:bg-[var(--primary-light)] hover:text-[var(--primary)]
-                            transition-all duration-150 no-underline group">
-                    <svg lucideSettings class="w-4 h-4 flex-shrink-0 text-[var(--text-muted)]
-                                              group-hover:text-[var(--primary)] transition-colors"></svg>
-                    <span>الملف الشخصي</span>
-                  </a>
-                  <div class="h-px bg-[var(--border)] my-1"></div>
-                  <button (click)="logout()"
-                    class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium w-full text-right
-                           hover:bg-red-50 dark:hover:bg-red-950/20 transition-all duration-150 group text-danger">
-                    <svg lucideLogOut class="w-4 h-4 flex-shrink-0 transition-transform duration-150
-                                            group-hover:-translate-x-0.5"></svg>
-                    <span>تسجيل الخروج</span>
-                  </button>
-                </div>
-              </div>
-            }
-          </div>
-        }
-
-      </div>
-    </nav>
-  </header>
-
-  <!-- ==================== MOBILE TOPBAR ==================== -->
-  <header
-    class="max-md:flex md:hidden items-center justify-between
-           bg-[var(--bg-card)]/95 backdrop-blur-md
-           border-b border-[var(--border)] px-4 h-14 flex-shrink-0">
-
-    <a routerLink="/home" class="flex items-center gap-2 no-underline group">
-      <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-[var(--bg-card)] shadow-sm">
-        <img src="/customerLogo.png" class="w-6 h-6" alt="رحلة">
-      </div>
-      <span class="text-base font-extrabold text-[var(--primary)]">رحلة</span>
-    </a>
-
-    <div class="flex items-center gap-1">
-      <button (click)="goToBlog()"
-        class="w-9 h-9 rounded-xl flex items-center justify-center
-               text-[var(--text-secondary)]
-               hover:bg-[var(--primary-light)] hover:text-[var(--primary)]
-               transition-all duration-150">
-        <svg lucideNewspaper class="w-[18px] h-[18px]"></svg>
-      </button>
-      <button (click)="themeService.toggle()"
-        class="w-9 h-9 rounded-xl flex items-center justify-center
-               text-[var(--text-secondary)]
-               hover:bg-[var(--primary-light)] hover:text-[var(--primary)]
-               transition-all duration-150">
-        @if (themeService.isDark()) {
-          <svg lucideSun class="w-[18px] h-[18px] text-warning"></svg>
-        } @else {
-          <svg lucideMoon class="w-[18px] h-[18px]"></svg>
-        }
-      </button>
-    </div>
-  </header>
+  <!-- ==================== DESKTOP TOP BAR ==================== -->
+  <app-navbar class="hidden md:block flex-shrink-0" />
 
   <!-- ==================== CONTENT (shared) ==================== -->
-  <main class="flex-1 overflow-y-auto pb-[60px] md:pb-0" style="overscroll-behavior:contain" >
+  <main class="flex-1 overflow-y-auto pb-[12px] md:pb-0 flex flex-col"
+        [style.paddingBottom]="capService.isNative() ? 'calc(12px + var(--safe-bottom))' : undefined"
+        style="overscroll-behavior-y: auto; touch-action: pan-y; -webkit-overflow-scrolling: touch; scroll-behavior: smooth;">
     <router-outlet />
   </main>
 
-</div>
-
-<!-- ==================== MOBILE BOTTOM NAV ==================== -->
-<nav class="md:hidden fixed bottom-0 left-0 right-0 z-[99999]
-            flex items-center justify-around px-2 py-1
-            bg-[var(--bg-card)] border-t border-[var(--border)]
-            shadow-[0_-2px_12px_rgba(0,0,0,0.05)]">
+  <!-- ==================== MOBILE BOTTOM NAV ==================== -->
+  <nav class="md:hidden sticky bottom-0 left-0 right-0 z-[99999]
+              flex items-center justify-around px-2
+              bg-[var(--bg-card)] border-t border-[var(--border)]
+              shadow-[0_-2px_12px_rgba(0,0,0,0.05)]"
+       [style.paddingBottom]="capService.isNative() ? 'calc(4px + var(--safe-bottom))' : '4px'"
+       [style.paddingTop]="'4px'">
 
   <a routerLink="/home"
     class="flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-xl transition-all duration-200 no-underline"
@@ -230,6 +57,15 @@
     <span class="text-[10px] font-bold transition-colors duration-200">الإشعارات</span>
   </a>
 
+  <a (click)="goToBlog()"
+    class="flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-xl transition-all duration-200 no-underline cursor-pointer"
+    [class.bg-[var(--primary-light)]]="isBlogActive()"
+    [class.text-[var(--primary)]]="isBlogActive()"
+    [class.text-[var(--text-muted)]]="!isBlogActive()">
+    <svg lucideNewspaper class="w-5 h-5 transition-colors duration-200"></svg>
+    <span class="text-[10px] font-bold transition-colors duration-200">المدونة</span>
+  </a>
+
   <a routerLink="/profile"
     class="flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-xl transition-all duration-200 no-underline"
     [class.bg-[var(--primary-light)]]="isProfileActive()"
@@ -238,4 +74,6 @@
     <svg lucideUser class="w-5 h-5 transition-colors duration-200"></svg>
     <span class="text-[10px] font-bold transition-colors duration-200">حسابي</span>
   </a>
-</nav>
+  </nav>
+
+</div>

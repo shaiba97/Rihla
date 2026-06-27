@@ -441,7 +441,7 @@
                     <div class="flex flex-col gap-0.5">
                       <span class="text-xs text-[var(--text-muted)]">{{ gatewayAccountHolder() }}</span>
                       <span class="text-xs text-[var(--primary)] font-medium">حوّل المبلغ على هذا الرقم</span>
-                      <span class="text-xl font-extrabold text-[var(--primary)] tabular-nums tracking-wider" dir="ltr">{{ gatewayAccountNumber() | arabicNumber }}</span>
+                      <span class="text-xl font-extrabold text-[var(--primary)] tabular-nums tracking-wider" dir="ltr">{{ gatewayAccountNumber() }}</span>
                     </div>
                     <button (click)="copyAccountNumber()"
                       class="px-3 py-2 rounded-xl bg-[var(--primary)] text-white text-xs font-bold active:scale-90 transition-all flex-shrink-0">

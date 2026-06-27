@@ -1,0 +1,1 @@
+export { ResponsiveBookings } from './bookings';

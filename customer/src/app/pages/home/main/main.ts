@@ -1,10 +1,23 @@
 import { Component } from '@angular/core';
-import { TripListComponent } from '../trip-list/trip-list';
 import { SearchHeroComponent } from '../search-hero/search-hero';
+import { HowItWorksComponent } from '../sections/how-it-works/how-it-works.component';
+import { WhyRihlaComponent } from '../sections/why-rihla/why-rihla.component';
+import { AppDownloadComponent } from '../sections/app-download/app-download.component';
+import { BlogCarouselComponent } from '../sections/blog-carousel/blog-carousel.component';
+import { BottomCtaComponent } from '../sections/bottom-cta/bottom-cta.component';
+import { HomeFooterComponent } from '../sections/home-footer/home-footer.component';
 
 @Component({
   selector: 'app-main',
-  imports: [TripListComponent, SearchHeroComponent],
+  imports: [
+    SearchHeroComponent,
+    HowItWorksComponent,
+    WhyRihlaComponent,
+    AppDownloadComponent,
+    BlogCarouselComponent,
+    BottomCtaComponent,
+    HomeFooterComponent,
+  ],
   templateUrl: './main.html',
   styleUrl: './main.css',
 })

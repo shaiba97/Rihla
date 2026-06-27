@@ -18,20 +18,8 @@
               group">
 
       <!-- Logo icon -->
-      <div class="w-9 h-9 rounded-xl
-                  flex items-center justify-center
-                  bg-gradient-to-br
-                  from-[var(--primary)]
-                  to-[var(--primary-hover)]
-                  shadow-sm
-                  group-hover:shadow-md
-                  group-hover:scale-105
-                  transition-all duration-200">
-        <svg lucideBus
-             class="w-5 h-5"
-             color="white">
-        </svg>
-      </div>
+      <img src="/customerLogo.png?v=4" alt="Rihla"
+           class="w-9 h-9 object-contain">
 
       <!-- Logo text -->
       <div class="flex flex-col leading-none">
@@ -141,6 +129,9 @@
 
       <!-- LOGGED IN -->
       @if (isLoggedIn()) {
+
+        <!-- Notification bell -->
+        <app-notification-bell></app-notification-bell>
 
         <!-- Divider -->
         <div class="w-px h-6
@@ -372,5 +363,3 @@
   }
 
 </header>
-
-<router-outlet />

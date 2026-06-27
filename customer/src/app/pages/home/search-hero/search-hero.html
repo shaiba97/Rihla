@@ -1,4 +1,5 @@
 <section
+  id="search-hero"
   dir="rtl"
   class="relative w-full overflow-hidden
          bg-gradient-to-bl
@@ -83,23 +84,12 @@
                         uppercase tracking-widest">
               من
             </span>
-            <input
-              type="text"
-              [ngModel]="from()"
-              (ngModelChange)="from.set($event)"
-              placeholder="مدينة المغادرة"
-              list="from-cities"
-              class="bg-transparent border-none
-                    outline-none w-full
-                    text-sm font-semibold
-                    text-[var(--text-primary)]
-                    placeholder:text-[var(--text-muted)]
-                    placeholder:font-normal">
-            <datalist id="from-cities">
-              @for (city of cities(); track $index) {
-                <option [value]="city"></option>
-              }
-            </datalist>
+            <app-city-select
+              #fromCitySelect
+              [placeholder]="'مدينة المغادرة'"
+              [allCities]="cities()"
+              [(value)]="from">
+            </app-city-select>
           </div>
         </div>
 
@@ -143,23 +133,12 @@
                         uppercase tracking-widest">
               إلى
             </span>
-            <input
-              type="text"
-              [ngModel]="to()"
-              (ngModelChange)="to.set($event)"
-              placeholder="مدينة الوصول"
-              list="to-cities"
-              class="bg-transparent border-none
-                    outline-none w-full
-                    text-sm font-semibold
-                    text-[var(--text-primary)]
-                    placeholder:text-[var(--text-muted)]
-                    placeholder:font-normal">
-            <datalist id="to-cities">
-              @for (city of cities(); track $index) {
-                <option [value]="city"></option>
-              }
-            </datalist>
+            <app-city-select
+              #toCitySelect
+              [placeholder]="'مدينة الوصول'"
+              [allCities]="cities()"
+              [(value)]="to">
+            </app-city-select>
           </div>
         </div>
 

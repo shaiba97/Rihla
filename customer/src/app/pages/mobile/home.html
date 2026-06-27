@@ -1,53 +1,53 @@
-<div dir="rtl" class="h-full w-full bg-[var(--bg-base)] relative">
+<div dir="rtl" class="h-full w-full bg-[var(--bg-base)]" style="overflow-anchor: none; scroll-behavior: smooth; overscroll-behavior: contain;">
 
-  <!-- ZONE C: COMPACT TOGGLE BAR -->
-  <div class="sticky top-0 z-40 bg-[var(--bg-card)] border-b border-[var(--border)] overflow-hidden transition-none"
-    [style.height.px]="scrollProgress() > 0.05 ? 52 : 0"
-    [style.opacity]="scrollProgress() > 0.05 ? 1 : 0"
-    [style.box-shadow]="'0 2px 16px rgba(13,148,136,' + (scrollProgress() * 0.15) + ')'">
-    <div class="flex items-center justify-between px-4 h-[52px]">
-      <button (click)="openSearchModal()" class="flex-1 flex items-center gap-2 text-right overflow-hidden">
-        <div class="flex flex-col text-right flex-1 min-w-0">
-          <span class="text-[14px] font-bold text-[var(--text-primary)] truncate">{{ routeLabel() }}</span>
-          @if (selectedDate()) {
-            <span class="text-[10px] text-[var(--text-muted)]">{{ selectedDate() | date:'EEE d MMM':'':'ar' }}</span>
-          }
-        </div>
-      </button>
-      <button (click)="openSearchModal()" class="w-9 h-9 flex items-center justify-center rounded-full bg-[var(--primary-light)] text-[var(--primary)] flex-shrink-0 mr-2 active:scale-90 transition-all duration-150">
-        <svg lucidePencil class="w-4 h-4"></svg>
-      </button>
-    </div>
+  <!-- ══════════════════════════════════════ -->
+  <!-- WELCOME CARD — above hero              -->
+  <!-- ══════════════════════════════════════ -->
+  <div class="block md:hidden w-full
+              bg-[var(--bg-card)]
+              px-5 pt-6 pb-5
+              flex flex-col gap-1"
+       dir="rtl"
+       style="min-height:140px">
+
+    <!-- Line 1: greeting -->
+    <span class="text-sm font-medium
+                 text-[var(--text-muted)]">
+      أهلاً بك،
+    </span>
+
+    <!-- Line 2: user name — larger -->
+    <span class="text-2xl font-extrabold
+                 text-[var(--text-primary)]
+                 leading-tight">
+      {{ userName() }}
+    </span>
+
+    <!-- Line 3: platform message -->
+    <span class="text-xs
+                 text-[var(--text-muted)]
+                 mt-0.5">
+      نتمنى لك رحلة سعيدة وآمنة معنا
+    </span>
+
   </div>
 
-  <!-- ZONE A: HERO HEADER -->
-  <div class="relative overflow-hidden will-change-[height,opacity]"
-    [style.height.px]="heroHeight()"
+  <!-- ZONE B: HERO HEADER (in normal flow, fixed 280px height) -->
+  <div class="relative h-[280px] overflow-hidden mt-3"
     [style.opacity]="heroOpacity()"
-    style="position: relative; z-index: 10;">
+    style="transition: opacity 0.3s ease;">
     <div class="absolute inset-0 bg-gradient-to-br from-[var(--primary)] via-[var(--primary-hover)] to-[var(--primary)]"></div>
     <div class="absolute inset-0 opacity-10" style="background-image:radial-gradient(circle,white 1px,transparent 1px);background-size:24px 24px"></div>
-    <div class="relative z-10 flex flex-col items-center justify-center h-full text-center gap-2"
-      [style.transform]="'scale(' + (1 - scrollProgress() * 0.08) + ')'"
-      [style.padding-bottom.px]="heroOverlap()">
+    <div class="relative z-10 flex flex-col items-center justify-center h-full text-center gap-2">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center"><svg lucideBus class="w-6 h-6 text-white"></svg></div>
         <span class="text-3xl font-extrabold text-white">رحلة</span>
       </div>
       <p class="text-white/80 text-sm font-medium">سافر بأمان وراحة في السودان</p>
     </div>
   </div>
 
-  <!-- ZONE B: SEARCH CARD -->
-  <div class="px-4 bg-[var(--bg-base)] overflow-hidden will-change-[max-height,opacity]"
-    [style.margin-top.px]="-(heroOverlap())"
-    [style.position]="'relative'"
-    [style.z-index]="'20'"
-    [style.max-height.px]="Math.max(0, 600 * (1 - searchCardProgress()))"
-    [style.opacity]="Math.max(0, 1 - searchCardProgress() * 1.5)"
-    [style.padding-top.px]="16 * (1 - searchCardProgress())"
-    [style.padding-bottom.px]="12 * (1 - searchCardProgress())"
-    style="position: relative; z-index: 20;">
+  <!-- ZONE C: FULL SEARCH FORM (always visible below hero) -->
+  <div #mainSearchCard class="bg-[var(--bg-base)] px-4 pt-4 pb-3">
     <div class="bg-[var(--bg-card)] rounded-3xl border border-[var(--border)] shadow-[0_-4px_0_0_var(--bg-card),0_8px_32px_rgba(13,148,136,0.18)] overflow-hidden">
 
       <!-- FROM -->
@@ -56,8 +56,7 @@
           <svg lucideMapPin class="w-5 h-5 flex-shrink-0 text-[var(--primary)]"></svg>
           <div class="flex flex-col flex-1 min-w-0">
             <span class="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">من</span>
-            <input type="text" [ngModel]="from()" (ngModelChange)="from.set($event)" placeholder="مدينة المغادرة" list="home-from-cities" class="bg-transparent outline-none text-[15px] font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:font-normal w-full">
-            <datalist id="home-from-cities">@for (c of cities(); track c) {<option [value]="c"></option>}</datalist>
+            <app-city-select #homeFromCitySelect [placeholder]="'مدينة المغادرة'" [allCities]="cities()" [(value)]="from"></app-city-select>
           </div>
         </div>
       </div>
@@ -80,8 +79,7 @@
           <svg lucideBus class="w-5 h-5 flex-shrink-0 text-[var(--primary)]"></svg>
           <div class="flex flex-col flex-1 min-w-0">
             <span class="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">إلى</span>
-            <input type="text" [ngModel]="to()" (ngModelChange)="to.set($event)" placeholder="مدينة الوصول" list="home-to-cities" class="bg-transparent outline-none text-[15px] font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:font-normal w-full">
-            <datalist id="home-to-cities">@for (c of cities(); track c) {<option [value]="c"></option>}</datalist>
+            <app-city-select #homeToCitySelect [placeholder]="'مدينة الوصول'" [allCities]="cities()" [(value)]="to"></app-city-select>
           </div>
         </div>
       </div>
@@ -117,10 +115,65 @@
     @if (error()) { <p class="mt-2 text-center text-sm text-red-500 font-medium">{{ error() }}</p> }
   </div>
 
-  <!-- ZONE D: SCROLL CONTENT -->
-  <div class="px-4 pb-4 pt-12 flex flex-col gap-4 min-h-0">
+  <!-- ══════════════════════════════════════ -->
+  <!-- COMPACT SEARCH BAR — sticky, conditional -->
+  <!-- ══════════════════════════════════════ -->
+  @if (showCompactSearchBar()) {
+    <div class="block md:hidden
+                fixed top-0 left-0 right-0
+                z-30
+                bg-[var(--bg-card)]
+                border-b border-[var(--border)]
+                shadow-[0_2px_12px_var(--shadow)]
+                px-4 py-3
+                flex items-center justify-between
+                gap-3
+                animate-in fade-in
+                slide-in-from-top-2
+                duration-200"
+         dir="rtl"
+         (click)="openSearchModal()">
+
+      <!-- Right: pencil icon -->
+      <div class="w-9 h-9 rounded-xl
+                  bg-[var(--primary-light)]
+                  flex items-center justify-center
+                  flex-shrink-0">
+        <svg lucidePencil
+             class="w-4 h-4 text-[var(--primary)]">
+        </svg>
+      </div>
+
+      <!-- Middle: route + date -->
+      <div class="flex-1 flex flex-col
+                  items-start gap-0.5 min-w-0">
+        <span class="text-sm font-bold
+                     text-[var(--text-primary)]
+                     truncate">
+          {{ compactSearchRouteLabel() }}
+        </span>
+        <span class="text-[11px]
+                     text-[var(--text-muted)]">
+          {{ compactSearchDateLabel() }}
+        </span>
+      </div>
+
+      <!-- Left: label -->
+      <span class="text-xs font-bold
+                   text-[var(--primary)]
+                   flex-shrink-0">
+        ابحث عن رحلة
+      </span>
+
+    </div>
+  }
+
+  <!-- ZONE D: SCROLL CONTENT (pb-0 — webshell handles nav clearance) -->
+  <div class="px-4 pb-0 flex flex-col gap-4">
     <div class="flex items-center justify-between">
-      <h2 class="text-base font-bold text-[var(--text-primary)]">رحلات مميزة</h2>
+      <h2 class="text-base font-bold text-[var(--text-primary)]"> 
+        كل الرحلات  
+      </h2>
     </div>
     <div class="flex flex-col gap-3">
       @if (featuredTrips().length === 0) {
@@ -133,6 +186,7 @@
         <app-mobile-trip-card [trip]="trip" (selected)="goToSeat($event)"></app-mobile-trip-card>
       }
     </div>
+
   </div>
 
 
@@ -155,8 +209,7 @@
               <svg lucideMapPin class="w-5 h-5 flex-shrink-0 text-[var(--primary)]"></svg>
               <div class="flex flex-col flex-1">
                 <span class="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">من</span>
-                <input type="text" [ngModel]="from()" (ngModelChange)="from.set($event)" placeholder="مدينة المغادرة" list="modal-from-cities" class="bg-transparent outline-none text-[15px] font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:font-normal w-full">
-                <datalist id="modal-from-cities">@for (c of cities(); track c) {<option [value]="c"></option>}</datalist>
+                <app-city-select #modalFromCitySelect [placeholder]="'مدينة المغادرة'" [allCities]="cities()" [(value)]="from"></app-city-select>
               </div>
             </div>
           </div>
@@ -175,8 +228,7 @@
               <svg lucideBus class="w-5 h-5 flex-shrink-0 text-[var(--primary)]"></svg>
               <div class="flex flex-col flex-1">
                 <span class="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">إلى</span>
-                <input type="text" [ngModel]="to()" (ngModelChange)="to.set($event)" placeholder="مدينة الوصول" list="modal-to-cities" class="bg-transparent outline-none text-[15px] font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:font-normal w-full">
-                <datalist id="modal-to-cities">@for (c of cities(); track c) {<option [value]="c"></option>}</datalist>
+                <app-city-select #modalToCitySelect [placeholder]="'مدينة الوصول'" [allCities]="cities()" [(value)]="to"></app-city-select>
               </div>
             </div>
           </div>

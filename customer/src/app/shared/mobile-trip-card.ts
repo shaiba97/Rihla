@@ -20,6 +20,7 @@ export class MobileTripCardComponent implements OnInit {
 
   platformFee = signal<number>(0);
   displayPrice = computed(() => Number(this.trip()?.price ?? 0) + this.platformFee());
+  bookedSeats = signal<number[]>([]);
 
   depDate = computed(() => formatArabicDate(this.trip()?.tripDate ?? this.trip()?.departureDate));
   arrDate = computed(() => {
@@ -31,6 +32,13 @@ export class MobileTripCardComponent implements OnInit {
     this.bookingSvc.getActiveFee().subscribe({
       next: (res: any) => this.platformFee.set(Number(res?.amount ?? 0)),
       error: () => {},
+    });
+    this.bookingSvc.getBookedSeats(this.trip().id).subscribe({
+      next: (res: any) => {
+        const seats = res?.data ?? res;
+        this.bookedSeats.set(Array.isArray(seats) ? seats : []);
+      },
+      error: () => this.bookedSeats.set([]),
     });
   }
 
