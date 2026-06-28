@@ -13,10 +13,10 @@
     <div class="flex flex-col items-center">
       <span class="text-[22px] font-extrabold text-[var(--text-primary)] tabular-nums leading-none">{{ trip().tripTime | timeFormat }}</span>
       <span class="text-[11px] font-medium text-[var(--text-secondary)] mt-1">{{ trip().boardingCity }}</span>
-      <span class="text-[9px] text-[var(--text-muted)] mt-0.5 flex items-center gap-1"><svg lucideCalendar class="w-2.5 h-2.5 flex-shrink-0"></svg>{{ depDate() }}</span>
+      <span class="text-[9px] text-[var(--text-secondary)] mt-0.5 flex items-center gap-1"><svg lucideCalendar class="w-2.5 h-2.5 flex-shrink-0"></svg>{{ depDate() }}</span>
     </div>
     <div class="flex flex-col items-center flex-1 mx-3 gap-1">
-      <span class="text-[10px] text-[var(--text-muted)]">{{ trip().tripTime | duration : trip().arriveTime }}</span>
+      <span class="text-[10px] text-[var(--text-secondary)]">{{ trip().tripTime | duration : trip().arriveTime }}</span>
       <div class="w-full flex items-center gap-1">
         <div class="w-2 h-2 rounded-full bg-[var(--primary)] flex-shrink-0"></div>
         <div class="flex-1 border-t-2 border-dashed border-[var(--border)]"></div>
@@ -27,12 +27,12 @@
       <span class="text-[22px] font-extrabold text-[var(--text-primary)] tabular-nums leading-none">{{ trip().arriveTime | timeFormat }}</span>
       <span class="text-[11px] font-medium text-[var(--text-secondary)] mt-1">{{ trip().destCity }}</span>
       @if (arrDate()) {
-        <span class="text-[9px] text-[var(--text-muted)] mt-0.5 flex items-center gap-1"><svg lucideCalendar class="w-2.5 h-2.5 flex-shrink-0"></svg>{{ arrDate() }}</span>
+        <span class="text-[9px] text-[var(--text-secondary)] mt-0.5 flex items-center gap-1"><svg lucideCalendar class="w-2.5 h-2.5 flex-shrink-0"></svg>{{ arrDate() }}</span>
       }
     </div>
   </div>
   <div class="px-4 pb-4 pt-2 flex flex-col gap-1">
-    <span class="text-[11px] text-[var(--text-muted)]">{{ ((trip().busChairs ?? trip().seatsLeft ?? 0) - bookedSeats().length) | arabicNumber }} مقعد متاح</span>
-    <span class="text-[10px] text-[var(--text-muted)] flex items-center gap-1"><svg lucideClock class="w-2.5 h-2.5 flex-shrink-0"></svg>الحضور: قبل ساعة من المغادرة</span>
+    <span class="text-[11px] text-[var(--text-secondary)]">{{ ((trip().busChairs ?? trip().seatsLeft ?? 0) - bookedSeats().length) | arabicNumber }} مقعد متاح</span>
+    <span class="text-[10px] text-[var(--text-secondary)] flex items-center gap-1"><svg lucideClock class="w-2.5 h-2.5 flex-shrink-0"></svg>الحضور: قبل ساعة من المغادرة</span>
   </div>
 </div>

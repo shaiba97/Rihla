@@ -34,7 +34,7 @@
     <!-- ERROR -->
     @if (error()) {
       <div class="text-center py-16">
-        <svg lucideFileText class="w-12 h-12 text-[var(--text-muted)] mx-auto mb-3"></svg>
+        <svg lucideFileText class="w-12 h-12 text-[var(--text-secondary)] mx-auto mb-3"></svg>
         <p class="text-sm text-[var(--text-secondary)]">تعذر تحميل المقالات</p>
       </div>
     }
@@ -73,7 +73,7 @@
             <div class="p-5 flex flex-col gap-2 flex-1">
 
               <!-- Meta: date + author -->
-              <div class="flex items-center gap-3 text-[11px] text-[var(--text-muted)]">
+              <div class="flex items-center gap-3 text-[11px] text-[var(--text-secondary)]">
                 <span class="flex items-center gap-1">
                   <svg lucideCalendar class="w-3 h-3"></svg>
                   {{ post.createdAt | date:'d MMM yyyy' }}
@@ -115,7 +115,7 @@
     <!-- EMPTY -->
     @if (!loading() && !error() && posts().length === 0) {
       <div class="text-center py-16">
-        <svg lucideFileText class="w-12 h-12 text-[var(--text-muted)] mx-auto mb-3"></svg>
+        <svg lucideFileText class="w-12 h-12 text-[var(--text-secondary)] mx-auto mb-3"></svg>
         <p class="text-sm text-[var(--text-secondary)]">لا توجد مقالات بعد</p>
       </div>
     }

@@ -12,23 +12,23 @@
         <svg lucideUserPlus class="w-7 h-7 text-[var(--primary)]"></svg>
       </div>
       <h1 class="text-xl font-extrabold text-[var(--text-primary)]">إنشاء حساب جديد</h1>
-      <p class="text-sm text-[var(--text-muted)] text-center">أدخل بياناتك لإنشاء حساب</p>
+      <p class="text-sm text-[var(--text-secondary)] text-center">أدخل بياناتك لإنشاء حساب</p>
     </div>
 
     <div class="flex flex-col gap-4 w-full max-w-sm">
       <div class="flex items-center gap-3 px-4 py-3.5 rounded-2xl border border-[var(--border)] bg-[var(--bg-card)]">
-        <svg lucideUser class="w-5 h-5 text-[var(--text-muted)] flex-shrink-0"></svg>
-        <input type="text" [ngModel]="name()" (ngModelChange)="name.set($event)" placeholder="الاسم الكامل" class="flex-1 bg-transparent outline-none text-[15px] font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:font-normal">
+        <svg lucideUser class="w-5 h-5 text-[var(--text-secondary)] flex-shrink-0"></svg>
+        <input type="text" [ngModel]="name()" (ngModelChange)="name.set($event)" placeholder="الاسم الكامل" class="flex-1 bg-transparent outline-none text-[15px] font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] placeholder:font-normal">
       </div>
 
       <div class="flex items-center gap-3 px-4 py-3.5 rounded-2xl border border-[var(--border)] bg-[var(--bg-card)]">
-        <svg lucidePhone class="w-5 h-5 text-[var(--text-muted)] flex-shrink-0"></svg>
-        <input type="text" [ngModel]="identifier()" (ngModelChange)="identifier.set($event)" placeholder="رقم الهاتف أو البريد الإلكتروني" class="flex-1 bg-transparent outline-none text-[15px] font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:font-normal">
+        <svg lucidePhone class="w-5 h-5 text-[var(--text-secondary)] flex-shrink-0"></svg>
+        <input type="text" [ngModel]="identifier()" (ngModelChange)="identifier.set($event)" placeholder="رقم الهاتف أو البريد الإلكتروني" class="flex-1 bg-transparent outline-none text-[15px] font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] placeholder:font-normal">
       </div>
 
       <div class="flex items-center gap-3 px-4 py-3.5 rounded-2xl border border-[var(--border)] bg-[var(--bg-card)]">
-        <svg lucideLock class="w-5 h-5 text-[var(--text-muted)] flex-shrink-0"></svg>
-        <input type="password" [ngModel]="password()" (ngModelChange)="password.set($event)" placeholder="كلمة المرور" class="flex-1 bg-transparent outline-none text-[15px] font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:font-normal">
+        <svg lucideLock class="w-5 h-5 text-[var(--text-secondary)] flex-shrink-0"></svg>
+        <input type="password" [ngModel]="password()" (ngModelChange)="password.set($event)" placeholder="كلمة المرور" class="flex-1 bg-transparent outline-none text-[15px] font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] placeholder:font-normal">
       </div>
 
       <label class="flex items-start gap-3 cursor-pointer group">
@@ -38,7 +38,7 @@
             <polyline points="20 6 9 17 4 12"></polyline>
           </svg>
         </div>
-        <span class="text-sm text-[var(--text-muted)] leading-relaxed">
+        <span class="text-sm text-[var(--text-secondary)] leading-relaxed">
           أوافق على
           <a routerLink="/terms" class="text-[var(--primary)] font-bold hover:underline">الشروط والأحكام</a>
           و
@@ -63,7 +63,7 @@
       </button>
 
       <div class="text-center">
-        <span class="text-[13px] text-[var(--text-muted)]">لديك حساب بالفعل؟ </span>
+        <span class="text-[13px] text-[var(--text-secondary)]">لديك حساب بالفعل؟ </span>
         <a (click)="goToLogin()" class="text-[13px] font-bold text-[var(--primary)] cursor-pointer">تسجيل الدخول</a>
       </div>
     </div>

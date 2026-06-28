@@ -31,8 +31,7 @@ export class Login {
     }
     this.error.set('');
     this.isLoading.set(true);
-    const isEmail = id.includes('@');
-    this.authStore.login({ phone: isEmail ? undefined : id, email: id, password: pw }).subscribe({
+    this.authStore.login({ email: id, password: pw }).subscribe({
       next: (res: LoginResponse) => {
         const token = res.token;
         const user = res.user;

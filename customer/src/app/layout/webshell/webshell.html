@@ -23,7 +23,7 @@
     class="flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-xl transition-all duration-200 no-underline"
     [class.bg-[var(--primary-light)]]="isHomeActive()"
     [class.text-[var(--primary)]]="isHomeActive()"
-    [class.text-[var(--text-muted)]]="!isHomeActive()">
+    [class.text-[var(--text-secondary)]]="!isHomeActive()">
     <svg lucideHome class="w-5 h-5 transition-colors duration-200"></svg>
     <span class="text-[10px] font-bold transition-colors duration-200">الرئيسية</span>
   </a>
@@ -32,7 +32,7 @@
     class="flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-xl transition-all duration-200 no-underline cursor-pointer"
     [class.bg-[var(--primary-light)]]="isBookingsActive()"
     [class.text-[var(--primary)]]="isBookingsActive()"
-    [class.text-[var(--text-muted)]]="!isBookingsActive()">
+    [class.text-[var(--text-secondary)]]="!isBookingsActive()">
     <svg lucideCalendarClock class="w-5 h-5 transition-colors duration-200"></svg>
     <span class="text-[10px] font-bold transition-colors duration-200">حجوزاتي</span>
   </a>
@@ -41,7 +41,7 @@
     class="flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-xl transition-all duration-200 no-underline cursor-pointer relative"
     [class.bg-[var(--primary-light)]]="isNotifsActive()"
     [class.text-[var(--primary)]]="isNotifsActive()"
-    [class.text-[var(--text-muted)]]="!isNotifsActive()">
+    [class.text-[var(--text-secondary)]]="!isNotifsActive()">
     <div class="relative">
       <svg lucideBell class="w-5 h-5 transition-colors duration-200"></svg>
       @if (isLoggedIn() && unreadCount() > 0) {
@@ -61,7 +61,7 @@
     class="flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-xl transition-all duration-200 no-underline cursor-pointer"
     [class.bg-[var(--primary-light)]]="isBlogActive()"
     [class.text-[var(--primary)]]="isBlogActive()"
-    [class.text-[var(--text-muted)]]="!isBlogActive()">
+    [class.text-[var(--text-secondary)]]="!isBlogActive()">
     <svg lucideNewspaper class="w-5 h-5 transition-colors duration-200"></svg>
     <span class="text-[10px] font-bold transition-colors duration-200">المدونة</span>
   </a>
@@ -70,7 +70,7 @@
     class="flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-xl transition-all duration-200 no-underline"
     [class.bg-[var(--primary-light)]]="isProfileActive()"
     [class.text-[var(--primary)]]="isProfileActive()"
-    [class.text-[var(--text-muted)]]="!isProfileActive()">
+    [class.text-[var(--text-secondary)]]="!isProfileActive()">
     <svg lucideUser class="w-5 h-5 transition-colors duration-200"></svg>
     <span class="text-[10px] font-bold transition-colors duration-200">حسابي</span>
   </a>

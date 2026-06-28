@@ -16,13 +16,13 @@ import { LucideMapPin } from '@lucide/angular';
           (focus)="open()"
           (blur)="onBlur()"
           [placeholder]="placeholder()"
-          class="w-full bg-transparent border-none outline-none text-sm font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:font-normal">
+          class="w-full bg-transparent border-none outline-none text-sm font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] placeholder:font-normal">
         @if (isOpen() && filteredCities().length > 0) {
           <div class="fixed z-50 bg-[var(--bg-card)] border border-[var(--border)] rounded-xl shadow-xl overflow-hidden" [style.width.px]="dropdownWidth()" [style.top.px]="dropdownTop()" [style.left.px]="dropdownLeft()">
             <div class="max-h-56 overflow-y-auto">
               @for (city of filteredCities(); track city) {
                 <button type="button" (mousedown)="handleClick(city, $event)" (touchstart)="handleClick(city, $event)" class="w-full text-right px-4 py-2.5 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--primary-light)] transition-colors border-b border-[var(--border)] last:border-b-0 flex items-center gap-2">
-                  <svg lucideMapPin class="w-3.5 h-3.5 flex-shrink-0 text-[var(--text-muted)]"></svg>
+                  <svg lucideMapPin class="w-3.5 h-3.5 flex-shrink-0 text-[var(--text-secondary)]"></svg>
                   {{ city }}
                 </button>
               }
@@ -76,6 +76,11 @@ export class CitySelectComponent {
 
   onBlur(): void {
     console.log('CITY SELECT: onBlur() called');
+    const term = this.searchTerm().trim();
+    if (term && !this.value()) {
+      const match = this.allCities().find(c => c === term);
+      if (match) this.value.set(match);
+    }
     this.close();
   }
 
@@ -105,13 +110,12 @@ export class CitySelectComponent {
     console.log('CITY SELECT: isOpen() before:', this.isOpen());
     console.log('CITY SELECT: city being selected:', city);
     
-    // In Android WebView, touch events may interfere with mousedown events
-    // Use setTimeout to ensure proper event processing order
-    const delay = this.isAndroidApp ? 50 : 0; // 50ms delay for Android WebView
+    this.searchTerm.set(city);
+    this.value.set(city);
     
+    // Delay dropdown close on Android to allow event propagation
+    const delay = this.isAndroidApp ? 50 : 0;
     setTimeout(() => {
-      this.searchTerm.set(city);
-      this.value.set(city);
       this.isOpen.set(false);
       console.log('CITY SELECT: handleClick() after - value():', this.value());
       console.log('CITY SELECT: handleClick() after - isOpen():', this.isOpen());

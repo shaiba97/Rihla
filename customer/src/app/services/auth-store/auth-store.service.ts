@@ -13,8 +13,7 @@ export interface CustomerData {
 }
 
 export interface LoginPayload {
-  phone?: string;
-  email?: string;
+  email: string;
   password: string;
 }
 
@@ -103,11 +102,7 @@ export class AuthStoreService {
   readonly isLoggedIn = computed(() => !!this.token() && !!this.customerData());
 
   login(data: LoginPayload): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.apiUrl}/users/post-login`, {
-      phone: data.phone,
-      email: data.email,
-      password: data.password,
-    });
+    return this.http.post<LoginResponse>(`${this.apiUrl}/users/post-login`, data);
   }
 
   register(data: RegisterPayload): Observable<CreateUserResponse> {

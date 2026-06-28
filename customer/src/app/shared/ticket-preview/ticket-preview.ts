@@ -31,14 +31,14 @@ import { AuthStoreService } from '../../services/auth-store/auth-store.service';
             <div class="flex items-center gap-2">
               <button
                 (click)="print()"
-                class="w-9 h-9 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:bg-[var(--primary-light)] hover:text-[var(--primary)] transition-all duration-150"
+                class="w-9 h-9 rounded-full flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--primary-light)] hover:text-[var(--primary)] transition-all duration-150"
                 aria-label="طباعة"
               >
                 <svg lucidePrinter class="w-5 h-5"></svg>
               </button>
               <button
                 (click)="close()"
-                class="w-9 h-9 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:bg-[var(--primary-light)] hover:text-[var(--primary)] transition-all duration-150"
+                class="w-9 h-9 rounded-full flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--primary-light)] hover:text-[var(--primary)] transition-all duration-150"
                 aria-label="إغلاق"
               >
                 <svg lucideX class="w-5 h-5"></svg>
@@ -55,7 +55,7 @@ import { AuthStoreService } from '../../services/auth-store/auth-store.service';
                 title="عرض التذكرة"
               ></iframe>
             } @else {
-              <div class="flex items-center justify-center h-[50vh] text-sm text-[var(--text-muted)]">
+              <div class="flex items-center justify-center h-[50vh] text-sm text-[var(--text-secondary)]">
                 لا توجد تذكرة متاحة
               </div>
             }

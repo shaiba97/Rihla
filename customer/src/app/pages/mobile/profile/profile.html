@@ -15,15 +15,15 @@
             class="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-base)] text-[15px] font-semibold text-[var(--text-primary)] outline-none focus:border-[var(--primary)] text-center"
             placeholder="الاسم">
           <div class="flex items-center gap-2 px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-base)]">
-            <svg lucidePhone class="w-4 h-4 text-[var(--text-muted)] flex-shrink-0"></svg>
+            <svg lucidePhone class="w-4 h-4 text-[var(--text-secondary)] flex-shrink-0"></svg>
             <input type="text" [ngModel]="editPhone()" (ngModelChange)="editPhone.set($event)"
-              class="flex-1 bg-transparent outline-none text-[14px] font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-center"
+              class="flex-1 bg-transparent outline-none text-[14px] font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] text-center"
               placeholder="رقم الهاتف">
           </div>
           <div class="flex items-center gap-2 px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-base)]">
-            <svg lucideMail class="w-4 h-4 text-[var(--text-muted)] flex-shrink-0"></svg>
+            <svg lucideMail class="w-4 h-4 text-[var(--text-secondary)] flex-shrink-0"></svg>
             <input type="email" [ngModel]="editEmail()" (ngModelChange)="editEmail.set($event)"
-              class="flex-1 bg-transparent outline-none text-[14px] font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-center"
+              class="flex-1 bg-transparent outline-none text-[14px] font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] text-center"
               placeholder="البريد الإلكتروني">
           </div>
         </div>
@@ -32,7 +32,7 @@
         @if (customerEmail()) {
           <span class="text-[12px] text-[var(--text-secondary)]">{{ customerEmail() }}</span>
         }
-        <span class="text-[13px] text-[var(--text-muted)]" dir="ltr">{{ customerPhone() }}</span>
+        <span class="text-[13px] text-[var(--text-secondary)]" dir="ltr">{{ customerPhone() }}</span>
       }
     </div>
 
@@ -92,7 +92,7 @@
 
     <!-- Delete account -->
     <div class="px-4 mt-6 mb-8">
-      <button (click)="openDeleteConfirm()" class="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl text-[12px] font-medium text-[var(--text-muted)] hover:text-red-400 hover:bg-red-50/50 transition-all duration-150 active:scale-[0.98]">
+      <button (click)="openDeleteConfirm()" class="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl text-[12px] font-medium text-[var(--text-secondary)] hover:text-red-400 hover:bg-red-50/50 transition-all duration-150 active:scale-[0.98]">
         <svg lucideTrash2 class="w-3.5 h-3.5"></svg>
         <span>حذف الحساب</span>
       </button>
@@ -108,7 +108,7 @@
             </div>
             <div class="flex flex-col">
               <span class="text-[15px] font-bold text-[var(--text-primary)]">حذف الحساب</span>
-              <span class="text-[12px] text-[var(--text-muted)]">لا يمكن التراجع عن هذا الإجراء</span>
+              <span class="text-[12px] text-[var(--text-secondary)]">لا يمكن التراجع عن هذا الإجراء</span>
             </div>
           </div>
 
@@ -134,11 +134,11 @@
   } @else {
     <div class="flex-1 flex flex-col items-center justify-center px-6 gap-5 text-center">
       <div class="w-16 h-16 rounded-full bg-[var(--bg-card)] border-2 border-[var(--border)] flex items-center justify-center">
-        <svg lucideUser class="w-8 h-8 text-[var(--text-muted)]"></svg>
+        <svg lucideUser class="w-8 h-8 text-[var(--text-secondary)]"></svg>
       </div>
       <div class="flex flex-col gap-1">
         <span class="text-[16px] font-bold text-[var(--text-primary)]">تسجيل الدخول</span>
-        <span class="text-[13px] text-[var(--text-muted)]">سجل الدخول لمتابعة حجوزاتك</span>
+        <span class="text-[13px] text-[var(--text-secondary)]">سجل الدخول لمتابعة حجوزاتك</span>
       </div>
       <button (click)="login()" class="flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl bg-[var(--primary)] text-white font-bold text-[15px] active:scale-[0.98] transition-all duration-150 shadow-lg">
         <svg lucideLogIn class="w-5 h-5"></svg>

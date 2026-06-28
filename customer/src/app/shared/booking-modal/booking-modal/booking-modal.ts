@@ -297,7 +297,7 @@ export class BookingModalComponent implements OnInit, OnDestroy {
     if (seat.status === 'selected')
       return ['bg-[var(--primary)]', 'text-white', 'border-[var(--primary)]', 'shadow-md'];
     if (seat.status === 'booked')
-      return ['bg-[var(--border)]', 'text-[var(--text-muted)]', 'cursor-not-allowed', 'opacity-60'];
+      return ['bg-[var(--border)]', 'text-[var(--text-secondary)]', 'cursor-not-allowed', 'opacity-60'];
     return ['bg-[var(--bg-card)]', 'text-[var(--text-primary)]', 'border-[var(--border)]', 'hover:border-[var(--primary)]', 'hover:bg-[var(--primary-light)]', 'cursor-pointer'];
   }
 

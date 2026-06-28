@@ -22,13 +22,13 @@ import { environment } from '../../../environments/environment';
         </div>
       } @else if (error() || !post()) {
         <div class="text-center py-20">
-          <svg lucideFileText class="w-16 h-16 text-[var(--text-muted)] mx-auto mb-4"></svg>
+          <svg lucideFileText class="w-16 h-16 text-[var(--text-secondary)] mx-auto mb-4"></svg>
           <p class="text-[var(--text-secondary)]">المقال غير موجود</p>
           <a routerLink="/blogs" class="inline-block mt-4 text-sm font-semibold text-[var(--primary)]">العودة إلى المدونة</a>
         </div>
       } @else {
         <article>
-          <div class="flex items-center gap-1.5 text-xs text-[var(--text-muted)] mb-3">
+          <div class="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] mb-3">
             <svg lucideCalendar class="w-3.5 h-3.5"></svg>
             <span>{{ post()!.createdAt | date:'d MMM yyyy' }}</span>
             <span class="mx-1.5">·</span>

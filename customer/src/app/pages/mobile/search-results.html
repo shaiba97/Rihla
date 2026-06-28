@@ -6,7 +6,7 @@
     </button>
     <div class="flex flex-col flex-1 min-w-0">
       <span class="text-[15px] font-bold text-[var(--text-primary)] truncate">{{ from() }} ← {{ to() }}</span>
-      <span class="text-[11px] text-[var(--text-muted)]">{{ dateLabel() }}</span>
+      <span class="text-[11px] text-[var(--text-secondary)]">{{ dateLabel() }}</span>
     </div>
     <button (click)="openEdit()" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[var(--primary-light)] transition-all flex-shrink-0">
       <svg lucidePencil class="w-4 h-4 text-[var(--primary)]"></svg>
@@ -22,7 +22,7 @@
           <svg lucideLogIn class="w-4 h-4"></svg>
           <span>تسجيل الدخول</span>
         </button>
-        <button (click)="dismissAuthError()" class="text-[13px] font-semibold text-[var(--text-muted)] active:scale-[0.98] transition-all">إلغاء</button>
+        <button (click)="dismissAuthError()" class="text-[13px] font-semibold text-[var(--text-secondary)] active:scale-[0.98] transition-all">إلغاء</button>
       </div>
     </div>
   }
@@ -32,15 +32,15 @@
     <div class="fixed top-0 right-0 left-0 z-50 bg-[var(--bg-card)] rounded-b-3xl shadow-2xl border-b border-[var(--border)] overflow-hidden">
       <div class="flex items-center justify-between px-4 py-3 border-b border-[var(--border)]">
         <span class="text-[15px] font-bold text-[var(--text-primary)]">تعديل البحث</span>
-        <button (click)="closeEdit()" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[var(--bg-base)]"><svg lucideX class="w-5 h-5 text-[var(--text-muted)]"></svg></button>
+        <button (click)="closeEdit()" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[var(--bg-base)]"><svg lucideX class="w-5 h-5 text-[var(--text-secondary)]"></svg></button>
       </div>
       <div class="px-4 pb-5 pt-3 flex flex-col gap-3">
         <div class="border-b border-[var(--border)]">
           <div class="flex items-center gap-3 px-4 py-3.5">
             <svg lucideMapPin class="w-5 h-5 flex-shrink-0 text-[var(--primary)]"></svg>
             <div class="flex flex-col flex-1 min-w-0">
-              <span class="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">من</span>
-              <input type="text" [ngModel]="editFrom()" (ngModelChange)="editFrom.set($event)" list="edit-from" placeholder="مدينة المغادرة" class="bg-transparent outline-none text-[15px] font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:font-normal w-full">
+              <span class="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">من</span>
+              <input type="text" [ngModel]="editFrom()" (ngModelChange)="editFrom.set($event)" list="edit-from" placeholder="مدينة المغادرة" class="bg-transparent outline-none text-[15px] font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] placeholder:font-normal w-full">
               <datalist id="edit-from">@for (c of cities(); track c) {<option [value]="c"></option>}</datalist>
             </div>
           </div>
@@ -59,8 +59,8 @@
           <div class="flex items-center gap-3 px-4 py-3.5">
             <svg lucideBus class="w-5 h-5 flex-shrink-0 text-[var(--primary)]"></svg>
             <div class="flex flex-col flex-1 min-w-0">
-              <span class="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest">إلى</span>
-              <input type="text" [ngModel]="editTo()" (ngModelChange)="editTo.set($event)" list="edit-to" placeholder="مدينة الوصول" class="bg-transparent outline-none text-[15px] font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:font-normal w-full">
+              <span class="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-widest">إلى</span>
+              <input type="text" [ngModel]="editTo()" (ngModelChange)="editTo.set($event)" list="edit-to" placeholder="مدينة الوصول" class="bg-transparent outline-none text-[15px] font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] placeholder:font-normal w-full">
               <datalist id="edit-to">@for (c of cities(); track c) {<option [value]="c"></option>}</datalist>
             </div>
           </div>
@@ -95,20 +95,20 @@
   @if (isLoading()) {
     <div class="flex-1 flex flex-col items-center justify-center gap-4 py-20">
       <svg lucideLoaderCircle class="w-10 h-10 animate-spin text-[var(--primary)]"></svg>
-      <p class="text-sm text-[var(--text-muted)] font-medium">جاري البحث...</p>
+      <p class="text-sm text-[var(--text-secondary)] font-medium">جاري البحث...</p>
     </div>
   }
 
   @if (!isLoading() && error()) {
     <div class="flex-1 flex flex-col items-center justify-center gap-3 py-20 px-6 text-center">
-      <svg lucideSearchX class="w-12 h-12 text-[var(--text-muted)]"></svg>
+      <svg lucideSearchX class="w-12 h-12 text-[var(--text-secondary)]"></svg>
       <p class="text-sm font-semibold text-[var(--text-primary)]">{{ error() }}</p>
     </div>
   }
 
   @if (!isLoading() && !error() && trips().length === 0) {
     <div class="flex-1 flex flex-col items-center justify-center gap-3 py-20 px-6 text-center">
-      <svg lucideBus class="w-12 h-12 text-[var(--text-muted)]"></svg>
+      <svg lucideBus class="w-12 h-12 text-[var(--text-secondary)]"></svg>
       <p class="text-sm font-semibold text-[var(--text-primary)]">لا توجد رحلات متاحة لهذا المسار</p>
     </div>
   }

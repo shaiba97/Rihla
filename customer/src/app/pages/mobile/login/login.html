@@ -12,18 +12,18 @@
         <svg lucidePhone class="w-7 h-7 text-[var(--primary)]"></svg>
       </div>
       <h1 class="text-xl font-extrabold text-[var(--text-primary)]">مرحباً بك</h1>
-      <p class="text-sm text-[var(--text-muted)] text-center">سجل دخولك لمتابعة حجوزاتك</p>
+      <p class="text-sm text-[var(--text-secondary)] text-center">سجل دخولك لمتابعة حجوزاتك</p>
     </div>
 
     <div class="flex flex-col gap-4 w-full max-w-sm">
       <div class="flex items-center gap-3 px-4 py-3.5 rounded-2xl border border-[var(--border)] bg-[var(--bg-card)]">
-        <svg lucidePhone class="w-5 h-5 text-[var(--text-muted)] flex-shrink-0"></svg>
-        <input type="text" [ngModel]="identifier()" (ngModelChange)="identifier.set($event)" placeholder="رقم الهاتف أو البريد الإلكتروني" class="flex-1 bg-transparent outline-none text-[15px] font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:font-normal">
+        <svg lucidePhone class="w-5 h-5 text-[var(--text-secondary)] flex-shrink-0"></svg>
+        <input type="text" [ngModel]="identifier()" (ngModelChange)="identifier.set($event)" placeholder="رقم الهاتف أو البريد الإلكتروني" class="flex-1 bg-transparent outline-none text-[15px] font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] placeholder:font-normal">
       </div>
 
       <div class="flex items-center gap-3 px-4 py-3.5 rounded-2xl border border-[var(--border)] bg-[var(--bg-card)]">
-        <svg lucideLock class="w-5 h-5 text-[var(--text-muted)] flex-shrink-0"></svg>
-        <input type="password" [ngModel]="password()" (ngModelChange)="password.set($event)" placeholder="كلمة المرور" class="flex-1 bg-transparent outline-none text-[15px] font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:font-normal">
+        <svg lucideLock class="w-5 h-5 text-[var(--text-secondary)] flex-shrink-0"></svg>
+        <input type="password" [ngModel]="password()" (ngModelChange)="password.set($event)" placeholder="كلمة المرور" class="flex-1 bg-transparent outline-none text-[15px] font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] placeholder:font-normal">
       </div>
 
       @if (error()) {
@@ -36,7 +36,7 @@
       </button>
 
       <div class="text-center">
-        <span class="text-[13px] text-[var(--text-muted)]">ليس لديك حساب؟ </span>
+        <span class="text-[13px] text-[var(--text-secondary)]">ليس لديك حساب؟ </span>
         <a (click)="goToRegister()" class="text-[13px] font-bold text-[var(--primary)] cursor-pointer">إنشاء حساب</a>
       </div>
     </div>

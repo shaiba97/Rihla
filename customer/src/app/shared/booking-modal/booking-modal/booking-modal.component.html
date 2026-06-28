@@ -24,7 +24,7 @@
         </div>
         <div>
           <h2 class="text-xl font-extrabold text-[var(--text-primary)]"> سيتم تأكيد في خلال {{ 5 | arabicNumber }} دقائق</h2>
-          <p class="text-sm text-[var(--text-muted)] mt-1"> تابع في صفحة حجوزاتك </p>
+          <p class="text-sm text-[var(--text-secondary)] mt-1"> تابع في صفحة حجوزاتك </p>
         </div>
       </div>
       <div class="px-6 md:px-8 pb-2 flex flex-col gap-3">
@@ -48,7 +48,7 @@
         </div>
         <div class="bg-[var(--bg-base)] rounded-2xl p-4 flex flex-col gap-2">
           <div class="flex items-center justify-between">
-            <span class="text-xs text-[var(--text-muted)]">المقاعد</span>
+            <span class="text-xs text-[var(--text-secondary)]">المقاعد</span>
             <span class="text-sm font-bold text-[var(--text-primary)]">{{ selectedSeats().join('، ') | arabicNumber }}</span>
           </div>
           <div class="border-t border-[var(--border)] pt-2 flex items-center justify-between">
@@ -81,7 +81,7 @@
           }
         </div>
         <button (click)="onClose()"
-          class="w-9 h-9 rounded-full flex items-center justify-center text-[var(--text-muted)] hover:bg-[var(--primary-light)] hover:text-[var(--primary)] transition-all duration-150">
+          class="w-9 h-9 rounded-full flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--primary-light)] hover:text-[var(--primary)] transition-all duration-150">
           <svg lucideX class="w-5 h-5"></svg>
         </button>
       </div>
@@ -92,7 +92,7 @@
           class="flex items-center gap-2 px-5 py-4 text-sm font-semibold border-b-2 transition-all duration-150"
           [ngClass]="currentStep() === 'seat'
             ? ['border-[var(--primary)]', 'text-[var(--primary)]']
-            : ['border-transparent', 'text-[var(--text-muted)]', 'hover:text-[var(--text-secondary)]']">
+            : ['border-transparent', 'text-[var(--text-secondary)]', 'hover:text-[var(--text-secondary)]']">
           <svg lucideArmchair class="w-4 h-4"></svg>
           <span>١. اختيار المقعد</span>
         </button>
@@ -102,8 +102,8 @@
           [ngClass]="currentStep() === 'passenger'
             ? ['border-[var(--primary)]', 'text-[var(--primary)]']
             : canGoToPassenger()
-              ? ['border-transparent', 'text-[var(--text-muted)]', 'hover:text-[var(--text-secondary)]']
-              : ['border-transparent', 'text-[var(--text-muted)]', 'opacity-40']">
+              ? ['border-transparent', 'text-[var(--text-secondary)]', 'hover:text-[var(--text-secondary)]']
+              : ['border-transparent', 'text-[var(--text-secondary)]', 'opacity-40']">
           <svg lucideUser class="w-4 h-4"></svg>
           <span>٢. بيانات الراكب</span>
         </button>
@@ -113,8 +113,8 @@
           [ngClass]="currentStep() === 'payment'
             ? ['border-[var(--primary)]', 'text-[var(--primary)]']
             : canGoToPayment()
-              ? ['border-transparent', 'text-[var(--text-muted)]', 'hover:text-[var(--text-secondary)]']
-              : ['border-transparent', 'text-[var(--text-muted)]', 'opacity-40']">
+              ? ['border-transparent', 'text-[var(--text-secondary)]', 'hover:text-[var(--text-secondary)]']
+              : ['border-transparent', 'text-[var(--text-secondary)]', 'opacity-40']">
           <svg lucideCreditCard class="w-4 h-4"></svg>
           <span>٣. الدفع</span>
         </button>
@@ -122,7 +122,7 @@
 
       <!-- ── LOADING ── -->
       @if (isLoading()) {
-        <div class="flex items-center justify-center py-24 gap-3 text-[var(--text-muted)]">
+        <div class="flex items-center justify-center py-24 gap-3 text-[var(--text-secondary)]">
           <svg lucideLoader class="w-8 h-8 animate-spin text-[var(--primary)]"></svg>
           <span class="text-sm font-medium">جاري تحميل بيانات الرحلة...</span>
         </div>
@@ -142,7 +142,7 @@
               <h3 class="text-sm font-bold text-[var(--text-primary)]">اختر مقعدك</h3>
               <div class="inline-flex flex-col items-center bg-[var(--bg-card)] border-2 border-[var(--border)] rounded-3xl p-5 shadow-sm mx-auto w-full max-w-xs">
                 <div class="flex justify-start w-full mb-4 pr-2">
-                  <div class="w-10 h-10 rounded-full border-4 border-[var(--border)] flex items-center justify-center text-[var(--text-muted)]">
+                  <div class="w-10 h-10 rounded-full border-4 border-[var(--border)] flex items-center justify-center text-[var(--text-secondary)]">
                     <svg lucideBus class="w-4 h-4"></svg>
                   </div>
                 </div>
@@ -206,7 +206,7 @@
                 </div>
                 <div>
                   <p class="text-base font-bold text-[var(--text-primary)]">{{ trip()!.Bus?.name }}</p>
-                  <p class="text-xs text-[var(--text-muted)]">{{ trip()!.Bus?.chairs }} مقعد</p>
+                  <p class="text-xs text-[var(--text-secondary)]">{{ trip()!.Bus?.chairs }} مقعد</p>
                 </div>
               </div>
               <div class="h-px bg-[var(--border)]"></div>
@@ -219,7 +219,7 @@
                   <div class="flex flex-col gap-0.5">
                     <span class="text-xl font-extrabold text-[var(--text-primary)] tabular-nums leading-none">{{ trip()!.departureTime | timeFormat }}</span>
                     <span class="text-xs font-medium text-[var(--text-secondary)]">{{ trip()!.fromCity }}</span>
-                    <span class="text-[10px] text-[var(--text-muted)]">{{ trip()!.fromStation }}</span>
+                    <span class="text-[10px] text-[var(--text-secondary)]">{{ trip()!.fromStation }}</span>
                   </div>
                 </div>
                 <div class="flex items-start gap-3">
@@ -229,7 +229,7 @@
                   <div class="flex flex-col gap-0.5">
                     <span class="text-xl font-extrabold text-[var(--text-primary)] tabular-nums leading-none">{{ trip()!.arrivalTime | timeFormat }}</span>
                     <span class="text-xs font-medium text-[var(--text-secondary)]">{{ trip()!.toCity }}</span>
-                    <span class="text-[10px] text-[var(--text-muted)]">{{ trip()!.toStation }}</span>
+                    <span class="text-[10px] text-[var(--text-secondary)]">{{ trip()!.toStation }}</span>
                   </div>
                 </div>
               </div>
@@ -274,7 +274,7 @@
                   <svg lucideSmartphone class="w-4 h-4 text-[var(--primary)]"></svg>
                   بيانات التواصل
                 </h3>
-                <p class="text-xs text-[var(--text-muted)] -mt-2">سيتم إرسال التذكرة على هذا الرقم</p>
+                <p class="text-xs text-[var(--text-secondary)] -mt-2">سيتم إرسال التذكرة على هذا الرقم</p>
                 <div class="flex gap-0 overflow-hidden rounded-xl border border-[var(--border)] focus-within:border-[var(--primary)] focus-within:ring-2 focus-within:ring-[var(--primary-light)] transition-all duration-150 bg-[var(--bg-card)]" [formGroup]="contactForm">
                   <div class="flex-shrink-0 border-l border-[var(--border)]">
                     <select formControlName="countryCode"
@@ -285,7 +285,7 @@
                     </select>
                   </div>
                   <input type="tel" formControlName="whatsappNumber" placeholder="9xxxxxxxxx" maxlength="9"
-                    class="flex-1 px-4 py-3 bg-transparent text-sm font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none">
+                    class="flex-1 px-4 py-3 bg-transparent text-sm font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] outline-none">
                 </div>
                 @if (contactForm.get('whatsappNumber')?.invalid && contactForm.get('whatsappNumber')?.touched) {
                   <p class="text-xs flex items-center gap-1 text-danger">
@@ -308,15 +308,15 @@
                           <svg lucideUser class="w-3.5 h-3.5 text-[var(--primary)]"></svg>
                         </div>
                         <span class="text-sm font-bold text-[var(--text-primary)]">راكب {{ $index + 1 | arabicNumber }}</span>
-                        <span class="text-xs text-[var(--text-muted)] mr-auto">مقعد رقم {{ selectedSeats()[$index] | arabicNumber }}</span>
+                        <span class="text-xs text-[var(--text-secondary)] mr-auto">مقعد رقم {{ selectedSeats()[$index] | arabicNumber }}</span>
                       </div>
                       <input type="text" formControlName="name" placeholder="الاسم الكامل"
-                        class="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--bg-card)] text-sm font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:font-normal outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary-light)] transition-all duration-150">
+                        class="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--bg-card)] text-sm font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] placeholder:font-normal outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary-light)] transition-all duration-150">
                       @if (invalid(p.get('name'))) {
                         <p class="text-xs text-danger">يرجى إدخال الاسم</p>
                       }
                       <input type="number" formControlName="age" placeholder="العمر" min="1" max="120"
-                        class="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--bg-card)] text-sm font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:font-normal outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary-light)] transition-all duration-150">
+                        class="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--bg-card)] text-sm font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] placeholder:font-normal outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary-light)] transition-all duration-150">
                       @if (invalid(p.get('age'))) {
                         <p class="text-xs text-danger">يرجى إدخال عمر صحيح</p>
                       }
@@ -363,14 +363,14 @@
                   <div class="w-2.5 h-2.5 rounded-full bg-[var(--primary)] flex-shrink-0"></div>
                   <div>
                     <p class="text-xs font-bold text-[var(--text-primary)]">{{ trip()!.departureTime | timeFormat }} — {{ trip()!.fromCity }}</p>
-                    <p class="text-[10px] text-[var(--text-muted)]">{{ trip()!.fromStation }}</p>
+                    <p class="text-[10px] text-[var(--text-secondary)]">{{ trip()!.fromStation }}</p>
                   </div>
                 </div>
                 <div class="flex items-center gap-3">
                   <div class="w-2.5 h-2.5 rounded-full border-2 border-[var(--primary)] flex-shrink-0"></div>
                   <div>
                     <p class="text-xs font-bold text-[var(--text-primary)]">{{ trip()!.arrivalTime | timeFormat }} — {{ trip()!.toCity }}</p>
-                    <p class="text-[10px] text-[var(--text-muted)]">{{ trip()!.toStation }}</p>
+                    <p class="text-[10px] text-[var(--text-secondary)]">{{ trip()!.toStation }}</p>
                   </div>
                 </div>
               </div>
@@ -436,10 +436,10 @@
 
               @if (selectedGateway()) {
                 <div class="flex flex-col gap-1.5">
-                  <span class="text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">رقم التحويل</span>
+                  <span class="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">رقم التحويل</span>
                   <div class="flex items-center justify-between px-4 py-3.5 rounded-2xl bg-[var(--primary-light)] border-2 border-[var(--primary)]">
                     <div class="flex flex-col gap-0.5">
-                      <span class="text-xs text-[var(--text-muted)]">{{ gatewayAccountHolder() }}</span>
+                      <span class="text-xs text-[var(--text-secondary)]">{{ gatewayAccountHolder() }}</span>
                       <span class="text-xs text-[var(--primary)] font-medium">حوّل المبلغ على هذا الرقم</span>
                       <span class="text-xl font-extrabold text-[var(--primary)] tabular-nums tracking-wider" dir="ltr">{{ gatewayAccountNumber() }}</span>
                     </div>
@@ -459,7 +459,7 @@
                 <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-4 flex flex-col gap-3">
                   <span class="text-xs font-bold text-[var(--text-primary)]">بيانات الدفع</span>
                   <input [ngModel]="paymentForm.get('transactionId')?.value" (ngModelChange)="paymentForm.get('transactionId')?.setValue($event)" type="text" placeholder="رقم العملية *"
-                    class="w-full px-4 py-3 rounded-xl border bg-[var(--bg-base)] text-sm font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none">
+                    class="w-full px-4 py-3 rounded-xl border bg-[var(--bg-base)] text-sm font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] outline-none">
                   <div>
                     <label class="flex items-center gap-3 px-4 py-4 rounded-xl border-2 border-dashed border-[var(--border)] bg-[var(--bg-base)] cursor-pointer active:scale-[0.98] transition-all hover:border-[var(--primary)]">
                       <svg lucideUpload class="w-5 h-5 text-[var(--primary)] flex-shrink-0"></svg>
@@ -496,14 +496,14 @@
                   <div class="w-2.5 h-2.5 rounded-full bg-[var(--primary)] mt-1 flex-shrink-0"></div>
                   <div>
                     <p class="text-xs font-bold text-[var(--text-primary)]">{{ trip()!.departureTime | timeFormat }}</p>
-                    <p class="text-[10px] text-[var(--text-muted)]">{{ trip()!.fromCity }} — {{ trip()!.fromStation }}</p>
+                    <p class="text-[10px] text-[var(--text-secondary)]">{{ trip()!.fromCity }} — {{ trip()!.fromStation }}</p>
                   </div>
                 </div>
                 <div class="flex items-start gap-3">
                   <div class="w-2.5 h-2.5 rounded-full border-2 border-[var(--primary)] mt-1 flex-shrink-0"></div>
                   <div>
                     <p class="text-xs font-bold text-[var(--text-primary)]">{{ trip()!.arrivalTime | timeFormat }}</p>
-                    <p class="text-[10px] text-[var(--text-muted)]">{{ trip()!.toCity }} — {{ trip()!.toStation }}</p>
+                    <p class="text-[10px] text-[var(--text-secondary)]">{{ trip()!.toCity }} — {{ trip()!.toStation }}</p>
                   </div>
                 </div>
               </div>
@@ -512,7 +512,7 @@
                 @for (p of passengersArray.controls; track $index) {
                   <div class="flex items-center justify-between text-xs text-[var(--text-secondary)]">
                     <span>{{ p.get('name')?.value || 'راكب ' + ($index + 1) }}</span>
-                    <span class="text-[var(--text-muted)]">مقعد {{ selectedSeats()[$index] | arabicNumber }}</span>
+                    <span class="text-[var(--text-secondary)]">مقعد {{ selectedSeats()[$index] | arabicNumber }}</span>
                   </div>
                 }
               </div>

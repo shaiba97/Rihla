@@ -12,7 +12,6 @@
   --bg-card:        #FFFFFF;
   --border:         #99F6E4;
   --text-secondary: #0F766E;
-  --text-muted:     #5EEAD4;
   --shadow:         rgba(13, 148, 136, 0.1);
   --safe-top:       env(safe-area-inset-top, 0px);
   --safe-bottom:    env(safe-area-inset-bottom, 0px);
@@ -41,7 +40,6 @@ html, body {
   --border:         #0F4F4A;
   --text-primary:   #CCFBF1;
   --text-secondary: #5EEAD4;
-  --text-muted:     #0D9488;
   --shadow:         rgba(0, 0, 0, 0.3);
   --danger:         #FCA5A5;
   --success:        #6EE7B7;

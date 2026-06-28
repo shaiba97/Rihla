@@ -35,7 +35,7 @@
       <div class="flex-1 flex flex-col items-center justify-center px-6 gap-3 text-center">
         <svg lucideAlertCircle class="w-12 h-12 text-red-400"></svg>
         <p class="text-sm font-bold text-[var(--text-primary)]">انتهت صلاحية الجلسة</p>
-        <p class="text-[13px] text-[var(--text-muted)]">الرجاء العودة واختيار المقاعد مرة أخرى</p>
+        <p class="text-[13px] text-[var(--text-secondary)]">الرجاء العودة واختيار المقاعد مرة أخرى</p>
         <button (click)="goHome()" class="mt-2 px-8 py-3 rounded-2xl bg-[var(--primary)] text-white font-bold text-[14px] active:scale-95 transition-all">العودة للرئيسية</button>
       </div>
     } @else {
@@ -44,31 +44,31 @@
         <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-4 flex flex-col gap-2">
           <span class="text-[13px] font-bold text-[var(--text-primary)]">ملخص الحجز</span>
           <div class="flex items-center justify-between">
-            <span class="text-[12px] text-[var(--text-muted)]">من</span>
+            <span class="text-[12px] text-[var(--text-secondary)]">من</span>
             <span class="text-[13px] font-semibold text-[var(--text-primary)]">{{ trip().boardingCity }}</span>
           </div>
           <div class="flex items-center justify-between">
-            <span class="text-[12px] text-[var(--text-muted)]">إلى</span>
+            <span class="text-[12px] text-[var(--text-secondary)]">إلى</span>
             <span class="text-[13px] font-semibold text-[var(--text-primary)]">{{ trip().destCity }}</span>
           </div>
           <div class="flex items-center justify-between">
-            <span class="text-[12px] text-[var(--text-muted)]">التاريخ</span>
+            <span class="text-[12px] text-[var(--text-secondary)]">التاريخ</span>
             <span class="text-[13px] font-semibold text-[var(--text-primary)]">{{ formattedDate() }}</span>
           </div>
           <div class="flex items-center justify-between">
-            <span class="text-[12px] text-[var(--text-muted)]">الزمن</span>
+            <span class="text-[12px] text-[var(--text-secondary)]">الزمن</span>
             <span class="text-[13px] font-semibold text-[var(--text-primary)]">{{ formattedTime() }}</span>
           </div>
            <div class="flex items-center justify-between">
-             <span class="text-[12px] text-[var(--text-muted)]">المقاعد</span>
+             <span class="text-[12px] text-[var(--text-secondary)]">المقاعد</span>
              <span class="text-[13px] font-semibold text-[var(--text-primary)]">{{ formattedSeats() | arabicNumber }}</span>
            </div>
             <div class="flex items-center justify-between">
-               <span class="text-[12px] text-[var(--text-muted)]">سعر التذكرة</span>
+               <span class="text-[12px] text-[var(--text-secondary)]">سعر التذكرة</span>
                <span class="text-[13px] font-semibold text-[var(--text-primary)] tabular-nums">{{ (baseAmount() - platformFee()) * selectedSeats().length | arabicNumber }} <span class="text-[11px] font-medium">جنيه</span></span>
              </div>
             <div class="flex items-center justify-between">
-               <span class="text-[12px] text-[var(--text-muted)]">رسوم المنصة</span>
+               <span class="text-[12px] text-[var(--text-secondary)]">رسوم المنصة</span>
                <span class="text-[13px] font-semibold text-[var(--text-primary)] tabular-nums">{{ platformFee() * selectedSeats().length | arabicNumber }} <span class="text-[11px] font-medium">جنيه</span></span>
              </div>
             <div class="border-t border-[var(--border)] my-1 pt-2 flex items-center justify-between">
@@ -87,7 +87,7 @@
           @for (p of passengers(); track $index; let i = $index) {
             <div class="flex items-center justify-between py-1">
               <span class="text-[13px] text-[var(--text-secondary)]">{{ p.name }}</span>
-              <span class="text-[11px] text-[var(--text-muted)] bg-[var(--primary)] text-white px-2 py-0.5 rounded-full font-bold">مقعد {{ selectedSeats()[i] | arabicNumber }}</span>
+              <span class="text-[11px] text-[var(--text-secondary)] bg-[var(--primary)] text-white px-2 py-0.5 rounded-full font-bold">مقعد {{ selectedSeats()[i] | arabicNumber }}</span>
             </div>
           }
         </div>
@@ -115,14 +115,14 @@
             @if (selectedAccountNumber()) {
               <div class="flex items-center justify-between px-3 py-2.5 rounded-xl bg-[var(--bg-base)] border border-[var(--border)]">
                 <div class="flex flex-col">
-                  <span class="text-[11px] text-[var(--text-muted)]">{{ selectedAccountBank() }}</span>
+                  <span class="text-[11px] text-[var(--text-secondary)]">{{ selectedAccountBank() }}</span>
                   <span class="text-[15px] font-bold text-[var(--text-primary)] tracking-wider" dir="ltr">{{ selectedAccountNumber() | arabicNumber }}</span>
                 </div>
                 <button (click)="copyAccountNumber()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[var(--primary-light)] transition-all flex-shrink-0">
                   @if (copied()) {
                     <svg lucideCheck class="w-4 h-4 text-emerald-500"></svg>
                   } @else {
-                    <svg lucideCopy class="w-4 h-4 text-[var(--text-muted)]"></svg>
+                    <svg lucideCopy class="w-4 h-4 text-[var(--text-secondary)]"></svg>
                   }
                 </button>
               </div>
@@ -134,7 +134,7 @@
 
           <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-4 flex flex-col gap-3">
             <span class="text-[13px] font-bold text-[var(--text-primary)]">بيانات الدفع</span>
-            <input type="number" formControlName="transactionId" placeholder="رقم العملية *" class="w-full px-4 py-3 rounded-xl border bg-[var(--bg-base)] text-[14px] font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:font-normal outline-none transition-all"
+            <input type="number" formControlName="transactionId" placeholder="رقم العملية *" class="w-full px-4 py-3 rounded-xl border bg-[var(--bg-base)] text-[14px] font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] placeholder:font-normal outline-none transition-all"
               [class.border-red-400]="invalid(paymentForm.get('transactionId'))"
               [class.border-[var(--border)]]="!invalid(paymentForm.get('transactionId'))"
               [class.focus:border-[var(--primary)]]="!invalid(paymentForm.get('transactionId'))">
@@ -158,7 +158,7 @@
 
       <div class="fixed max-md:bottom-[57px] bottom-0 right-0 left-0 bg-[var(--bg-card)] border-t border-[var(--border)] px-4 py-3 flex items-center justify-between gap-4 shadow-[0_-4px_20px_rgba(13,148,136,0.1)]">
          <div class="flex flex-col">
-            <span class="text-[11px] text-[var(--text-muted)]">{{ selectedSeats().length | arabicNumber }} مقعد</span>
+            <span class="text-[11px] text-[var(--text-secondary)]">{{ selectedSeats().length | arabicNumber }} مقعد</span>
             <span class="text-[18px] font-extrabold text-[var(--primary)] leading-tight tabular-nums">{{ totalAmount() | arabicNumber }} <span class="text-[11px] font-medium">جنيه</span></span>
           </div>
         <button (click)="onSubmit()" [disabled]="isSubmitting()" class="flex items-center gap-2 px-6 py-3.5 rounded-2xl font-bold text-[15px] active:scale-95 transition-all duration-150 flex-shrink-0"
@@ -166,7 +166,7 @@
           [class.text-white]="canSubmit()"
           [class.shadow-lg]="canSubmit()"
           [class.bg-[var(--border)]]="!canSubmit()"
-          [class.text-[var(--text-muted)]]="!canSubmit()"
+          [class.text-[var(--text-secondary)]]="!canSubmit()"
           [class.cursor-not-allowed]="!canSubmit()">
           @if (isSubmitting()) {
             <span>جاري التأكيد...</span>

@@ -6,18 +6,18 @@
           <svg lucideBus class="w-8 h-8" color="white"></svg>
         </div>
         <h1 class="text-2xl font-extrabold text-[var(--text-primary)]">مرحباً بك في رحلة</h1>
-        <p class="text-sm text-[var(--text-muted)] text-center">سجل دخولك لمتابعة حجوزاتك وحجز تذاكر جديدة</p>
+        <p class="text-sm text-[var(--text-secondary)] text-center">سجل دخولك لمتابعة حجوزاتك وحجز تذاكر جديدة</p>
       </div>
 
       <div class="flex flex-col gap-5">
         <div class="flex items-center gap-3 px-4 py-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-base)] transition-all duration-200 focus-within:border-[var(--primary)] focus-within:shadow-[0_0_0_3px_var(--primary-light)]">
-          <svg lucidePhone class="w-5 h-5 text-[var(--text-muted)] flex-shrink-0"></svg>
-          <input type="text" [ngModel]="identifier()" (ngModelChange)="identifier.set($event)" placeholder="رقم الهاتف أو البريد الإلكتروني" class="flex-1 bg-transparent outline-none text-[15px] font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:font-normal">
+          <svg lucidePhone class="w-5 h-5 text-[var(--text-secondary)] flex-shrink-0"></svg>
+          <input type="text" [ngModel]="identifier()" (ngModelChange)="identifier.set($event)" placeholder="رقم الهاتف أو البريد الإلكتروني" class="flex-1 bg-transparent outline-none text-[15px] font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] placeholder:font-normal">
         </div>
 
         <div class="flex items-center gap-3 px-4 py-4 rounded-2xl border border-[var(--border)] bg-[var(--bg-base)] transition-all duration-200 focus-within:border-[var(--primary)] focus-within:shadow-[0_0_0_3px_var(--primary-light)]">
-          <svg lucideLock class="w-5 h-5 text-[var(--text-muted)] flex-shrink-0"></svg>
-          <input type="password" [ngModel]="password()" (ngModelChange)="password.set($event)" placeholder="كلمة المرور" class="flex-1 bg-transparent outline-none text-[15px] font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:font-normal">
+          <svg lucideLock class="w-5 h-5 text-[var(--text-secondary)] flex-shrink-0"></svg>
+          <input type="password" [ngModel]="password()" (ngModelChange)="password.set($event)" placeholder="كلمة المرور" class="flex-1 bg-transparent outline-none text-[15px] font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] placeholder:font-normal">
         </div>
 
         @if (error()) {
@@ -39,11 +39,11 @@
         </button>
 
         <div class="text-center">
-          <span class="text-sm text-[var(--text-muted)]">ليس لديك حساب؟ </span>
+          <span class="text-sm text-[var(--text-secondary)]">ليس لديك حساب؟ </span>
           <a routerLink="/register" class="text-sm font-bold text-[var(--primary)] hover:text-[var(--primary-hover)] transition-colors">إنشاء حساب جديد</a>
         </div>
       </div>
     </div>
-    <p class="text-center text-xs text-[var(--text-muted)] mt-6">© 2026 رحلة. جميع الحقوق محفوظة.</p>
+    <p class="text-center text-xs text-[var(--text-secondary)] mt-6">© 2026 رحلة. جميع الحقوق محفوظة.</p>
   </div>
 </div>

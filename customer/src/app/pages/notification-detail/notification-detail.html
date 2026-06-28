@@ -19,7 +19,7 @@
         </div>
         <button (click)="deleteNotif()"
           class="w-9 h-9 flex items-center justify-center rounded-xl
-                 hover:bg-[var(--danger-light)] text-[var(--text-muted)]
+                 hover:bg-[var(--danger-light)] text-[var(--text-secondary)]
                  hover:text-[var(--danger)] transition-all cursor-pointer"
           title="حذف الإشعار">
           <svg lucideTrash2 class="w-4 h-4"></svg>
@@ -37,7 +37,7 @@
         </div>
         <div class="flex flex-col">
           <span class="text-sm font-extrabold text-[var(--text-primary)]">{{ n.title }}</span>
-          <span class="text-[10px] text-[var(--text-muted)]">{{ timeSince(n.createdAt) }}</span>
+          <span class="text-[10px] text-[var(--text-secondary)]">{{ timeSince(n.createdAt) }}</span>
         </div>
       </div>
 
@@ -48,7 +48,7 @@
 
       <!-- METADATA -->
       @if (n.createdAt) {
-        <div class="flex items-center gap-2 mt-4 text-xs text-[var(--text-muted)] bg-[var(--bg-card)] rounded-xl px-4 py-3 border border-[var(--border)]">
+        <div class="flex items-center gap-2 mt-4 text-xs text-[var(--text-secondary)] bg-[var(--bg-card)] rounded-xl px-4 py-3 border border-[var(--border)]">
           <svg lucideCalendarClock class="w-3.5 h-3.5 flex-shrink-0"></svg>
           <span>{{ n.createdAt | date:'EEEE d MMMM yyyy, h:mm a':'':'ar' }}</span>
         </div>
@@ -57,11 +57,11 @@
     } @else {
       <div class="flex flex-col items-center justify-center py-20 gap-4">
         <div class="w-20 h-20 rounded-full bg-[var(--bg-card)] border border-[var(--border)] flex items-center justify-center shadow-sm">
-          <svg lucideBell class="w-10 h-10 text-[var(--text-muted)] opacity-40"></svg>
+          <svg lucideBell class="w-10 h-10 text-[var(--text-secondary)] opacity-40"></svg>
         </div>
         <div class="text-center">
           <p class="text-base font-bold text-[var(--text-primary)]">الإشعار غير موجود</p>
-          <p class="text-sm text-[var(--text-muted)] mt-1">ربما تم حذفه</p>
+          <p class="text-sm text-[var(--text-secondary)] mt-1">ربما تم حذفه</p>
         </div>
       </div>
     }
