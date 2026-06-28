@@ -11,3 +11,12 @@ APK          : android/app/build/outputs/apk/release/app-release.apk
 AAB	         : android/app/build/outputs/bundle/release/app-release.aab
 APK          → sideload directly to any Android device (send to friends)
 AAB          → upload to Google Play Console for Play Store distribution
+
+
+
+*************************************************************************************************************
+
+ON WINDOWS
+
+- APK        : android\app\build\outputs\apk\release\app-release.apk (4.3 MB)
+- AAB        : android\app\build\outputs\bundle\release\app-release.aab (4.1 MB)
