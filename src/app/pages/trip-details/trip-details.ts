@@ -6,13 +6,13 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { TripService, Trip, Booking } from '../../core/services/trip';
 import { BusService, Bus } from '../../core/services/bus';
 import { AuthService } from '../../core/services/auth';
-import { LucideBus, LucideArrowRight, LucideRoute, LucideArrowLeft, LucideDownload, LucideX, LucideTrash2, LucideUserPlus } from '@lucide/angular';
+import { LucideBus, LucideArrowRight, LucideRoute, LucideArrowLeft, LucideDownload, LucideEye, LucideX, LucideTrash2, LucideUserPlus } from '@lucide/angular';
 import { ArabicNumberPipe } from '../../pipes/arabic-number/arabic-number-pipe';
 import { WsService } from '../../core/services/ws.service'
 
 @Component({
   selector: 'app-trip-details',
-  imports: [CommonModule, RouterModule, FormsModule, LucideBus, LucideArrowRight, LucideRoute, LucideArrowLeft, LucideDownload, LucideX, LucideTrash2, LucideUserPlus, ArabicNumberPipe],
+  imports: [CommonModule, RouterModule, FormsModule, LucideBus, LucideArrowRight, LucideRoute, LucideArrowLeft, LucideDownload, LucideEye, LucideX, LucideTrash2, LucideUserPlus, ArabicNumberPipe],
   templateUrl: './trip-details.html',
   styleUrl: './trip-details.css',
 })

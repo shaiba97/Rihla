@@ -11,25 +11,6 @@
     </button>
   </div>
 
-  <!-- TABS -->
-  <div class="flex items-center gap-1 border-b border-[var(--border)] overflow-x-auto scrollbar-hide">
-    @for (tab of tabs; track tab.id) {
-      <button (click)="switchTab(tab.id)" class="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold border-b-2 transition-all duration-150 relative whitespace-nowrap"
-        [class.border-[var(--primary)]]="activeTab()===tab.id"
-        [class.text-[var(--text-primary)]]="activeTab()===tab.id"
-        [class.border-transparent]="activeTab()!==tab.id"
-        [class.text-[var(--text-muted)]]="activeTab()!==tab.id"
-        [class.hover:text-[var(--text-primary)]]="activeTab()!==tab.id">
-        @switch (tab.icon) {
-          @case ('activity') { <svg lucideActivity class="w-3.5 h-3.5"></svg> }
-          @case ('bar-chart') { <svg lucideBarChart3 class="w-3.5 h-3.5"></svg> }
-          @case ('circle-dollar-sign') { <svg lucideCircleDollarSign class="w-3.5 h-3.5"></svg> }
-        }
-        {{ tab.label }}
-      </button>
-    }
-  </div>
-
   @if (isLoading()) {
     <div class="flex flex-col items-center justify-center py-24 gap-4">
       <svg lucideLoaderCircle class="w-12 h-12 animate-spin text-[var(--primary)]"></svg>
@@ -46,7 +27,6 @@
   }
 
   @if (!isLoading() && summary()) {
-    @if (activeTab() === 'overview') {
     <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
       @for (card of cards(); track card.label) {
         <div class="flex flex-col gap-3 p-4 rounded-2xl border bg-[var(--bg-card)] hover:shadow-md transition-all duration-200">
@@ -164,9 +144,8 @@
         <div class="flex flex-col items-center justify-center py-16 gap-3 text-[var(--text-muted)]"><svg lucideTicket class="w-10 h-10 opacity-30"></svg><p class="text-sm text-center">لا توجد مدفوعات مسجلة بعد.<br>ستظهر هنا عند بدء حجوزات العملاء.</p></div>
       }
     </div>
-    }
 
-    @if (activeTab() === 'performance') {
+    <!-- Performance tracking -->
     <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] overflow-hidden">
       <div class="px-5 py-3.5 border-b border-[var(--border)] flex items-center justify-between flex-wrap gap-3">
         <h2 class="text-base font-bold text-[var(--text-primary)] flex items-center gap-2"><svg lucideBarChart3 class="w-4 h-4 text-[var(--primary)]"></svg>الأداء المالي</h2>
@@ -195,10 +174,5 @@
         </div>
       }
     </div>
-    }
-  }
-
-  @if (activeTab() === 'payout') {
-    <app-payout></app-payout>
   }
 </div>

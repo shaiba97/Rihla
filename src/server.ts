@@ -9,15 +9,7 @@ import { join } from 'node:path';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 const app = express();
-const angularApp = new AngularNodeAppEngine({
-  allowedHosts: [
-    'localhost',
-    'app-company-frontend.onrender.com',
-    'app-customer-frontend.onrender.com',
-    'app-admin-frontend.onrender.com'
-  ],
-  trustProxyHeaders: true
-});
+const angularApp = new AngularNodeAppEngine();
 
 app.use(
   express.static(browserDistFolder, {
@@ -37,7 +29,7 @@ app.use((req, res, next) => {
 });
 
 if (isMainModule(import.meta.url) || process.env['pm_id']) {
-  const port = process.env['PORT'] || 3001;
+  const port = process.env['PORT'] || 4000;
   app.listen(port, (error) => {
     if (error) throw error;
     console.log(`Node Express server listening on http://localhost:${port}`);

@@ -3,22 +3,20 @@ import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth';
 import { FinancialsService, FinancialSummary } from '../../../core/services/financials/financials.service';
-import { PayoutService } from '../../../core/services/payout/payout.service';
 import { TripService, Trip } from '../../../core/services/trip';
 import { BusService, Bus } from '../../../core/services/bus';
 import { ArabicNumberPipe } from '../../../pipes/arabic-number/arabic-number-pipe';
-import { LucideTrendingUp, LucideWallet, LucideTicket, LucideBus, LucideRoute, LucideLoaderCircle, LucideAlertCircle, LucideRefreshCw, LucideCalendar, LucideArrowLeft, LucideBarChart3, LucideUsers, LucideCheckCircle, LucideClock } from '@lucide/angular';
+import { LucideTrendingUp, LucideWallet, LucideTicket, LucideBus, LucideRoute, LucideLoaderCircle, LucideAlertCircle, LucideRefreshCw, LucideCalendar, LucideArrowLeft, LucideBarChart3, LucideUsers } from '@lucide/angular';
 import { WsService } from '../../../core/services/ws.service';
 
 @Component({
   selector: 'app-dashboard',
-  imports: [DatePipe, ArabicNumberPipe, LucideTrendingUp, LucideWallet, LucideTicket, LucideBus, LucideRoute, LucideLoaderCircle, LucideAlertCircle, LucideRefreshCw, LucideCalendar, LucideArrowLeft, LucideBarChart3, LucideUsers, LucideCheckCircle, LucideClock],
+  imports: [DatePipe, ArabicNumberPipe, LucideTrendingUp, LucideWallet, LucideTicket, LucideBus, LucideRoute, LucideLoaderCircle, LucideAlertCircle, LucideRefreshCw, LucideCalendar, LucideArrowLeft, LucideBarChart3, LucideUsers],
   templateUrl: './dashboard.html',
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   private auth = inject(AuthService);
   private financialsSvc = inject(FinancialsService);
-  private payoutSvc = inject(PayoutService);
   private tripSvc = inject(TripService);
   private busSvc = inject(BusService);
   private router = inject(Router);
@@ -28,7 +26,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   companyName = this.auth.companyName;
 
   summary = signal<FinancialSummary | null>(null);
-  payoutStats = signal<any>(null);
   trips = signal<Trip[]>([]);
   buses = signal<Bus[]>([]);
   isLoading = signal(true);
@@ -36,7 +33,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   stats = computed(() => {
     const s = this.summary();
-    const p = this.payoutStats();
     if (!s) return [];
     const activeTrips = this.trips().filter(t => t.status === 'IN_PROGRESS' || t.status === 'SCHEDULED').length;
     const totalBuses = this.buses().length;
@@ -45,8 +41,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       { label: 'إيرادات الشهر', value: s.thisMonthRevenue, currency: 'جنيه', icon: 'calendar', color: 'blue', sub: 'الشهر الجاري' },
       { label: 'حجوزات مؤكدة', value: s.totalBookings, currency: '', icon: 'ticket', color: 'violet', sub: 'إجمالي المقاعد المباعة' },
       { label: 'الرحلات النشطة', value: activeTrips, currency: '', icon: 'route', color: 'orange', sub: `من أصل ${totalBuses} حافلة` },
-      { label: 'مستحقات غير مدفوعة', value: p?.totalUnpaidAmount ?? 0, currency: 'جنيه', icon: 'wallet', color: 'amber', sub: 'بإنتظار الصرف' },
-    ].filter(x => x.label);
+    ];
   });
 
   upcomingTrips = computed(() =>
@@ -78,10 +73,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
       next: r => this.summary.set(r.data),
       error: e => this.error.set(e?.error?.message ?? 'حدث خطأ'),
     });
-    this.payoutSvc.getDashboardStats().subscribe({
-      next: r => this.payoutStats.set(r.data),
-      error: () => {},
-    });
     this.tripSvc.getTrips().subscribe({
       next: r => this.trips.set(r),
       error: () => {},
@@ -103,7 +94,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   goToTrip(id: string) { this.router.navigate(['trips/trip/trip-details', id]); }
   goToTrips() { this.router.navigate(['/trips']); }
   goToFinancials() { this.router.navigate(['/financials']); }
-  goTo(path: string) { this.router.navigate([path]); }
 
   methodLabel(m: string): string {
     return { bankak: 'بنكك', fawry: 'فوري', mashriq: 'المشرق', bravo: 'برافو' }[m] ?? m;

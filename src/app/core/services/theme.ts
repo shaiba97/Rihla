@@ -5,7 +5,7 @@ export class ThemeService {
   isDark = signal<boolean>(false);
 
   constructor() {
-    const saved      = localStorage.getItem('rihla_theme');
+    const saved      = localStorage.getItem('tafiya_theme');
     const prefersDark =
       window.matchMedia('(prefers-color-scheme: dark)')
             .matches;
@@ -19,7 +19,7 @@ export class ThemeService {
     this.isDark.set(next);
     this.applyTheme(next);
     localStorage.setItem(
-      'rihla_theme', next ? 'dark' : 'light'
+      'tafiya_theme', next ? 'dark' : 'light'
     );
   }
 

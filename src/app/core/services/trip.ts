@@ -2,7 +2,6 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { AuthService } from './auth';
 
 
 export interface Trip {
@@ -105,13 +104,7 @@ export class TripService {
     return this.http.delete<void>(`${this.apiUrl}/trips/delete-trip/${id}`);
   }
 
-  private auth = inject(AuthService);
-
   downloadPassengers(tripId: string): string {
-    const token = this.auth.getToken();
-    if (token) {
-      return `${this.apiUrl}/trips/passenger-list/${tripId}?token=${token}`;
-    }
     return `${this.apiUrl}/trips/download-passengers/${tripId}`;
   }
 

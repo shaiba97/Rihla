@@ -1,12 +1,9 @@
 import { Component, signal, inject, OnInit, computed } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { ChartComponent } from 'ng-apexcharts';
-import { LucideTrendingUp, LucideWallet, LucideBanknote, LucideTicket, LucideClock, LucideMapPin, LucideLoaderCircle, LucideAlertCircle, LucideRefreshCw, LucideCalendar, LucideBarChart3, LucideActivity, LucideCircleDollarSign } from '@lucide/angular';
+import { LucideTrendingUp, LucideWallet, LucideBanknote, LucideTicket, LucideClock, LucideMapPin, LucideLoaderCircle, LucideAlertCircle, LucideRefreshCw, LucideCalendar, LucideBarChart3 } from '@lucide/angular';
 import { FinancialsService, FinancialSummary } from '../../../core/services/financials/financials.service';
 import { ApexAxisChartSeries, ApexChart, ApexXAxis, ApexYAxis, ApexGrid, ApexTooltip, ApexDataLabels, ApexFill } from 'ng-apexcharts';
-import { PayoutComponent } from '../../payout/payout/payout';
-
-export type Tab = 'overview' | 'performance' | 'payout';
 
 export type ChartOptions = {
   series: ApexAxisChartSeries;
@@ -23,7 +20,7 @@ export type ChartOptions = {
 @Component({
   selector: 'app-financials',
   standalone: true,
-  imports: [NgClass, ChartComponent, LucideTrendingUp, LucideWallet, LucideTicket, LucideClock, LucideMapPin, LucideLoaderCircle, LucideAlertCircle, LucideRefreshCw, LucideCalendar, LucideBarChart3, LucideActivity, LucideCircleDollarSign, PayoutComponent],
+  imports: [NgClass, ChartComponent, LucideTrendingUp, LucideWallet, LucideTicket, LucideClock, LucideMapPin, LucideLoaderCircle, LucideAlertCircle, LucideRefreshCw, LucideCalendar, LucideBarChart3],
   templateUrl: './financials.html',
 })
 export class FinancialsComponent implements OnInit {
@@ -31,17 +28,6 @@ export class FinancialsComponent implements OnInit {
   summary = signal<FinancialSummary | null>(null);
   isLoading = signal(true);
   error = signal('');
-  activeTab = signal<Tab>('overview');
-  tabs = [
-    { id: 'overview' as Tab, label: 'نظرة عامة', icon: 'activity' },
-    { id: 'performance' as Tab, label: 'الأداء المالي', icon: 'bar-chart' },
-    { id: 'payout' as Tab, label: 'المدفوعات', icon: 'circle-dollar-sign' },
-  ];
-
-  switchTab(tab: Tab) {
-    this.activeTab.set(tab);
-    if (tab === 'overview') this.load();
-  }
 
   perfPeriod = signal<'daily' | 'weekly' | 'monthly' | 'quarterly' | 'half-yearly' | 'yearly'>('monthly');
   perfData = signal<any[]>([]);

@@ -52,27 +52,9 @@ export const routes: Routes = [
       },
       {
         path: 'financials',
-        children: [
-          {
-            path: '',
-            loadComponent: () =>
-              import('./pages/financials/financials/financials')
-                .then(m => m.FinancialsComponent),
-          },
-          {
-            path: 'payout',
-            loadComponent: () =>
-              import('./pages/payout/payout/payout')
-                .then(m => m.PayoutComponent),
-          },
-        ],
-      },
-      { path: 'payout', redirectTo: 'financials/payout', pathMatch: 'full' },
-      {
-        path: 'notifications',
         loadComponent: () =>
-          import('./pages/notifications/notifications/notifications')
-            .then(m => m.NotificationsComponent),
+          import('./pages/financials/financials/financials')
+            .then(m => m.FinancialsComponent),
       },
       {
         path: 'profile',
