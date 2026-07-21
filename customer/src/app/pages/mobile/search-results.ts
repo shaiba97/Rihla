@@ -69,15 +69,8 @@ export class SearchResults implements OnInit {
   }
 
   ngOnInit(): void {
-    console.log('=== SEARCH-RESULTS COMPONENT INITIALIZED ===');
     this.tripSvc.getAllCities().subscribe({ next: r => this.cities.set([...new Set(r.data ?? [])]), error: () => {} });
     this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(p => {
-      console.log('=== QUERY PARAMS RECEIVED ===');
-      console.log('SEARCH-RESULTS: from param:', p['from']);
-      console.log('SEARCH-RESULTS: to param:', p['to']);
-      console.log('SEARCH-RESULTS: date param:', p['date']);
-      console.log('SEARCH-RESULTS: isWebView?', this.isWebView ? 'YES' : 'NO');
-      
       this.from.set(p['from'] ?? ''); this.to.set(p['to'] ?? ''); this.date.set(p['date'] ?? '');
       this.editFrom.set(p['from'] ?? ''); this.editTo.set(p['to'] ?? ''); this.editDate.set(p['date'] ?? '');
       this.loadTrips();
@@ -85,45 +78,19 @@ export class SearchResults implements OnInit {
   }
 
   loadTrips(): void {
-    console.log('=== LOAD TRIPS CALLED ===');
-    console.log('SEARCH-RESULTS: from signal value:', this.from());
-    console.log('SEARCH-RESULTS: to signal value:', this.to());
-    console.log('SEARCH-RESULTS: date signal value:', this.date());
-    console.log('SEARCH-RESULTS: isWebView?', this.isWebView ? 'YES' : 'NO');
-    
     this.isLoading.set(true); this.trips.set([]); this.error.set('');
     this.tripSvc.searchTrips({ from: this.from(), to: this.to(), date: this.date() }).subscribe({
-      next: r => { 
-        console.log('SEARCH-RESULTS: Search results received:', r.data); 
-        this.trips.set(r.data ?? []); 
-        this.isLoading.set(false); 
-      },
-      error: e => { 
-        console.log('SEARCH-RESULTS: Search error:', e); 
-        this.error.set(e?.error?.message ?? 'حدث خطأ أثناء البحث'); 
-        this.isLoading.set(false); 
-      },
+      next: r => { this.trips.set(r.data ?? []); this.isLoading.set(false); },
+      error: e => { this.error.set(e?.error?.message ?? 'حدث خطأ أثناء البحث'); this.isLoading.set(false); },
     });
   }
 
-  openEdit(): void { 
-    console.log('=== OPEN EDIT CALLED ===');
-    this.editFrom.set(this.from()); this.editTo.set(this.to()); this.editDate.set(this.date()); this.editMonth.set(this.date().slice(0, 7) || this.today.slice(0, 7)); this.showEdit.set(true);
-  }
+  openEdit(): void { this.editFrom.set(this.from()); this.editTo.set(this.to()); this.editDate.set(this.date()); this.editMonth.set(this.date().slice(0, 7) || this.today.slice(0, 7)); this.showEdit.set(true); }
   closeEdit(): void { this.showEdit.set(false); }
   swapEdit(): void { const t = this.editFrom(); this.editFrom.set(this.editTo()); this.editTo.set(t); this.editSwapped.set(!this.editSwapped()); }
-  prevEditMonth(): void { const [y, m] = this.editMonth().split('-').map(Number); const d = new Date(y, m - 2, 1); this.editMonth.set(`${d.getFullYear()}-{String(d.getMonth() + 1).padStart(2, '0')}`); }
-  nextEditMonth(): void { const [y, m] = this.editMonth().split('-').map(Number); const d = new Date(y, m, 1); this.editMonth.set(`${d.getFullYear()}-{String(d.getMonth() + 1).padStart(2, '0')}`); }
-  applyEdit(): void { 
-    console.log('=== APPLY EDIT CALLED ===');
-    console.log('SEARCH-RESULTS: editFrom value:', this.editFrom());
-    console.log('SEARCH-RESULTS: editTo value:', this.editTo());
-    console.log('SEARCH-RESULTS: editDate value:', this.editDate());
-    
-    if (!this.editFrom() || !this.editTo() || !this.editDate()) return; 
-    this.showEdit.set(false); 
-    this.router.navigate(['/search-results'], { queryParams: { from: this.editFrom(), to: this.editTo(), date: this.editDate() } });
-  }
+  prevEditMonth(): void { const [y, m] = this.editMonth().split('-').map(Number); const d = new Date(y, m - 2, 1); this.editMonth.set(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`); }
+  nextEditMonth(): void { const [y, m] = this.editMonth().split('-').map(Number); const d = new Date(y, m, 1); this.editMonth.set(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`); }
+  applyEdit(): void { if (!this.editFrom() || !this.editTo() || !this.editDate()) return; this.showEdit.set(false); this.router.navigate(['../results'], { relativeTo: this.route, queryParams: { from: this.editFrom(), to: this.editTo(), date: this.editDate() } }); }
   goBack(): void { history.back(); }
   onTripSelected(trip: any): void {
     if (!this.authStore.isLoggedIn()) {
@@ -133,28 +100,5 @@ export class SearchResults implements OnInit {
     this.router.navigate(['../seat', trip.id], { relativeTo: this.route, state: { trip } });
   }
   dismissAuthError(): void { this.authError.set(false); }
-  goToLogin(): void {
-    this.authError.set(false);
-    this.router.navigate(['/login']);
-  }
-
-  // WebView detection
-  get isWebView(): boolean {
-    if (typeof window === 'undefined') return false;
-    const ua = window.navigator?.userAgent?.toLowerCase() || '';
-    const isWebView = ua.includes(' webview') || false;
-    console.log('SEARCH-RESULTS: User agent:', ua);
-    console.log('SEARCH-RESULTS: isWebView:', isWebView);
-    return isWebView;
-  }
-
-  get isAndroidApp(): boolean {
-    const isWebView = this.isWebView;
-    const isAndroid = (window.navigator?.userAgent?.toLowerCase().includes('android') || false);
-    console.log('SEARCH-RESULTS: isWebView for isAndroidApp:', isWebView);
-    console.log('SEARCH-RESULTS: isAndroid:', isAndroid);
-    const result = isWebView && isAndroid;
-    console.log('SEARCH-RESULTS: isAndroidApp:', result);
-    return result;
-  }
+  goToLogin(): void { this.authError.set(false); this.router.navigate(['/m/login']); }
 }

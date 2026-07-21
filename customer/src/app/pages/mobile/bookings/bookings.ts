@@ -72,11 +72,11 @@ export class Bookings implements OnInit, OnDestroy {
   }
 
   goToLogin(): void {
-    this.router.navigate(['/login']);
+    this.router.navigate(['/m/login']);
   }
 
   goHome(): void {
-    this.router.navigate(['/home']);
+    this.router.navigate(['/m/home']);
   }
 
   statusClass(status: string): Record<string, boolean> {

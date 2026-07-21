@@ -1,0 +1,39 @@
+<div dir="rtl" class="h-screen w-full bg-[var(--bg-base)] grid grid-rows-[1fr_auto]">
+  <div class="overflow-y-auto">
+    <router-outlet />
+  </div>
+  <nav class="bg-[var(--bg-card)] border-t border-[var(--border)] flex items-center justify-around px-2 py-1 shadow-[0_-2px_12px_rgba(0,0,0,0.05)]">
+    <a routerLink="/m/home"
+      class="flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-xl transition-all duration-200"
+      [ngClass]="isHomeActive() ? 'bg-[var(--primary-light)] text-[var(--primary)]' : 'text-[var(--text-muted)]'">
+      <svg lucideHome class="w-5 h-5 transition-colors duration-200" [class.text-[var(--primary)]]="isHomeActive()"></svg>
+      <span class="text-[10px] font-bold transition-colors duration-200" [class.text-[var(--primary)]]="isHomeActive()">الرئيسية</span>
+    </a>
+    <a routerLink="/m/bookings"
+      class="flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-xl transition-all duration-200"
+      [ngClass]="isBookingsActive() ? 'bg-[var(--primary-light)] text-[var(--primary)]' : 'text-[var(--text-muted)]'">
+      <svg lucideCalendarClock class="w-5 h-5 transition-colors duration-200" [class.text-[var(--primary)]]="isBookingsActive()"></svg>
+      <span class="text-[10px] font-bold transition-colors duration-200" [class.text-[var(--primary)]]="isBookingsActive()">حجوزاتي</span>
+    </a>
+    <a routerLink="/m/notifications"
+      class="flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-xl transition-all duration-200 relative"
+      [ngClass]="isNotifsActive() ? 'bg-[var(--primary-light)] text-[var(--primary)]' : 'text-[var(--text-muted)]'">
+      <div class="relative">
+        <svg lucideBell class="w-5 h-5 transition-colors duration-200" [class.text-[var(--primary)]]="isNotifsActive()"></svg>
+      </div>
+      <span class="text-[10px] font-bold transition-colors duration-200" [class.text-[var(--primary)]]="isNotifsActive()">الإشعارات</span>
+    </a>
+    <a routerLink="/m/blogs"
+      class="flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-xl transition-all duration-200"
+      [ngClass]="isBlogActive() ? 'bg-[var(--primary-light)] text-[var(--primary)]' : 'text-[var(--text-muted)]'">
+      <svg lucideNewspaper class="w-5 h-5 transition-colors duration-200" [class.text-[var(--primary)]]="isBlogActive()"></svg>
+      <span class="text-[10px] font-bold transition-colors duration-200" [class.text-[var(--primary)]]="isBlogActive()">المدونة</span>
+    </a>
+    <a routerLink="/m/profile"
+      class="flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-xl transition-all duration-200"
+      [ngClass]="isProfileActive() ? 'bg-[var(--primary-light)] text-[var(--primary)]' : 'text-[var(--text-muted)]'">
+      <svg lucideUser class="w-5 h-5 transition-colors duration-200" [class.text-[var(--primary)]]="isProfileActive()"></svg>
+      <span class="text-[10px] font-bold transition-colors duration-200" [class.text-[var(--primary)]]="isProfileActive()">حسابي</span>
+    </a>
+  </nav>
+</div>
