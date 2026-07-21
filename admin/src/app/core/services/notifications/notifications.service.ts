@@ -36,7 +36,7 @@ export class NotificationsService {
   private wsUrl = environment.wsUrl;
 
   private socket: Socket | null = null;
-  private readonly SETTINGS_KEY = 'rihla_notif_settings';
+  private readonly SETTINGS_KEY = 'tafiya_notif_settings';
 
   notifications = signal<AppNotification[]>([]);
   settings = signal<NotificationSettings>(this.loadSettings());

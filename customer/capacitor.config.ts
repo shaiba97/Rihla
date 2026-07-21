@@ -3,7 +3,7 @@ import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.rihla.app',
-  appName: 'رحلة',
+  appName: 'تفية',
   webDir: 'dist/customer/browser',
   server: {
     cleartext: true

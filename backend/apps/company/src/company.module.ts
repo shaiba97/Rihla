@@ -6,10 +6,10 @@ import { TripsModule } from './trips/trips.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { PaymentModule } from './payment/payment.module';
-import { RihlaWsModule } from '@app/websocket';
+import { TafiyaWsModule } from '@app/websocket';
 
 @Module({
-  imports: [BusesModule, TripsModule, UsersModule, AuthModule, PaymentModule, RihlaWsModule],
+  imports: [BusesModule, TripsModule, UsersModule, AuthModule, PaymentModule, TafiyaWsModule],
   controllers: [CompanyController],
   providers: [CompanyService],
 })

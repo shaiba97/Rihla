@@ -6,14 +6,14 @@ import {
   SeatStartFrom,
 } from '../dto/bus.dto';
 import { PrismaService } from '@app/prisma';
-import { RihlaWsGateway, WS_EVENTS } from '@app/websocket';
+import { TafiyaWsGateway, WS_EVENTS } from '@app/websocket';
 
 @Injectable()
 export class BusesService {
   private readonly logger = new Logger(BusesService.name);
   constructor(
     private readonly prisma: PrismaService,
-    private readonly wsGateway: RihlaWsGateway,
+    private readonly wsGateway: TafiyaWsGateway,
   ) {}
 
   async create(createBusDto: CreateBusDto, userId?: string) {

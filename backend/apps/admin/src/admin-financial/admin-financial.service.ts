@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { PrismaService, Prisma } from '@app/prisma';
 import { PDFService } from '@app/pdf';
-import { RihlaWsGateway, WS_EVENTS } from '@app/websocket';
+import { TafiyaWsGateway, WS_EVENTS } from '@app/websocket';
 import { NotificationsService } from '../notifications/notifications.service';
 
 type Period = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'half-yearly' | 'yearly';
@@ -92,7 +92,7 @@ export class AdminFinancialService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly pdfService: PDFService,
-    private readonly wsGateway: RihlaWsGateway,
+    private readonly wsGateway: TafiyaWsGateway,
     private readonly notifications: NotificationsService,
   ) {}
 
@@ -292,7 +292,7 @@ export class AdminFinancialService {
     try {
       const phone = payment.Booking?.passengerContact;
       if (phone) {
-        const msg = `✅ تم تأكيد حجزك في رحلة!\n👤 المقعد: ${payment.Booking?.seatNumbers?.join(',')}\n💰 المبلغ: ${payment.totalAmount} جنيه${ticketUrl ? '\n🎫 التذكرة: http://localhost:3003' + ticketUrl : ''}`;
+        const msg = `✅ تم تأكيد حجزك في تفية!\n👤 المقعد: ${payment.Booking?.seatNumbers?.join(',')}\n💰 المبلغ: ${payment.totalAmount} جنيه${ticketUrl ? '\n🎫 التذكرة: http://localhost:3003' + ticketUrl : ''}`;
         new Logger('WhatsApp').log('📱 WhatsApp (dev): ' + msg);
       }
     } catch { /* WhatsApp not available */ }

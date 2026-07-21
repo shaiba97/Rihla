@@ -16,7 +16,7 @@ const wsOrigins = process.env.CORS_ORIGINS
   cors: { origin: [...wsOrigins, 'https://rihla-customer-frontend.onrender.com', 'https://rihla-admin.onrender.com', 'https://rihla-company.onrender.com'], credentials: true },
   namespace: '/',
 })
-export class RihlaWsGateway
+export class TafiyaWsGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
   @WebSocketServer()

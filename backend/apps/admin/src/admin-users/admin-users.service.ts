@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@app/prisma';
-import { RihlaWsGateway, WS_EVENTS } from '@app/websocket';
+import { TafiyaWsGateway, WS_EVENTS } from '@app/websocket';
 @Injectable()
 export class AdminUsersService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly wsGateway: RihlaWsGateway,
+    private readonly wsGateway: TafiyaWsGateway,
   ) {}
   async getStats() {
     const [total, customers, companies] = await Promise.all([

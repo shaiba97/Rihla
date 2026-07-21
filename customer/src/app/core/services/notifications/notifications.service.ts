@@ -37,7 +37,7 @@ export class NotificationsService {
 
   private socket: Socket | null = null;
   get connected(): boolean { return this.socket?.connected ?? false; }
-  private readonly SETTINGS_KEY = 'rihla_notif_settings';
+  private readonly SETTINGS_KEY = 'tafiya_notif_settings';
   private audioUnlocked = false;
 
   notifications = signal<AppNotification[]>([]);

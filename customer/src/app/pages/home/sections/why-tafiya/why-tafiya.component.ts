@@ -9,7 +9,7 @@ import {
 } from '@lucide/angular';
 
 @Component({
-  selector: 'app-why-rihla',
+  selector: 'app-why-tafiya',
   imports: [
     LucideZap,
     LucideShieldCheck,
@@ -18,9 +18,9 @@ import {
     LucideQrCode,
     LucideBell,
   ],
-  templateUrl: './why-rihla.component.html',
+  templateUrl: './why-tafiya.component.html',
 })
-export class WhyRihlaComponent {
+export class WhyTafiyaComponent {
   features = [
     { icon: 'zap', title: 'حجز سريع', desc: 'احجز رحلتك في أقل من دقيقة واحدة.' },
     { icon: 'shield-check', title: 'مقاعد مضمونة', desc: 'حجزك مؤكد ١٠٠٪ فور إتمام الدفع.' },

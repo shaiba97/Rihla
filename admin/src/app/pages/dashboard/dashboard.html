@@ -32,7 +32,7 @@
         <div class="relative z-10 flex items-start justify-between gap-2">
           <div class="flex flex-col gap-1">
             <div class="flex items-center gap-1.5"><svg lucideZap class="w-3.5 h-3.5 text-white/70"></svg><span class="text-white/70 text-[11px] font-medium">{{ greeting() }}، مدير النظام</span></div>
-            <h1 class="text-xl font-extrabold text-white leading-tight">لوحة تحكم رحلة</h1>
+            <h1 class="text-xl font-extrabold text-white leading-tight">لوحة تحكم تفية</h1>
           </div>
           @if (d.platform?.pendingPaymentsRequiringAction > 0) {
             <button (click)="goTo('/financial')" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[var(--warning)] text-white text-[10px] font-bold animate-pulse whitespace-nowrap"><svg lucideAlertCircle class="w-3 h-3"></svg>{{ toArabic(d.platform.pendingPaymentsRequiringAction) }}</button>
@@ -40,7 +40,7 @@
         </div>
         <div class="relative z-10 flex gap-2 mt-4 overflow-x-auto scrollbar-hide">
           @for (item of [
-            { label: 'رحلة نشطة', val: toArabic(d.operations?.activeTrips ?? 0) },
+            { label: 'تفية نشطة', val: toArabic(d.operations?.activeTrips ?? 0) },
             { label: 'حجز اليوم', val: toArabic(d.bookings?.today ?? 0) },
             { label: 'إيرادات الشهر', val: fmtAmount(d.revenue?.revenueThisMonth ?? 0) + ' ج' },
             { label: 'معلق', val: toArabic(d.platform?.pendingPaymentsRequiringAction ?? 0) },
@@ -154,7 +154,7 @@
       <div class="relative z-10 flex items-start justify-between gap-4 flex-wrap">
         <div class="flex flex-col gap-2">
           <div class="flex items-center gap-2"><svg lucideZap class="w-5 h-5 text-white/70"></svg><span class="text-white/70 text-sm font-medium">{{ greeting() }}، مدير النظام</span></div>
-          <h1 class="text-3xl font-extrabold text-white leading-tight">لوحة تحكم رحلة</h1>
+          <h1 class="text-3xl font-extrabold text-white leading-tight">لوحة تحكم تفية</h1>
           <p class="text-white/60 text-sm">آخر تحديث: {{ fmtTime(now) }} — {{ fmtDate(now) }}</p>
         </div>
         <div class="flex items-center gap-2">
@@ -169,7 +169,7 @@
 
       <div class="relative z-10 flex flex-wrap gap-3 mt-6">
         @for (item of [
-          { label: 'رحلة نشطة', val: toArabic(d.operations?.activeTrips ?? 0) },
+          { label: 'تفية نشطة', val: toArabic(d.operations?.activeTrips ?? 0) },
           { label: 'حجز اليوم', val: toArabic(d.bookings?.today ?? 0) },
           { label: 'إيرادات الشهر', val: fmtAmount(d.revenue?.revenueThisMonth ?? 0) + ' جنيه' },
           { label: 'طلبات معلقة', val: toArabic(d.platform?.pendingPaymentsRequiringAction ?? 0) },
@@ -259,11 +259,11 @@
           <div class="flex items-center justify-between flex-wrap gap-3">
             <div class="flex flex-col gap-0.5">
               <h2 class="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2"><svg lucideTrendingUp class="w-4 h-4 text-[var(--primary)]"></svg>الإيرادات — آخر ١٤ يوماً</h2>
-              <p class="text-xs text-[var(--text-muted)]">مجموع ما حصله عملاء رحلة</p>
+              <p class="text-xs text-[var(--text-muted)]">مجموع ما حصله عملاء تفية</p>
             </div>
             <div class="flex items-center gap-3">
               <div class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-[var(--primary)]"></div><span class="text-[10px] text-[var(--text-muted)]">إجمالي الإيرادات</span></div>
-              <div class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-[var(--success)]"></div><span class="text-[10px] text-[var(--text-muted)]">أرباح رحلة</span></div>
+              <div class="flex items-center gap-1.5"><div class="w-2.5 h-2.5 rounded-full bg-[var(--success)]"></div><span class="text-[10px] text-[var(--text-muted)]">أرباح تفية</span></div>
             </div>
           </div>
           @if (chartData().length > 0) {

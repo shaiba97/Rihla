@@ -7,7 +7,7 @@ import {
   PassengerForm,
 } from '../../../services/booking/booking.interfaces';
 
-const SESSION_KEY = 'rihla_booking_session';
+const SESSION_KEY = 'tafiya_booking_session';
 const TIMEOUT_MS  = 7 * 60 * 1000; // 7 minutes
 
 @Injectable({ providedIn: 'root' })

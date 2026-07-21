@@ -2,7 +2,7 @@ import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId:    'com.rihla.company',
-  appName:  'رحلة',
+  appName:  'تفية',
   webDir:   'dist/company/browser',
   server: {
     androidScheme: 'https',

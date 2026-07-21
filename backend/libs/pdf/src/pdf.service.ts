@@ -230,7 +230,7 @@ export class PDFService {
 }
 
 /**
- * Rihla (رحلة) — Ticket Generator
+ * Tafiya (تفية) — Ticket Generator
  * pdfMake | Arabic RTL | Tajawal Font
  *
  * Usage (NestJS / Node.js):
@@ -504,7 +504,7 @@ function buildHeader(logoBase64: any) {
               {
                 stack: [
                   {
-                    text:      'رحلة',
+                    text:      'تفية',
                     font:      'Tajawal',
                     bold:      true,
                     fontSize:  30,
@@ -776,7 +776,7 @@ function buildFooter(bookingId: any) {
               border:[false,false,false,false],
             },
             {
-              text: 'رحلة — منصة حجز التذاكر',
+              text: 'تفية — منصة حجز التذاكر',
               font:'Tajawal', fontSize:8, color:C.primary, alignment:'left',
               border:[false,false,false,false],
             },
@@ -890,7 +890,7 @@ if (require.main === module) {
   };
 
   generateTicketBuffer(sampleData).then(buf => {
-    const outPath = path.join(__dirname, 'rihla-ticket.pdf');
+    const outPath = path.join(__dirname, 'tafiya-ticket.pdf');
     fs.writeFileSync(outPath, buf);
     console.log('✅  Ticket saved →', outPath, `(${(buf.length/1024).toFixed(1)} KB)`);
   }).catch((e: any) => {

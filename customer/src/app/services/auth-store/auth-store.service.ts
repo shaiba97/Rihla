@@ -88,8 +88,8 @@ export interface LogoutResponse {
 
 @Injectable({ providedIn: 'root' })
 export class AuthStoreService {
-  private readonly DATA_KEY = 'rihla_customer_data';
-  private readonly TOKEN_KEY = 'rihla_access_token';
+  private readonly DATA_KEY = 'tafiya_customer_data';
+  private readonly TOKEN_KEY = 'tafiya_access_token';
   private http = inject(HttpClient);
   private apiUrl = environment.apiUrl.customer;
 

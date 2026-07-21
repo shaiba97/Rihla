@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '@app/prisma';
 import { PDFService } from '@app/pdf';
-import { RihlaWsGateway, WS_EVENTS } from '@app/websocket';
+import { TafiyaWsGateway, WS_EVENTS } from '@app/websocket';
 import { PaymentStatus } from '@app/prisma';
 import { CreatePaymentDto, UpdatePaymentDto } from '../dto/booking.dto';
 
@@ -34,7 +34,7 @@ export class PaymentService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly pdfService: PDFService,
-    private readonly wsGateway: RihlaWsGateway,
+    private readonly wsGateway: TafiyaWsGateway,
   ) {}
 
   private readonly logger = new Logger(PaymentService.name);

@@ -1,9 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common'; import { PrismaService } from '@app/prisma'; import { RihlaWsGateway, WS_EVENTS } from '@app/websocket';
+import { Injectable, NotFoundException } from '@nestjs/common'; import { PrismaService } from '@app/prisma'; import { TafiyaWsGateway, WS_EVENTS } from '@app/websocket';
 @Injectable()
 export class PaymentAccountsService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly wsGateway: RihlaWsGateway,
+    private readonly wsGateway: TafiyaWsGateway,
   ) {}
   async getAll() { return this.prisma.paymentAccount.findMany({ orderBy: { createdAt: 'desc' } }); }
   async create(data: any) {

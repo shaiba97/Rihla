@@ -13,7 +13,7 @@ import {
   CreateBookingWithPaymentDto,
 } from '../dto/booking.dto';
 import { BookingStatus, PaymentStatus } from '@app/prisma';
-import { RihlaWsGateway, WS_EVENTS } from '@app/websocket';
+import { TafiyaWsGateway, WS_EVENTS } from '@app/websocket';
 import { RedisService } from '@app/redis';
 import { NotificationsService } from '../../notifications/notifications.service';
 
@@ -26,7 +26,7 @@ export class BookingService {
   constructor(
     private readonly paymentService: PaymentService,
     private readonly prisma: PrismaService,
-    private readonly wsGateway: RihlaWsGateway,
+    private readonly wsGateway: TafiyaWsGateway,
     private readonly redis: RedisService,
     private readonly notifications: NotificationsService,
   ) {}

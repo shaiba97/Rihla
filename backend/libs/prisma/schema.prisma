@@ -69,6 +69,7 @@ model Trip {
 
   @@index([fromCity, toCity])
   @@index([departureDate])
+  @@index([status])
 }
 
 model users {
@@ -109,6 +110,9 @@ model Booking {
   Trip               Trip          @relation(fields: [tripId], references: [id], onDelete: Cascade)
   Payment            Payment?
   TicketPDF          TicketPDF?
+
+  @@index([tripId])
+  @@index([tripId, status])
 }
 
 model Payment {

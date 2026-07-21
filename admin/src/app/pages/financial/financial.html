@@ -3,7 +3,7 @@
     <div class="flex items-center justify-between flex-wrap gap-3">
       <div class="flex flex-col gap-0.5">
         <h1 class="text-xl font-extrabold text-[var(--text-primary)]">الإدارة المالية</h1>
-        <p class="text-xs text-[var(--text-muted)]">إدارة المدفوعات والرسوم وحسابات الدفع لمنصة رحلة</p>
+        <p class="text-xs text-[var(--text-muted)]">إدارة المدفوعات والرسوم وحسابات الدفع لمنصة تفية</p>
       </div>
       <button (click)="refresh()" class="flex items-center gap-2 px-3 py-2 rounded-xl border border-[var(--border)] text-xs font-semibold text-[var(--text-secondary)] hover:border-[var(--border-strong)] hover:text-[var(--text-primary)] transition-all duration-150"><svg lucideRefreshCw class="w-3.5 h-3.5"></svg>تحديث</button>
     </div>
@@ -247,7 +247,7 @@
     @if (activeTab() === 'platform-fee') {
       <div class="flex flex-col gap-5">
         <div class="flex items-center justify-between flex-wrap gap-3">
-          <div class="flex flex-col gap-1"><h2 class="text-base font-bold text-[var(--text-primary)]">رسوم منصة رحلة</h2><p class="text-xs text-[var(--text-muted)]">الرسوم تُضاف تلقائياً على سعر التذكرة — لا تُؤخذ من الشركة</p></div>
+          <div class="flex flex-col gap-1"><h2 class="text-base font-bold text-[var(--text-primary)]">رسوم منصة تفية</h2><p class="text-xs text-[var(--text-muted)]">الرسوم تُضاف تلقائياً على سعر التذكرة — لا تُؤخذ من الشركة</p></div>
           <button (click)="openCreateFee()" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--primary)] text-white text-sm font-bold hover:bg-[var(--primary-hover)] transition-all active:scale-95"><svg lucidePlus class="w-4 h-4"></svg>إضافة رسوم</button>
         </div>
         <div class="flex items-start gap-4 bg-[var(--bg-card)] border border-[var(--border)] rounded-2xl p-5">
@@ -257,11 +257,11 @@
             <div class="flex flex-wrap gap-3 text-xs text-[var(--text-secondary)]">
               <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--bg-base)] border border-[var(--border)]"><span class="font-bold text-[var(--text-primary)]">١</span>الشركة تحدد سعر التذكرة</div>
               <div class="text-[var(--text-muted)] self-center">+</div>
-              <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--primary)] text-white"><span class="font-bold">٢</span>رحلة تضيف الرسوم الثابتة</div>
+              <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--primary)] text-white"><span class="font-bold">٢</span>تفية تضيف الرسوم الثابتة</div>
               <div class="text-[var(--text-muted)] self-center">=</div>
               <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-[var(--bg-base)] border border-[var(--border)]"><span class="font-bold text-[var(--text-primary)]">٣</span>العميل يدفع المجموع</div>
             </div>
-            <p class="text-xs text-[var(--text-muted)] mt-1">مثال: سعر التذكرة ١٠٠ جنيه + رسوم المنصة ٥ جنيه = العميل يدفع ١٠٥ جنيه. الشركة تستلم ١٠٠ جنيه كاملة. رحلة تكسب ٥ جنيه.</p>
+            <p class="text-xs text-[var(--text-muted)] mt-1">مثال: سعر التذكرة ١٠٠ جنيه + رسوم المنصة ٥ جنيه = العميل يدفع ١٠٥ جنيه. الشركة تستلم ١٠٠ جنيه كاملة. تفية تكسب ٥ جنيه.</p>
           </div>
         </div>
         @if (showFeeForm()) {

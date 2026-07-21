@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '@app/prisma';
 import { RedisService } from '@app/redis';
-import { RihlaWsGateway, WS_EVENTS } from '@app/websocket';
+import { TafiyaWsGateway, WS_EVENTS } from '@app/websocket';
 import { PDFService } from '@app/pdf';
 import { CreateTripDto, UpdateTripDto } from '../dto/trips.dto';
 
@@ -13,7 +13,7 @@ import { CreateTripDto, UpdateTripDto } from '../dto/trips.dto';
 export class TripsService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly wsGateway: RihlaWsGateway,
+    private readonly wsGateway: TafiyaWsGateway,
     private readonly pdfService: PDFService,
     private readonly redisService: RedisService,
   ) {}
@@ -80,10 +80,15 @@ export class TripsService {
   }
 
   async getAvailableTrips() {
+    const now = new Date();
+
     const trips = await this.prisma.trip.findMany({
-      where: { status: 'SCHEDULED' },
+      where: {
+        status: 'SCHEDULED',
+        departureDate: { gte: now },
+      },
       include: {
-        Bus: true,
+        Bus: { select: { id: true, chairs: true } },
         Booking: {
           where: { status: { in: ['PENDING', 'CONFIRMED'] as any } },
           select: { seatNumbers: true },

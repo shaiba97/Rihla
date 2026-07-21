@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-<string name="app_name">رحلة</string>
-<string name="title_activity_main">رحلة</string>
+<string name="app_name">تفية</string>
+<string name="title_activity_main">تفية</string>
     <string name="package_name">com.rihla.app</string>
     <string name="custom_url_scheme">com.rihla.app</string>
 </resources>

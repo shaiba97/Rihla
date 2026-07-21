@@ -36,7 +36,10 @@
             "outputMode": "server",
             "security": {
               "allowedHosts": [
+                "app-admin-frontend.onrender.com",
                 "rihla-admin-frontend.onrender.com",
+                "app-backend-gz2l.onrender.com",
+                "rihla-backend-rbh7.onrender.com",
                 "localhost"
               ]
             },

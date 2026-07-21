@@ -18,6 +18,9 @@ export class PrismaService implements OnModuleInit, OnModuleDestroy {
       user: url.username,
       password: decodeURIComponent(url.password),
       ssl: { rejectUnauthorized: false },
+      max: 5,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 10000,
     });
     const adapter = new PrismaPg(pool);
 
