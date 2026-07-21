@@ -12,13 +12,14 @@ const allowedHosts = [
   'app-backend-gz2l.onrender.com',
   'rihla-backend-rbh7.onrender.com',
   'localhost',
-].join(',');
-process.env['NG_ALLOWED_HOSTS'] = allowedHosts;
+  '0.0.0.0',
+];
+process.env['NG_ALLOWED_HOSTS'] = allowedHosts.join(',');
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
-const angularApp = new AngularNodeAppEngine();
+const angularApp = new AngularNodeAppEngine({ allowedHosts });
 
 /**
  * Example Express Rest API endpoints can be defined here.
