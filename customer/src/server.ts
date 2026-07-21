@@ -7,6 +7,14 @@ import {
 import express from 'express';
 import { join } from 'node:path';
 
+const allowedHosts = [
+  'app-customer-frontend.onrender.com',
+  'app-backend-gz2l.onrender.com',
+  'rihla-backend-rbh7.onrender.com',
+  'localhost',
+].join(',');
+process.env['NG_ALLOWED_HOSTS'] = allowedHosts;
+
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
