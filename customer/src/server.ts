@@ -19,7 +19,7 @@ process.env['NG_ALLOWED_HOSTS'] = allowedHosts.join(',');
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
-const angularApp = new AngularNodeAppEngine({ allowedHosts });
+const angularApp = new AngularNodeAppEngine({ allowedHosts, trustProxyHeaders: true });
 
 /**
  * Example Express Rest API endpoints can be defined here.
