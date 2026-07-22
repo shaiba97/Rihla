@@ -52,10 +52,22 @@ export const routes: Routes = [
       },
       {
         path: 'financials',
-        loadComponent: () =>
-          import('./pages/financials/financials/financials')
-            .then(m => m.FinancialsComponent),
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./pages/financials/financials/financials')
+                .then(m => m.FinancialsComponent),
+          },
+          {
+            path: 'payout',
+            loadComponent: () =>
+              import('./pages/payout/payout/payout')
+                .then(m => m.PayoutComponent),
+          },
+        ],
       },
+      { path: 'payout', redirectTo: 'financials/payout', pathMatch: 'full' },
       {
         path: 'profile',
         loadComponent: () =>
