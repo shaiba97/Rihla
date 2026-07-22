@@ -1,0 +1,236 @@
+<div class="flex flex-col gap-6" dir="rtl">
+  <div class="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] shadow-[0_1px_3px_var(--shadow)] p-6 flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <div class="w-12 h-12 rounded-xl bg-[var(--primary-light)] flex items-center justify-center">
+        <svg lucideRoute class="w-6 h-6 text-[var(--primary)]"></svg>
+      </div>
+      <div>
+        <h2 class="text-lg font-bold text-[var(--text-primary)] m-0">الرحلات</h2>
+        <p class="text-sm text-[var(--text-muted)] m-0">إدارة ومتابعة الرحلات</p>
+      </div>
+    </div>
+    <button (click)="openCreateModal()" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--primary)] text-white hover:opacity-90 transition">
+      <span class="text-xl">+</span><span>رحلة جديدة</span>
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="flex items-center justify-center py-12"><div class="animate-spin w-8 h-8 border-4 border-[var(--primary)] border-t-transparent rounded-full"></div></div>
+  }
+
+  @if (!loading() && trips().length > 0) {
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      @for (trip of trips(); track trip.id) {
+        <div (click)="goToTripDetails(trip.id)" class="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] shadow-[0_1px_3px_var(--shadow)] overflow-hidden hover:shadow-lg transition cursor-pointer flex flex-col">
+          <div class="w-full h-40 bg-[var(--primary-light)] flex items-center justify-center">
+            <svg lucideRoute class="w-16 h-16 text-[var(--primary)]"></svg>
+          </div>
+          <div class="p-4 flex flex-col gap-3 flex-1">
+            <div class="flex items-center gap-2">
+              <span class="text-[var(--primary)] font-bold">{{ trip.fromCity }}</span>
+              <svg lucideArrowLeft class="w-4 h-4 text-[var(--text-muted)]"></svg>
+              <span class="text-[var(--primary)] font-bold">{{ trip.toCity }}</span>
+            </div>
+            <div class="text-sm text-[var(--text-muted)] flex items-center gap-1">{{ trip.fromState }} <svg lucideArrowLeft class="w-3.5 h-3.5"></svg> {{ trip.toState }}</div>
+            <div class="flex items-center gap-4 text-sm">
+              <div class="flex flex-col">
+                <span class="text-[var(--text-muted)]">المغادرة</span>
+                <span class="text-[var(--text-primary)] font-medium">{{ trip.departureDate | date:'yyyy-MM-dd' | arabicNumber }}</span>
+                <span class="text-[var(--primary)] font-bold">{{ trip.departureTime | arabicNumber }}</span>
+              </div>
+              <div class="flex flex-col">
+                <span class="text-[var(--text-muted)]">الوصول</span>
+                <span class="text-[var(--text-primary)] font-medium">{{ trip.arrivalDate | date:'yyyy-MM-dd' | arabicNumber }}</span>
+                <span class="text-green-600 font-bold">{{ trip.arrivalTime | arabicNumber }}</span>
+              </div>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="px-2 py-1 rounded-full text-xs font-bold" [style.background]="getStatusColor(trip.status) + '20'" [style.color]="getStatusColor(trip.status)">{{ getStatusLabel(trip.status) }}</span>
+              <span class="font-bold text-[var(--text-primary)]">{{ trip.price | arabicNumber:'price' }} ج س</span>
+            </div>
+            <div class="flex gap-2 mt-auto pt-2 border-t border-[var(--border)]">
+              <button (click)="openUpdateModal(trip); $event.stopPropagation()" class="flex-1 flex items-center justify-center gap-1 py-2 px-3 rounded-lg bg-[var(--primary-light)] text-[var(--primary)] hover:opacity-80 transition text-sm">
+                <svg lucidePencil class="w-3.5 h-3.5"></svg>
+                تحديث
+              </button>
+              <button (click)="confirmDelete(trip.id); $event.stopPropagation()" class="flex-1 flex items-center justify-center gap-1 py-2 px-3 rounded-lg bg-red-50 text-red-600 hover:opacity-80 transition text-sm">
+                <svg lucideTrash2 class="w-3.5 h-3.5"></svg>
+                حذف
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (!loading() && trips().length === 0) {
+    <div class="flex flex-col items-center justify-center py-12 text-center rounded-xl border border-[var(--border)] bg-[var(--bg-card)]">
+      <div class="w-20 h-20 rounded-full bg-[var(--primary-light)] flex items-center justify-center mb-4">
+        <svg lucideBus class="w-10 h-10 text-[var(--primary)]"></svg>
+      </div>
+      <p class="text-lg font-medium text-[var(--text-muted)]">لا توجد رحلات</p>
+      <p class="text-sm text-[var(--text-muted)] mb-4">ابدأ بإضافة رحلتك الأولى</p>
+      <button (click)="openCreateModal()" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--primary)] text-white hover:opacity-90 transition">
+        <span class="text-xl">+</span><span>إضافة رحلة</span>
+      </button>
+    </div>
+  }
+</div>
+
+<!-- Create/Update Modal -->
+@if (showModal() || showUpdateModal()) {
+  <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" (click)="closeModal()">
+    <div class="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-xl border border-[var(--border)] bg-[var(--bg-card)] shadow-[0_4px_6px_var(--shadow)] p-6" (click)="$event.stopPropagation()">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-xl font-bold text-[var(--text-primary)]">{{ showUpdateModal() ? 'تحديث الرحلة' : 'إنشاء رحلة جديدة' }}</h3>
+        <button (click)="closeModal()" class="w-10 h-10 rounded-full bg-[var(--bg-hover)] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] transition">
+          <svg lucideX class="w-5 h-5"></svg>
+        </button>
+      </div>
+      @if (formErrors()['general']) {
+        <div class="mb-4 p-3 rounded-lg bg-red-50 text-red-600 text-sm">{{ formErrors()['general'] }}</div>
+      }
+      <form (submit)="$event.preventDefault(); submitForm()" class="flex flex-col gap-4">
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+          <div class="flex flex-col gap-2">
+            <label class="text-sm font-medium text-[var(--text-primary)]">ولاية البداية</label>
+            <select name="fromState" [ngModel]="fromState()" (ngModelChange)="fromState.set($event)" class="w-full px-4 py-3 rounded-lg border border-[var(--border)] bg-[var(--bg-input)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)] transition">
+              <option value="">اختر ولاية</option>
+              @for (state of states; track state) {
+                <option [value]="state">{{ state }}</option>
+              }
+            </select>
+            @if (formErrors()['fromState']) { <span class="text-xs text-red-500">{{ formErrors()['fromState'] }}</span> }
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label class="text-sm font-medium text-[var(--text-primary)]">ولاية النهاية</label>
+            <select name="toState" [ngModel]="toState()" (ngModelChange)="toState.set($event)" class="w-full px-4 py-3 rounded-lg border border-[var(--border)] bg-[var(--bg-input)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)] transition">
+              <option value="">اختر ولاية</option>
+              @for (state of states; track state) {
+                <option [value]="state">{{ state }}</option>
+              }
+            </select>
+            @if (formErrors()['toState']) { <span class="text-xs text-red-500">{{ formErrors()['toState'] }}</span> }
+          </div>
+
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+          <div class="flex flex-col gap-2">
+            <label class="text-sm font-medium text-[var(--text-primary)]">مدينة البداية</label>
+            <input type="text" name="fromCity" [ngModel]="fromCity()" (ngModelChange)="fromCity.set($event)" placeholder="أدخل مدينة البداية" class="w-full px-4 py-3 rounded-lg border border-[var(--border)] bg-[var(--bg-input)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)] transition">
+            @if (formErrors()['fromCity']) { <span class="text-xs text-red-500">{{ formErrors()['fromCity'] }}</span> }
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label class="text-sm font-medium text-[var(--text-primary)]">مدينة النهاية</label>
+            <input type="text" name="toCity" [ngModel]="toCity()" (ngModelChange)="toCity.set($event)" placeholder="أدخل مدينة النهاية" class="w-full px-4 py-3 rounded-lg border border-[var(--border)] bg-[var(--bg-input)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)] transition">
+            @if (formErrors()['toCity']) { <span class="text-xs text-red-500">{{ formErrors()['toCity'] }}</span> }
+          </div>
+
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+          <div class="flex flex-col gap-2">
+            <label class="text-sm font-medium text-[var(--text-primary)]">محطة البداية</label>
+            <input type="text" name="fromStation" [ngModel]="fromStation()" (ngModelChange)="fromStation.set($event)" placeholder="أدخل محطة البداية" class="w-full px-4 py-3 rounded-lg border border-[var(--border)] bg-[var(--bg-input)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)] transition">
+            @if (formErrors()['fromStation']) { <span class="text-xs text-red-500">{{ formErrors()['fromStation'] }}</span> }
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label class="text-sm font-medium text-[var(--text-primary)]">محطة النهاية</label>
+            <input type="text" name="toStation" [ngModel]="toStation()" (ngModelChange)="toStation.set($event)" placeholder="أدخل محطة النهاية" class="w-full px-4 py-3 rounded-lg border border-[var(--border)] bg-[var(--bg-input)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)] transition">
+            @if (formErrors()['toStation']) { <span class="text-xs text-red-500">{{ formErrors()['toStation'] }}</span> }
+          </div>
+
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+          <div class="flex flex-col gap-2">
+            <label class="text-sm font-medium text-[var(--text-primary)]">تاريخ المغادرة</label>
+            <input type="date" name="departureDate" [ngModel]="departureDate()" (ngModelChange)="departureDate.set($event)" class="w-full px-4 py-3 rounded-lg border border-[var(--border)] bg-[var(--bg-input)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)] transition">
+            @if (formErrors()['departureDate']) { <span class="text-xs text-red-500">{{ formErrors()['departureDate'] }}</span> }
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label class="text-sm font-medium text-[var(--text-primary)]">وقت المغادرة</label>
+            <input type="time" name="departureTime" [ngModel]="departureTime()" (ngModelChange)="departureTime.set($event)" class="w-full px-4 py-3 rounded-lg border border-[var(--border)] bg-[var(--bg-input)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)] transition">
+            @if (formErrors()['departureTime']) { <span class="text-xs text-red-500">{{ formErrors()['departureTime'] }}</span> }
+          </div>
+
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+          <div class="flex flex-col gap-2">
+            <label class="text-sm font-medium text-[var(--text-primary)]">تاريخ الوصول</label>
+            <input type="date" name="arrivalDate" [ngModel]="arrivalDate()" (ngModelChange)="arrivalDate.set($event)" class="w-full px-4 py-3 rounded-lg border border-[var(--border)] bg-[var(--bg-input)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)] transition">
+            @if (formErrors()['arrivalDate']) { <span class="text-xs text-red-500">{{ formErrors()['arrivalDate'] }}</span> }
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label class="text-sm font-medium text-[var(--text-primary)]">وقت الوصول</label>
+            <input type="time" name="arrivalTime" [ngModel]="arrivalTime()" (ngModelChange)="arrivalTime.set($event)" class="w-full px-4 py-3 rounded-lg border border-[var(--border)] bg-[var(--bg-input)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)] transition">
+            @if (formErrors()['arrivalTime']) { <span class="text-xs text-red-500">{{ formErrors()['arrivalTime'] }}</span> }
+          </div>
+
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+          <div class="flex flex-col gap-2">
+            <label class="text-sm font-medium text-[var(--text-primary)]">سعر التذكرة الواحدة (بالجنيه السوداني)</label>
+            <input type="number" name="price" [ngModel]="price()" (ngModelChange)="price.set(+$event)" placeholder="أدخل سعر التذكرة الواحدة" min="0" class="w-full px-4 py-3 rounded-lg border border-[var(--border)] bg-[var(--bg-input)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)] transition">
+            @if (formErrors()['price']) { <span class="text-xs text-red-500">{{ formErrors()['price'] }}</span> }
+          </div>
+
+          <div class="flex flex-col gap-2">
+            <label class="text-sm font-medium text-[var(--text-primary)]">الحافلة</label>
+            <select name="busId" [ngModel]="busId()" (ngModelChange)="busId.set($event)" class="w-full px-4 py-3 rounded-lg border border-[var(--border)] bg-[var(--bg-input)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)] transition">
+              <option value="">اختر حافلة</option>
+              @for (bus of buses(); track bus.id) { <option [value]="bus.id">{{ bus.name }} ({{ bus.plate.numbers | arabicNumber }})</option> }
+            </select>
+            @if (formErrors()['busId']) { <span class="text-xs text-red-500">{{ formErrors()['busId'] }}</span> }
+          </div>
+
+        </div>
+        
+        <button type="submit" [disabled]="submitting()" class="w-full py-3 rounded-lg bg-[var(--primary)] text-white font-medium hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition">
+          @if (submitting()) { 
+            <span class="flex items-center justify-center gap-2">
+              <span class="animate-spin w-5 h-5 border-2 border-white border-t-transparent rounded-full">
+              </span>جاري الحفظ...</span> 
+          } @else { 
+            <span>{{ showUpdateModal() ? 'تحديث الرحلة' : 'إنشاء الرحلة' }}</span> 
+          }
+        </button>
+
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Delete Confirmation Modal -->
+@if (showDeleteConfirm()) {
+  <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+    <div class="w-full max-w-md rounded-xl border border-[var(--border)] bg-[var(--bg-card)] shadow-[0_4px_6px_var(--shadow)] p-6 text-center">
+      <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
+        <svg lucideTrash2 class="w-8 h-8 text-red-600"></svg>
+      </div>
+      <h3 class="text-xl font-bold text-[var(--text-primary)] mb-2">حذف الرحلة</h3>
+      <p class="text-[var(--text-muted)] mb-6">هل أنت متأكد من حذف هذه الرحلة؟ لا يمكن التراجع عن هذا الإجراء.</p>
+      <div class="flex gap-4">
+        <button (click)="cancelDelete()" class="flex-1 py-3 rounded-lg border border-[var(--border)] text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition">إلغاء</button>
+        <button (click)="deleteTrip()" class="flex-1 py-3 rounded-lg bg-red-600 text-white hover:opacity-90 transition">حذف</button>
+      </div>
+    </div>
+  </div>
+}

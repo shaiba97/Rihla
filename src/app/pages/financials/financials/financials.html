@@ -1,0 +1,178 @@
+<div dir="rtl" class="p-6 flex flex-col gap-6">
+
+  <div class="flex items-center justify-between flex-wrap gap-3">
+    <div class="flex flex-col gap-1">
+      <h1 class="text-2xl font-extrabold text-[var(--text-primary)]">الإدارة المالية</h1>
+      <p class="text-sm text-[var(--text-secondary)]">نظرة شاملة على إيرادات شركتك وأرباحها</p>
+    </div>
+    <button (click)="load()" [disabled]="isLoading()" class="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-card)] text-sm font-semibold text-[var(--text-secondary)] hover:border-[var(--primary)] hover:text-[var(--primary)] transition-all duration-150 disabled:opacity-50">
+      <svg lucideRefreshCw class="w-4 h-4" [ngClass]="isLoading() ? ['animate-spin'] : []"></svg>
+      تحديث
+    </button>
+  </div>
+
+  @if (isLoading()) {
+    <div class="flex flex-col items-center justify-center py-24 gap-4">
+      <svg lucideLoaderCircle class="w-12 h-12 animate-spin text-[var(--primary)]"></svg>
+      <p class="text-sm font-medium text-[var(--text-muted)]">جاري تحميل البيانات المالية...</p>
+    </div>
+  }
+
+  @if (!isLoading() && error()) {
+    <div class="flex flex-col items-center justify-center py-24 gap-4">
+      <div class="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center"><svg lucideAlertCircle class="w-8 h-8 text-red-400"></svg></div>
+      <p class="text-base font-semibold text-[var(--text-primary)]">{{ error() }}</p>
+      <button (click)="load()" class="px-6 py-2.5 rounded-xl bg-[var(--primary)] text-white font-semibold text-sm hover:bg-[var(--primary-hover)] transition-all">حاول مجدداً</button>
+    </div>
+  }
+
+  @if (!isLoading() && summary()) {
+    <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+      @for (card of cards(); track card.label) {
+        <div class="flex flex-col gap-3 p-4 rounded-2xl border bg-[var(--bg-card)] hover:shadow-md transition-all duration-200">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center"
+            [ngClass]="card.color === 'primary' ? 'bg-[var(--primary-light)]' : card.color === 'emerald' ? 'bg-emerald-50' : card.color === 'amber' ? 'bg-amber-50' : card.color === 'blue' ? 'bg-blue-50' : card.color === 'violet' ? 'bg-violet-50' : 'bg-orange-50'">
+            @if (card.icon === 'trending-up') { <svg lucideTrendingUp class="w-5 h-5" [ngClass]="card.color === 'primary' ? 'text-[var(--primary)]' : card.color + '-600 dark:text-' + card.color + '-300'"></svg> }
+            @if (card.icon === 'calendar') { <svg lucideCalendar class="w-5 h-5" [ngClass]="card.color === 'primary' ? 'text-[var(--primary)]' : card.color + '-600 dark:text-' + card.color + '-300'"></svg> }
+            @if (card.icon === 'ticket') { <svg lucideTicket class="w-5 h-5" [ngClass]="card.color === 'primary' ? 'text-[var(--primary)]' : card.color + '-600 dark:text-' + card.color + '-300'"></svg> }
+            @if (card.icon === 'clock') { <svg lucideClock class="w-5 h-5" [ngClass]="card.color === 'primary' ? 'text-[var(--primary)]' : card.color + '-600 dark:text-' + card.color + '-300'"></svg> }
+            @if (card.icon === 'wallet') { <svg lucideWallet class="w-5 h-5" [ngClass]="card.color === 'primary' ? 'text-[var(--primary)]' : card.color + '-600 dark:text-' + card.color + '-300'"></svg> }
+            @if (card.icon === 'banknote') { <svg lucideBanknote class="w-5 h-5" [ngClass]="card.color === 'primary' ? 'text-[var(--primary)]' : card.color + '-600 dark:text-' + card.color + '-300'"></svg> }
+          </div>
+          <div class="flex flex-col gap-0.5">
+            <span class="text-[11px] font-medium text-[var(--text-muted)] leading-tight">{{ card.label }}</span>
+            <div class="flex items-baseline gap-1 flex-wrap">
+              <span class="text-xl font-extrabold leading-none tabular-nums" [ngClass]="card.color === 'primary' ? 'text-[var(--primary)]' : 'text-' + card.color + '-600 dark:text-' + card.color + '-300'">{{ fmt(card.value) }}</span>
+              @if (card.currency) { <span class="text-[10px] font-medium text-[var(--text-muted)]">{{ card.currency }}</span> }
+            </div>
+            <span class="text-[10px] text-[var(--text-muted)] mt-0.5 leading-tight">{{ card.sub }}</span>
+          </div>
+        </div>
+      }
+    </div>
+
+    @let s = summary()!;
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div class="lg:col-span-2 bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-5 flex flex-col gap-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-base font-bold text-[var(--text-primary)] flex items-center gap-2"><svg lucideTrendingUp class="w-4 h-4 text-[var(--primary)]"></svg>الإيرادات اليومية</h2>
+          <span class="text-xs font-medium text-[var(--text-muted)] px-2.5 py-1 rounded-full bg-[var(--bg-base)] border border-[var(--border)]">آخر ٣٠ يوماً</span>
+        </div>
+        @if (summary()?.dailyRevenue?.length) {
+          <apx-chart [series]="chartOptions().series" [chart]="chartOptions().chart" [xaxis]="chartOptions().xaxis" [yaxis]="chartOptions().yaxis" [grid]="chartOptions().grid" [tooltip]="chartOptions().tooltip" [dataLabels]="chartOptions().dataLabels" [fill]="chartOptions().fill" [colors]="chartOptions().colors" class="w-full"></apx-chart>
+        } @else {
+          <div class="flex flex-col items-center justify-center h-44 gap-2 text-[var(--text-muted)]"><svg lucideTrendingUp class="w-8 h-8 opacity-30"></svg><p class="text-sm">لا توجد بيانات بعد</p></div>
+        }
+      </div>
+
+      <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-5 flex flex-col gap-4">
+        <h2 class="text-base font-bold text-[var(--text-primary)] flex items-center gap-2"><svg lucideMapPin class="w-4 h-4 text-[var(--primary)]"></svg>أعلى الرحلات إيراداً</h2>
+        @if (s.topTrips.length > 0) {
+          <div class="flex flex-col gap-3">
+            @for (trip of s.topTrips; track trip.tripId; let i = $index) {
+              <div class="flex items-center gap-3">
+                <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0" [ngClass]="i === 0 ? 'bg-amber-400 text-white' : i === 1 ? 'bg-gray-300 text-gray-700' : i === 2 ? 'bg-amber-700 text-white' : 'bg-[var(--bg-base)] text-[var(--text-muted)] border border-[var(--border)]'">{{ toArabic(i + 1) }}</div>
+                <div class="flex flex-col flex-1 min-w-0">
+                  <span class="text-sm font-bold text-[var(--text-primary)] truncate">{{ trip.from }} ← {{ trip.to }}</span>
+                  <span class="text-[10px] text-[var(--text-muted)]">{{ toArabic(trip.bookings) }} حجز</span>
+                </div>
+                <div class="flex flex-col items-end flex-shrink-0">
+                  <span class="text-sm font-extrabold text-[var(--primary)] tabular-nums">{{ fmt(trip.revenue) }}</span>
+                  <span class="text-[9px] text-[var(--text-muted)]">جنيه</span>
+                </div>
+              </div>
+              @if (i < s.topTrips.length - 1) { <div class="h-px bg-[var(--border)]"></div> }
+            }
+          </div>
+        } @else {
+          <div class="flex-1 flex flex-col items-center justify-center gap-2 py-8 text-[var(--text-muted)]"><svg lucideMapPin class="w-8 h-8 opacity-30"></svg><p class="text-xs text-center">لا توجد رحلات مكتملة بعد</p></div>
+        }
+      </div>
+    </div>
+
+    <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] overflow-hidden">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--border)]">
+        <h2 class="text-base font-bold text-[var(--text-primary)] flex items-center gap-2"><svg lucideTicket class="w-4 h-4 text-[var(--primary)]"></svg>آخر المدفوعات</h2>
+        <span class="text-xs font-medium text-[var(--text-muted)]">آخر {{ toArabic(s.recentPayments.length) }} عملية</span>
+      </div>
+      @if (s.recentPayments.length > 0) {
+        <div class="hidden md:block overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="bg-[var(--bg-base)] border-b border-[var(--border)]">
+                <th class="text-right px-5 py-3 text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">المسار</th>
+                <th class="text-right px-5 py-3 text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">طريقة الدفع</th>
+                <th class="text-right px-5 py-3 text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">إجمالي التذكرة</th>
+                <th class="text-right px-5 py-3 text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider">التاريخ</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (p of s.recentPayments; track p.id; let i = $index) {
+                <tr class="border-b border-[var(--border)] hover:bg-[var(--bg-base)] transition-colors duration-100" [ngClass]="i % 2 === 0 ? [] : ['bg-[var(--bg-base)]/40']">
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-2">
+                      <div class="w-7 h-7 rounded-lg bg-[var(--primary-light)] flex items-center justify-center flex-shrink-0"><svg lucideMapPin class="w-3.5 h-3.5 text-[var(--primary)]"></svg></div>
+                      <span class="text-sm font-semibold text-[var(--text-primary)]">{{ p.from ?? '—' }} ← {{ p.to ?? '—' }}</span>
+                    </div>
+                  </td>
+                  <td class="px-5 py-3.5">
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-[var(--primary-light)] text-[var(--primary)] border border-[var(--border)]">
+                      {{ methodLabel(p.paymentMethod) }}
+                    </span>
+                  </td>
+                  <td class="px-5 py-3.5"><span class="text-sm font-bold text-[var(--text-primary)] tabular-nums">{{ fmt(p.companyAmount) }} <span class="text-xs font-normal text-[var(--text-muted)]">جنيه</span></span></td>
+                  <td class="px-5 py-3.5"><span class="text-xs font-medium text-[var(--text-muted)]">{{ fmtDate(p.createdAt) }}</span></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="md:hidden flex flex-col divide-y divide-[var(--border)]">
+          @for (p of s.recentPayments; track p.id) {
+            <div class="px-4 py-4 flex flex-col gap-3">
+              <div class="flex items-center justify-between"><span class="text-sm font-bold text-[var(--text-primary)]">{{ p.from ?? '—' }} ← {{ p.to ?? '—' }}</span><span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-[var(--primary-light)] text-[var(--primary)]">{{ methodLabel(p.paymentMethod) }}</span></div>
+              <div class="flex gap-3">
+                <div class="flex-1 flex flex-col gap-0.5 p-2.5 rounded-xl bg-[var(--bg-base)] border border-[var(--border)]"><span class="text-[10px] text-[var(--text-muted)]">الإجمالي</span><span class="text-sm font-extrabold text-[var(--text-primary)] tabular-nums">{{ fmt(p.companyAmount) }}</span></div>
+                <div class="flex-1 flex flex-col gap-0.5 p-2.5 rounded-xl bg-emerald-50 border border-emerald-100"><span class="text-[10px] text-emerald-500">صافي ربحك</span><span class="text-sm font-extrabold text-emerald-700 tabular-nums">{{ fmt(p.companyAmount) }}</span></div>
+              </div>
+              <span class="text-[11px] text-[var(--text-muted)]">{{ fmtDate(p.createdAt) }}</span>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="flex flex-col items-center justify-center py-16 gap-3 text-[var(--text-muted)]"><svg lucideTicket class="w-10 h-10 opacity-30"></svg><p class="text-sm text-center">لا توجد مدفوعات مسجلة بعد.<br>ستظهر هنا عند بدء حجوزات العملاء.</p></div>
+      }
+    </div>
+
+    <!-- Performance tracking -->
+    <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] overflow-hidden">
+      <div class="px-5 py-3.5 border-b border-[var(--border)] flex items-center justify-between flex-wrap gap-3">
+        <h2 class="text-base font-bold text-[var(--text-primary)] flex items-center gap-2"><svg lucideBarChart3 class="w-4 h-4 text-[var(--primary)]"></svg>الأداء المالي</h2>
+        <div class="flex items-center gap-1 bg-[var(--bg-base)] rounded-xl p-0.5 border border-[var(--border)] overflow-x-auto">
+          @for (p of perfPeriods; track p.id) {
+            <button (click)="setPerfPeriod(p.id)" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap" [class.bg-white]="perfPeriod()===p.id" [class.shadow-sm]="perfPeriod()===p.id" [class.text-[var(--text-primary)]]="perfPeriod()===p.id" [class.text-[var(--text-muted)]]="perfPeriod()!==p.id" [class.hover:text-[var(--text-primary)]]="perfPeriod()!==p.id">{{ p.label }}</button>
+          }
+        </div>
+      </div>
+      @if (perfData().length === 0) {
+        <div class="px-5 py-10 text-center text-xs text-[var(--text-muted)]">لا توجد بيانات أداء في هذه الفترة</div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead><tr class="bg-[var(--bg-base)] border-b border-[var(--border)]"><th class="text-right px-4 py-3 text-xs font-bold text-[var(--text-secondary)] whitespace-nowrap">الفترة</th><th class="text-right px-4 py-3 text-xs font-bold text-[var(--text-secondary)] whitespace-nowrap">المعاملات</th><th class="text-right px-4 py-3 text-xs font-bold text-[var(--text-secondary)] whitespace-nowrap">الإيرادات</th></tr></thead>
+            <tbody>
+              @for (e of perfData(); track e.period) {
+                <tr class="border-b border-[var(--border)] hover:bg-[var(--bg-base)] transition-colors">
+                  <td class="px-4 py-3 text-xs font-bold text-[var(--text-primary)] whitespace-nowrap">{{ e.period }}</td>
+                  <td class="px-4 py-3 text-xs tabular-nums text-[var(--text-primary)]">{{ toArabic(e.count) }}</td>
+                  <td class="px-4 py-3 text-xs font-bold tabular-nums text-[var(--text-primary)]">{{ fmt(e.revenue) }} <span class="text-[10px] font-normal text-[var(--text-muted)]">ج</span></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  }
+</div>

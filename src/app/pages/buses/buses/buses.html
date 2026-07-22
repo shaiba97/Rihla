@@ -1,0 +1,156 @@
+<div class="flex flex-col gap-6" dir="rtl">
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <div class="w-12 h-12 rounded-xl bg-[var(--primary-light)] flex items-center justify-center">
+        <svg lucideBus class="w-6 h-6 text-[var(--primary)]"></svg>
+      </div>
+      <div>
+        <h2 class="text-lg font-bold text-[var(--text-primary)] m-0">الحافلات</h2>
+        <p class="text-sm text-[var(--text-muted)] m-0">إدارة الحافلات الشركة</p>
+      </div>
+    </div>
+    <button
+      (click)="openCreateForm()"
+      class="flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--primary)] text-white font-medium hover:opacity-90 transition"
+    >
+      +
+      إضافة حافلة
+    </button>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+    @for (bus of buses(); track bus.id) {
+      <div
+        (click)="goToBusDetails(bus.id)"
+        class="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] shadow-[0_1px_3px_var(--shadow)] overflow-hidden hover:shadow-lg transition cursor-pointer"
+      >
+        <div class="h-40 flex items-center justify-center bg-[var(--primary-light)]">
+          <svg lucideBus class="w-16 h-16 text-[var(--primary)]"></svg>
+        </div>
+        <div class="p-4">
+          <h3 class="text-lg font-bold text-[var(--text-primary)] mb-1">{{ bus.name }}</h3>
+          @if (bus.plate) {
+            @if (typeof bus.plate === 'object') {
+              <p class="text-xs text-[var(--text-muted)] mb-2">
+                {{ bus.plate.numbers | arabicNumber }}
+                @if (bus.plate.english) { / {{ bus.plate.english }} }
+                @if (bus.plate.arabic) { / {{ bus.plate.arabic }} }
+              </p>
+            } @else {
+              <p class="text-xs text-[var(--text-muted)] mb-2">{{ bus.plate }}</p>
+            }
+          }
+          <p class="text-sm text-[var(--text-muted)] mb-4">
+            {{ formatDate(bus.createdAt) }}
+          </p>
+          <div class="flex items-center gap-2">
+            <button
+              (click)="openEditForm(bus); $event.stopPropagation()"
+              class="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-[var(--primary)] text-[var(--primary)] hover:bg-[var(--primary-light)] transition"
+            >
+              <svg lucidePencil class="w-4 h-4"></svg>
+              تعديل
+            </button>
+            <button
+              (click)="removeBusItem(bus.id); $event.stopPropagation()"
+              class="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-red-500 text-red-500 hover:bg-red-50 transition"
+            >
+              <svg lucideTrash2 class="w-4 h-4"></svg>
+              حذف
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  @if (buses().length === 0) {
+    <div class="flex flex-col items-center justify-center py-12 text-center">
+      <svg lucideBus class="w-16 h-16 mb-4 text-[var(--text-muted)]"></svg>
+      <p class="text-lg font-medium text-[var(--text-muted)]">لا توجد حافلات</p>
+      <p class="text-sm text-[var(--text-muted)]">أضف حافلة جديدة للبدء</p>
+    </div>
+  }
+</div>
+
+@if (showModal()) {
+  <div class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+    <div class="w-full max-w-lg bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] shadow-xl p-6">
+      <h3 class="text-lg font-bold text-[var(--text-primary)] mb-4">
+        {{ editingBus() ? 'تعديل حافلة' : 'إضافة حافلة جديدة' }}
+      </h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-medium text-[var(--text-muted)]">اسم الحافلة</label>
+          <input
+            [(ngModel)]="formData().name"
+            type="text"
+            class="px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--bg-main)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)]"
+            placeholder="أدخل اسم الحافلة"
+          />
+        </div>
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-medium text-[var(--text-muted)]">عدد المقاعد</label>
+          <input
+            [(ngModel)]="formData().chairs"
+            type="number"
+            class="px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--bg-main)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)]"
+            placeholder="أدخل عدد المقاعد"
+          />
+        </div>
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-medium text-[var(--text-muted)]">اتجاه المقاعد</label>
+          <select
+            [(ngModel)]="formData().seatStartFrom"
+            class="px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--bg-main)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)]"
+          >
+            <option value="RIGHT">يمين</option>
+            <option value="LEFT">يسار</option>
+          </select>
+        </div>
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-medium text-[var(--text-muted)]">رقم اللوحة (أرقام)</label>
+          <input
+            [(ngModel)]="formData().plate.numbers"
+            type="text"
+            class="px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--bg-main)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)]"
+            placeholder="1234"
+          />
+        </div>
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-medium text-[var(--text-muted)]">رقم اللوحة (إنجليزي)</label>
+          <input
+            [(ngModel)]="formData().plate.english"
+            type="text"
+            class="px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--bg-main)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)]"
+            placeholder="AB"
+          />
+        </div>
+        <div class="flex flex-col gap-2">
+          <label class="text-sm font-medium text-[var(--text-muted)]">رقم اللوحة (عربي)</label>
+          <input
+            [(ngModel)]="formData().plate.arabic"
+            type="text"
+            class="px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--bg-main)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary)]"
+            placeholder="س ع"
+          />
+        </div>
+      </div>
+      <div class="flex items-center justify-end gap-3 mt-6">
+        <button
+          (click)="closeModal()"
+          class="px-6 py-2 rounded-xl border border-[var(--border)] text-[var(--text-muted)] hover:bg-[var(--bg-card)] transition"
+        >
+          إلغاء
+        </button>
+        <button
+          (click)="submitForm()"
+          [disabled]="loading()"
+          class="px-6 py-2 rounded-xl bg-[var(--primary)] text-white font-medium hover:opacity-90 transition disabled:opacity-50"
+        >
+          {{ loading() ? 'جاري الحفظ...' : (editingBus() ? 'تحديث' : 'حفظ') }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

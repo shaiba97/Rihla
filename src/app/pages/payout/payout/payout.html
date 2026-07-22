@@ -1,0 +1,322 @@
+<div dir="rtl" class="p-4 md:p-6 flex flex-col gap-6">
+
+  <!-- HEADER -->
+  <div class="flex items-center justify-between flex-wrap gap-3">
+    <div class="flex flex-col gap-1">
+      <h1 class="text-2xl font-extrabold text-[var(--text-primary)]">المدفوعات</h1>
+      <p class="text-sm text-[var(--text-secondary)]">إدارة طلبات الصرف والمستحقات المالية</p>
+    </div>
+    <button (click)="load()" [disabled]="isLoading()" class="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-card)] text-sm font-semibold text-[var(--text-secondary)] hover:border-[var(--primary)] hover:text-[var(--primary)] transition-all duration-150 disabled:opacity-50">
+      <svg lucideRefreshCw class="w-4 h-4" [class.animate-spin]="isLoading()"></svg>
+      تحديث
+    </button>
+  </div>
+
+  @if (isLoading() && !error()) {
+    <div class="flex flex-col items-center justify-center py-24 gap-4">
+      <svg lucideLoaderCircle class="w-12 h-12 animate-spin text-[var(--primary)]"></svg>
+      <p class="text-sm font-medium text-[var(--text-muted)]">جاري تحميل بيانات المدفوعات...</p>
+    </div>
+  }
+
+  @if (error()) {
+    <div class="flex flex-col items-center justify-center py-24 gap-4">
+      <div class="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center"><svg lucideAlertCircle class="w-8 h-8 text-red-400"></svg></div>
+      <p class="text-base font-semibold text-[var(--text-primary)]">{{ error() }}</p>
+      <button (click)="load()" class="px-6 py-2.5 rounded-xl bg-[var(--primary)] text-white font-semibold text-sm hover:bg-[var(--primary-hover)] transition-all">حاول مجدداً</button>
+    </div>
+  }
+
+  @if (!isLoading() && !error()) {
+
+    <!-- SECTION 0: الحساب البنكي -->
+    <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] overflow-hidden">
+      <div class="px-5 py-4 border-b border-[var(--border)] flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-indigo-50 flex items-center justify-center"><svg lucideBuilding2 class="w-4 h-4 text-indigo-600"></svg></div>
+          <div>
+            <h2 class="text-base font-bold text-[var(--text-primary)]">الحساب البنكي</h2>
+            <span class="text-xs text-[var(--text-muted)]">بيانات حسابك لاستلام المستحقات</span>
+          </div>
+        </div>
+        <button (click)="toggleEditAccount()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-[var(--border)] text-xs font-semibold text-[var(--text-secondary)] hover:border-[var(--primary)] hover:text-[var(--primary)] transition-all">
+          <svg lucidePencil class="w-3.5 h-3.5"></svg>
+          {{ editingAccount() ? 'إلغاء' : 'تحديث' }}
+        </button>
+      </div>
+      @if (error() && editingAccount()) {
+        <div class="mx-5 mt-3 px-4 py-2.5 rounded-xl bg-[var(--danger-light)] border border-red-200 text-sm font-medium text-[var(--danger)]">{{ error() }}</div>
+      }
+      @if (successMsg()) {
+        <div class="mx-5 mt-3 px-4 py-2.5 rounded-xl bg-[var(--success-light)] border border-green-200 text-sm font-medium text-[var(--success)]">{{ successMsg() }}</div>
+      }
+      @if (editingAccount()) {
+        <div class="p-5 flex flex-col gap-4">
+          <div>
+            <label class="block text-xs font-bold text-[var(--text-secondary)] mb-1.5">اسم صاحب الحساب</label>
+            <input [ngModel]="accountForm().accountHolderName" (ngModelChange)="accountForm.set({...accountForm(), accountHolderName: $event})" type="text" placeholder="اسم صاحب الحساب" class="w-full px-4 py-2.5 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20 transition-all">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-[var(--text-secondary)] mb-1.5">اسم البنك أو المحفظة</label>
+            <input [ngModel]="accountForm().bankName" (ngModelChange)="accountForm.set({...accountForm(), bankName: $event})" type="text" placeholder="بنك السودان / محفظة إيكونيت ..." class="w-full px-4 py-2.5 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20 transition-all">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-[var(--text-secondary)] mb-1.5">رقم الحساب</label>
+            <input [ngModel]="accountForm().accountNumber" (ngModelChange)="accountForm.set({...accountForm(), accountNumber: $event})" type="text" placeholder="رقم الحساب" class="w-full px-4 py-2.5 rounded-xl bg-[var(--bg-base)] border border-[var(--border)] text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20 transition-all">
+          </div>
+          <button (click)="saveAccount()" [disabled]="savingAccount()" class="self-start flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--primary)] text-white text-sm font-bold hover:bg-[var(--primary-hover)] transition-all disabled:opacity-50">
+            @if (savingAccount()) {
+              <svg lucideLoaderCircle class="w-4 h-4 animate-spin"></svg>
+            }
+            حفظ
+          </button>
+        </div>
+      } @else if (account(); as acc) {
+        <div class="p-5 flex flex-col gap-4">
+          @if (acc.accountHolderName || acc.bankName || acc.accountNumber) {
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="flex flex-col gap-1 p-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border)]">
+                <span class="text-[10px] text-[var(--text-muted)]">اسم صاحب الحساب</span>
+                <span class="text-sm font-bold text-[var(--text-primary)]">{{ acc.accountHolderName || '—' }}</span>
+              </div>
+              <div class="flex flex-col gap-1 p-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border)]">
+                <span class="text-[10px] text-[var(--text-muted)]">البنك أو المحفظة</span>
+                <span class="text-sm font-bold text-[var(--text-primary)]">{{ acc.bankName || '—' }}</span>
+              </div>
+              <div class="flex flex-col gap-1 p-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border)]">
+                <span class="text-[10px] text-[var(--text-muted)]">رقم الحساب</span>
+                <span class="text-sm font-bold text-[var(--text-primary)]">{{ acc.accountNumber || '—' }}</span>
+              </div>
+            </div>
+          } @else {
+            <div class="flex items-center justify-center py-6 text-sm text-[var(--text-muted)]">لم تقم بإضافة بيانات الحساب البنكي بعد</div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- SECTION 1: المستحقات -->
+    <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] overflow-hidden">
+      <!-- Top bar -->
+      <div class="px-5 py-4 border-b border-[var(--border)] flex items-center justify-between flex-wrap gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-amber-50 flex items-center justify-center"><svg lucideLandmark class="w-4 h-4 text-amber-600"></svg></div>
+          <div class="flex flex-col">
+            <h2 class="text-base font-bold text-[var(--text-primary)]">المستحقات</h2>
+            <span class="text-xs text-[var(--text-muted)]">إجمالي المستحق: <span class="font-bold text-[var(--text-primary)]">{{ fmtPrice(totalUnpaid()) }}</span></span>
+          </div>
+        </div>
+        <button
+          (click)="requestAll()"
+          [disabled]="allDisabled() || requestingAll()"
+          class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--primary)] text-white text-sm font-semibold hover:bg-[var(--primary-hover)] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
+          @if (requestingAll()) {
+            <svg lucideLoaderCircle class="w-4 h-4 animate-spin"></svg>
+            جاري...
+          } @else {
+            <svg lucideSend class="w-4 h-4"></svg>
+            طلب صرف الكل
+          }
+        </button>
+      </div>
+
+      <!-- Trips list -->
+      @if (trips().length === 0) {
+        <div class="flex flex-col items-center justify-center py-12 gap-3 text-[var(--text-muted)]">
+          <svg lucideLandmark class="w-10 h-10 opacity-30"></svg>
+          <p class="text-sm text-center">لا توجد رحلات غير مسددة</p>
+        </div>
+      } @else {
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 p-4">
+          @for (trip of trips(); track trip.id) {
+            <div
+              class="flex flex-col gap-3 p-4 rounded-xl border transition-all duration-150"
+              [class.border-[var(--border)]]="!trip.paidOut"
+              [class.bg-[var(--bg-card)]]="!trip.paidOut"
+              [class.border-dashed]="trip.paidOut"
+              [class.border-gray-200]="trip.paidOut"
+              [class.bg-gray-50]="trip.paidOut"
+              [class.opacity-60]="trip.paidOut">
+              <!-- Route -->
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-[var(--primary-light)]/30 flex items-center justify-center flex-shrink-0">
+                  <svg lucideMapPin class="w-4 h-4 text-[var(--primary)]"></svg>
+                </div>
+                <div class="flex flex-col min-w-0 flex-1">
+                  <span class="text-sm font-bold text-[var(--text-primary)] truncate">{{ trip.fromCity }} ← {{ trip.toCity }}</span>
+                  <span class="text-[11px] text-[var(--text-muted)]">{{ fmtDate(trip.departureDate) }}</span>
+                </div>
+                @if (trip.paidOut) {
+                  @let receiptUrl = getReceiptForTrip(trip.id);
+                  @if (receiptUrl) {
+                    <button (click)="viewReceipt(receiptUrl)"
+                      class="flex items-center gap-1 text-[11px] font-bold text-[var(--primary)] bg-[var(--primary-light)] px-2.5 py-1 rounded-full border border-[var(--primary)]/20 whitespace-nowrap hover:opacity-80 transition-all">
+                      <svg lucideEye class="w-3 h-3"></svg>
+                      عرض الإيصال
+                    </button>
+                  } @else {
+                    <span class="flex items-center gap-1 text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 whitespace-nowrap">
+                      <svg lucideCheck class="w-3 h-3"></svg>
+                      مدفوع
+                    </span>
+                  }
+                }
+              </div>
+              <!-- Amount & action -->
+              <div class="flex items-center justify-between">
+                <div class="flex flex-col">
+                  <span class="text-[10px] text-[var(--text-muted)]">المستحق</span>
+                  <span class="text-base font-extrabold text-[var(--text-primary)] tabular-nums">{{ fmtPrice(trip.unpaidAmount) }}</span>
+                </div>
+                @if (!trip.paidOut) {
+                  @if (trip.hasPendingRequest) {
+                    <button disabled class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-50 text-amber-600 text-xs font-semibold border border-amber-200 opacity-70 cursor-not-allowed">
+                      <svg lucideClock class="w-3.5 h-3.5"></svg>
+                      قيد الانتظار...
+                    </button>
+                  } @else {
+                    <button
+                      (click)="requestSingle(trip.id)"
+                      [disabled]="requestingTrip() === trip.id"
+                      class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[var(--primary)] text-white text-xs font-semibold hover:bg-[var(--primary-hover)] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed">
+                      @if (requestingTrip() === trip.id) {
+                        <svg lucideLoaderCircle class="w-3.5 h-3.5 animate-spin"></svg>
+                        جاري...
+                      } @else {
+                        <svg lucideSend class="w-3.5 h-3.5"></svg>
+                        إرسال طلب صرف
+                      }
+                    </button>
+                  }
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- SECTION 2: طلباتي -->
+    <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] overflow-hidden">
+      <div class="px-5 py-4 border-b border-[var(--border)] flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center"><svg lucideFileText class="w-4 h-4 text-blue-600"></svg></div>
+        <div>
+          <h2 class="text-base font-bold text-[var(--text-primary)]">طلباتي</h2>
+          @if (stats(); as s) {
+            <span class="text-xs text-[var(--text-muted)]">لديك <span class="font-bold text-amber-600">{{ toArabic(s.pendingRequestCount) }}</span> طلب قيد الانتظار</span>
+          }
+        </div>
+      </div>
+
+      @if (requests().length === 0) {
+        <div class="flex flex-col items-center justify-center py-12 gap-3 text-[var(--text-muted)]">
+          <svg lucideFileText class="w-10 h-10 opacity-30"></svg>
+          <p class="text-sm text-center">لا توجد طلبات صرف بعد</p>
+        </div>
+      } @else {
+        <div class="flex flex-col divide-y divide-[var(--border)]">
+          @for (req of requests(); track req.id) {
+            <div class="px-5 py-4 flex items-center justify-between gap-4 hover:bg-[var(--bg-base)]/40 transition-colors">
+              <div class="flex flex-col gap-1 min-w-0 flex-1">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="text-sm font-bold text-[var(--text-primary)]">{{ fmtPrice(req.amount) }}</span>
+                  <span class="text-[11px] px-2.5 py-0.5 rounded-full font-bold border" [class]="statusClass(req.status)">
+                    @switch (req.status) {
+                      @case ('PENDING') { <span class="flex items-center gap-1"><svg lucideClock class="w-3 h-3"></svg>{{ statusLabel(req.status) }}</span> }
+                      @case ('APPROVED') { <span class="flex items-center gap-1"><svg lucideBadgeCheck class="w-3 h-3"></svg>{{ statusLabel(req.status) }}</span> }
+                      @case ('REJECTED') { <span class="flex items-center gap-1"><svg lucideX class="w-3 h-3"></svg>{{ statusLabel(req.status) }}</span> }
+                      @case ('CANCELLED') { <span class="flex items-center gap-1"><svg lucideBan class="w-3 h-3"></svg>{{ statusLabel(req.status) }}</span> }
+                    }
+                  </span>
+                </div>
+                <span class="text-[11px] text-[var(--text-muted)]">
+                  @if (req.tripId) {
+                    طلب صرف لرحلة
+                  } @else {
+                    طلب صرف لجميع الرحلات
+                  }
+                  · {{ fmtDate(req.createdAt) }}
+                </span>
+              </div>
+              @if (req.note) {
+                <span class="text-xs text-[var(--text-secondary)] hidden sm:block max-w-[200px] truncate">{{ req.note }}</span>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- SECTION 3: سجل المدفوعات -->
+    <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] overflow-hidden">
+      <div class="px-5 py-4 border-b border-[var(--border)] flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center"><svg lucideLandmark class="w-4 h-4 text-emerald-600"></svg></div>
+        <div>
+          <h2 class="text-base font-bold text-[var(--text-primary)]">سجل المدفوعات</h2>
+          @if (stats(); as s) {
+            <span class="text-xs text-[var(--text-muted)]">إجمالي المدفوع: <span class="font-bold text-emerald-600">{{ fmtPrice(s.totalPaidAmount) }}</span></span>
+          }
+        </div>
+      </div>
+
+      @if (history().length === 0) {
+        <div class="flex flex-col items-center justify-center py-12 gap-3 text-[var(--text-muted)]">
+          <svg lucideLandmark class="w-10 h-10 opacity-30"></svg>
+          <p class="text-sm text-center">لا توجد مدفوعات سابقة</p>
+        </div>
+      } @else {
+        <div class="flex flex-col divide-y divide-[var(--border)]">
+          @for (rec of history(); track rec.id) {
+            <div class="px-5 py-4 flex items-center justify-between gap-4 hover:bg-[var(--bg-base)]/40 transition-colors">
+              <div class="flex flex-col gap-1 min-w-0 flex-1">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="text-sm font-bold text-[var(--text-primary)]">{{ fmtPrice(rec.amount) }}</span>
+                </div>
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  @for (item of rec.items; track $index) {
+                    <span class="text-[11px] text-[var(--text-muted)] flex items-center gap-1">
+                      <svg lucideArrowLeft class="w-2.5 h-2.5"></svg>
+                      {{ item.trip.fromCity }} ← {{ item.trip.toCity }}
+                    </span>
+                  }
+                  @if (rec.note) {
+                    <span class="text-[11px] text-[var(--text-muted)]">· {{ rec.note }}</span>
+                  }
+                </div>
+              </div>
+              <div class="flex items-center gap-2 flex-shrink-0">
+                @if (rec.receiptFile) {
+                  <button (click)="viewReceipt(rec.receiptFile!)"
+                    class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-[var(--border)] text-[11px] font-semibold text-[var(--text-secondary)] hover:border-[var(--primary)] hover:text-[var(--primary)] transition-all">
+                    <svg lucideEye class="w-3 h-3"></svg>
+                    الإيصال
+                  </button>
+                }
+                <span class="text-[11px] text-[var(--text-muted)]">{{ fmtDate(rec.createdAt) }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+  }
+
+  @if (viewingReceipt()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" (click)="closeReceipt()">
+      <div class="relative max-w-2xl w-full rounded-2xl bg-white p-2 shadow-xl" (click)="$event.stopPropagation()">
+        <button (click)="closeReceipt()" class="absolute top-3 left-3 w-8 h-8 flex items-center justify-center rounded-full bg-black/50 text-white z-10 hover:bg-black/70 transition-all">
+          <svg lucideX class="w-4 h-4"></svg>
+        </button>
+        @if (receiptError()) {
+          <div class="flex flex-col items-center justify-center py-16 gap-3 text-[var(--text-muted)]">
+            <svg lucideAlertCircle class="w-12 h-12 opacity-30"></svg>
+            <p class="text-sm">فشل تحميل الإيصال</p>
+          </div>
+        } @else {
+          <img [src]="viewingReceipt()" (error)="receiptError.set(true)" class="w-full h-auto rounded-xl" alt="إيصال الدفع">
+        }
+      </div>
+    </div>
+  }
+</div>

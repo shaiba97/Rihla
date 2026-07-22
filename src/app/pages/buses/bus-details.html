@@ -1,0 +1,106 @@
+<div class="flex flex-col gap-6" dir="rtl">
+  @if (loading()) {
+    <div class="flex items-center justify-center py-12">
+      <div class="animate-spin w-8 h-8 border-4 border-[var(--primary)] border-t-transparent rounded-full"></div>
+    </div>
+  } @else if (bus()) {
+    <div class="flex flex-col gap-2">
+      <a
+        routerLink="/buses"
+        class="flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--primary)] transition w-fit"
+      >
+        <svg lucideArrowRight class="w-5 h-5"></svg>
+        العودة إلى الحافلات
+      </a>
+    </div>
+
+    <div class="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] shadow-[0_1px_3px_var(--shadow)] p-6">
+      <div class="flex flex-col md:flex-row gap-6">
+        <div class="w-40 h-40 rounded-xl bg-[var(--primary-light)] flex items-center justify-center">
+          <svg lucideBus class="w-16 h-16 text-[var(--primary)]"></svg>
+        </div>
+        <div class="flex-1 flex flex-col gap-4">
+          <div>
+            <h1 class="text-2xl font-bold text-[var(--text-primary)]">{{ bus()!.name }}</h1>
+          </div>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="flex flex-col gap-1">
+              <span class="text-sm text-[var(--text-muted)]">عدد المقاعد</span>
+              <span class="text-lg font-medium text-[var(--text-primary)]">{{ bus()!.chairs | arabicNumber }}</span>
+            </div>
+            <div class="flex flex-col gap-1">
+              <span class="text-sm text-[var(--text-muted)]">اتجاه المقاعد</span>
+              <span class="text-lg font-medium text-[var(--text-primary)]">{{ seatDirection }}</span>
+            </div>
+            <div class="flex flex-col gap-1">
+              <span class="text-sm text-[var(--text-muted)]">اللوحة</span>
+              <span class="text-lg font-medium text-[var(--text-primary)]">{{ bus()!.plate.numbers | arabicNumber }}/{{ bus()!.plate.english }}/{{ bus()!.plate.arabic }}</span>
+            </div>
+            <div class="flex flex-col gap-1">
+              <span class="text-sm text-[var(--text-muted)]">تاريخ الإضافة</span>
+              <span class="text-lg font-medium text-[var(--text-primary)]">{{ formatDate(bus()!.createdAt) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-4">
+      <h2 class="text-xl font-bold text-[var(--text-primary)]">الرحلات</h2>
+      @if (trips().length > 0) {
+        <div class="flex flex-col gap-3">
+          @for (trip of trips(); track trip.id) {
+            <div class="rounded-xl border border-[var(--border)] bg-[var(--bg-card)] shadow-[0_1px_3px_var(--shadow)] p-4 hover:shadow-md transition">
+              <div class="grid grid-cols-4 gap-4 items-center">
+                <div class="flex flex-col gap-1">
+                  <div class="flex items-center gap-2">
+                    <svg lucideMapPin class="w-4 h-4 text-[var(--primary)] flex-shrink-0"></svg>
+                    <span class="font-medium text-[var(--text-primary)]">{{ trip.fromCity }}</span>
+                  </div>
+                  <span class="text-sm text-[var(--text-muted)]">{{ trip.fromStation }}</span>
+                  <span class="text-[var(--text-muted)]">↓</span>
+                  <div class="flex items-center gap-2">
+                    <svg lucideMapPin class="w-4 h-4 text-green-500 flex-shrink-0"></svg>
+                    <span class="font-medium text-[var(--text-primary)]">{{ trip.toCity }}</span>
+                  </div>
+                  <span class="text-sm text-[var(--text-muted)]">{{ trip.toStation }}</span>
+                </div>
+                <div class="flex flex-col gap-1 items-center">
+                  <div class="flex items-center gap-2">
+                    <svg lucideClock class="w-4 h-4 text-[var(--text-muted)] flex-shrink-0"></svg>
+                    <span class="text-sm text-[var(--text-muted)]">المغادرة</span>
+                  </div>
+                  <span class="font-medium text-[var(--text-primary)]">{{ formatDate(trip.departureDate) }}</span>
+                  <span class="text-lg font-bold text-[var(--primary)]">{{ formatTime(trip.departureTime) }}</span>
+                </div>
+                <div class="flex flex-col gap-1 items-center">
+                  <div class="flex items-center gap-2">
+                    <svg lucideCalendar class="w-4 h-4 text-[var(--text-muted)] flex-shrink-0"></svg>
+                    <span class="text-sm text-[var(--text-muted)]">الوصول</span>
+                  </div>
+                  <span class="font-medium text-[var(--text-primary)]">{{ formatDate(trip.arrivalDate) }}</span>
+                  <span class="text-lg font-bold text-green-600">{{ formatTime(trip.arrivalTime) }}</span>
+                </div>
+                <div class="flex flex-col gap-1 items-center">
+                  <span class="text-sm text-[var(--text-muted)]">الحالة</span>
+                  <span class="px-2 py-1 rounded-full text-xs font-bold" [style.background]="tripStatusColor(trip.status) + '20'" [style.color]="tripStatusColor(trip.status)">{{ tripStatusLabel(trip.status) }}</span>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="flex flex-col items-center justify-center py-12 text-center rounded-xl border border-[var(--border)] bg-[var(--bg-card)]">
+          <svg lucideBus class="w-12 h-12 mb-4 text-[var(--text-muted)]"></svg>
+          <p class="text-lg font-medium text-[var(--text-muted)]">لا توجد رحلات</p>
+          <p class="text-sm text-[var(--text-muted)]">لم يتم إضافة أي رحلات لهذه الحافلة بعد</p>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="flex flex-col items-center justify-center py-12 text-center">
+      <p class="text-lg font-medium text-[var(--text-muted)]">لم يتم العثور على الحافلة</p>
+      <a routerLink="/buses" class="text-[var(--primary)] hover:underline mt-2">العودة إلى الحافلات</a>
+    </div>
+  }
+</div>
