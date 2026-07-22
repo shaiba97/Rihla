@@ -6,7 +6,6 @@ import { AppDownloadComponent } from '../sections/app-download/app-download.comp
 import { BlogCarouselComponent } from '../sections/blog-carousel/blog-carousel.component';
 import { BottomCtaComponent } from '../sections/bottom-cta/bottom-cta.component';
 import { HomeFooterComponent } from '../sections/home-footer/home-footer.component';
-import { TripListComponent } from '../trip-list/trip-list';
 
 @Component({
   selector: 'app-main',
@@ -18,7 +17,6 @@ import { TripListComponent } from '../trip-list/trip-list';
     BlogCarouselComponent,
     BottomCtaComponent,
     HomeFooterComponent,
-    TripListComponent,
   ],
   templateUrl: './main.html',
   styleUrl: './main.css',
