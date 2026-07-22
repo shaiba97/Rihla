@@ -1,9 +1,9 @@
 export const environment = {
   production: false,
   apiUrl: {
-    company: '/api-company',
-    customer: '/api-customer',
+    company:  'https://app-backend-gz2l.onrender.com/api-company',
+    customer: 'https://app-backend-gz2l.onrender.com/api-customer',
   },
-  wsUrl: 'http://localhost:3002',
-  fileUrl: 'http://localhost:3002',
+  wsUrl: 'https://app-backend-gz2l.onrender.com',
+  fileUrl: 'https://app-backend-gz2l.onrender.com',
 };
