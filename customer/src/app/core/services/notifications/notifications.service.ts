@@ -1,5 +1,6 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import { environment } from '../../../../environments/environment';
 import { AuthStoreService } from '../../../services/auth-store/auth-store.service';
@@ -45,12 +46,38 @@ export class NotificationsService {
   unreadCount = computed(() => this.notifications().filter(n => !n.isRead).length);
 
   private audioCtx: AudioContext | null = null;
+  private pollTimer: ReturnType<typeof setInterval> | null = null;
 
   constructor() {
-    // Expose for console debugging
     if (typeof window !== 'undefined') {
       (window as any).__notifSvc = this;
     }
+  }
+
+  async init(): Promise<void> {
+    await this.fetch();
+    this.connect();
+    this.startPolling();
+  }
+
+  private startPolling(): void {
+    this.stopPolling();
+    this.pollTimer = setInterval(() => this.fetch(), 15000);
+  }
+
+  stopPolling(): void {
+    if (this.pollTimer) clearInterval(this.pollTimer);
+    this.pollTimer = null;
+  }
+
+  async fetch(): Promise<void> {
+    try {
+      const res: any = await firstValueFrom(
+        this.http.get(`${this.api}/notifications?limit=40`),
+      );
+      const data = res?.data ?? res;
+      this.notifications.set(data?.notifications ?? data ?? []);
+    } catch {}
   }
 
   private getAudioCtx(): AudioContext {
@@ -127,48 +154,32 @@ export class NotificationsService {
     localStorage.setItem(this.SETTINGS_KEY, JSON.stringify(updated));
   }
 
-  loadNotifications(): void {
-    this.http.get<any>(`${this.api}/notifications?limit=40`).subscribe({
-      next: (res: any) => {
-        const data = res?.data ?? res;
-        this.notifications.set(data?.notifications ?? data ?? []);
-      },
-      error: () => {},
-    });
+  async markRead(id: string): Promise<void> {
+    try {
+      await firstValueFrom(this.http.patch(`${this.api}/notifications/${id}/read`, {}));
+      this.notifications.update(list => list.map(n => n.id === id ? { ...n, isRead: true } : n));
+    } catch {}
   }
 
-  markRead(id: string): void {
-    this.http.patch(`${this.api}/notifications/${id}/read`, {}).subscribe({
-      next: () => {
-        this.notifications.update(list => list.map(n => n.id === id ? { ...n, isRead: true } : n));
-      },
-      error: () => {},
-    });
+  async markAllRead(): Promise<void> {
+    try {
+      await firstValueFrom(this.http.patch(`${this.api}/notifications/read-all`, {}));
+      this.notifications.update(list => list.map(n => ({ ...n, isRead: true })));
+    } catch {}
   }
 
-  markAllRead(): void {
-    this.http.patch(`${this.api}/notifications/read-all`, {}).subscribe({
-      next: () => {
-        this.notifications.update(list => list.map(n => ({ ...n, isRead: true })));
-      },
-      error: () => {},
-    });
+  async remove(id: string): Promise<void> {
+    try {
+      await firstValueFrom(this.http.delete(`${this.api}/notifications/${id}`));
+      this.notifications.update(list => list.filter(n => n.id !== id));
+    } catch {}
   }
 
-  remove(id: string): void {
-    this.http.delete(`${this.api}/notifications/${id}`).subscribe({
-      next: () => {
-        this.notifications.update(list => list.filter(n => n.id !== id));
-      },
-      error: () => {},
-    });
-  }
-
-  clearAll(): void {
-    this.http.delete(`${this.api}/notifications/clear-all`).subscribe({
-      next: () => this.notifications.set([]),
-      error: () => {},
-    });
+  async clearAll(): Promise<void> {
+    try {
+      await firstValueFrom(this.http.delete(`${this.api}/notifications/clear-all`));
+      this.notifications.set([]);
+    } catch {}
   }
 
   private addFromWs(n: AppNotification): void {
@@ -190,7 +201,7 @@ export class NotificationsService {
       if (user.role === 'ADMIN') {
         this.socket!.emit('join:room', { room: 'admin' });
       }
-      this.loadNotifications();
+      this.fetch();
     });
 
     this.socket.on('notification:new', (data: AppNotification) => {
@@ -205,7 +216,6 @@ export class NotificationsService {
       this.showBrowserNotification(data);
     });
 
-    // Unlock audio & request notification permission on first user gesture
     const unlock = () => {
       this.unlockAudio();
       this.requestBrowserPermission();
