@@ -46,7 +46,7 @@ export class NotificationDetailPage implements OnInit {
       this.router.navigate(['/notifications']);
       return;
     }
-    this.notifSvc.loadNotifications();
+    this.notifSvc.fetch();
   }
 
   deleteNotif(): void {

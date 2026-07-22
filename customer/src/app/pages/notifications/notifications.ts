@@ -27,7 +27,7 @@ export class NotificationsPage implements OnInit, OnDestroy {
   settings = this.notifSvc.settings;
 
   ngOnInit(): void {
-    this.notifSvc.loadNotifications();
+    this.notifSvc.fetch();
   }
 
   ngOnDestroy(): void {}
