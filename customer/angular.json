@@ -69,6 +69,7 @@
               "outputHashing": "all"
             },
             "mobile": {
+              "server": false,
               "outputMode": "static",
               "outputHashing": "all",
               "budgets": [

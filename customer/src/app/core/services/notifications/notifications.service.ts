@@ -2,6 +2,8 @@ import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
+import { Capacitor } from '@capacitor/core';
+import { LocalNotifications } from '@capacitor/local-notifications';
 import { environment } from '../../../../environments/environment';
 import { AuthStoreService } from '../../../services/auth-store/auth-store.service';
 
@@ -39,13 +41,11 @@ export class NotificationsService {
   private socket: Socket | null = null;
   get connected(): boolean { return this.socket?.connected ?? false; }
   private readonly SETTINGS_KEY = 'tafiya_notif_settings';
-  private audioUnlocked = false;
 
   notifications = signal<AppNotification[]>([]);
   settings = signal<NotificationSettings>(this.loadSettings());
   unreadCount = computed(() => this.notifications().filter(n => !n.isRead).length);
 
-  private audioCtx: AudioContext | null = null;
   private pollTimer: ReturnType<typeof setInterval> | null = null;
 
   constructor() {
@@ -56,6 +56,7 @@ export class NotificationsService {
 
   async init(): Promise<void> {
     await this.fetch();
+    this.requestLocalPermission();
     this.connect();
     this.startPolling();
   }
@@ -80,63 +81,29 @@ export class NotificationsService {
     } catch {}
   }
 
-  private getAudioCtx(): AudioContext {
-    if (!this.audioCtx) {
-      this.audioCtx = new AudioContext();
-    }
-    if (this.audioCtx.state === 'suspended') {
-      this.audioCtx.resume().catch(() => {});
-    }
-    return this.audioCtx;
-  }
+  private isNative = Capacitor.isNativePlatform();
 
-  unlockAudio(): void {
-    if (this.audioUnlocked) return;
+  private async showLocalNotification(n: AppNotification): Promise<void> {
+    if (!this.isNative || !this.settings().soundEnabled) return;
     try {
-      const ctx = this.getAudioCtx();
-      if (ctx.state === 'suspended') ctx.resume();
-      this.audioUnlocked = true;
-    } catch {}
-  }
-
-  playBookingSound(): void {
-    if (!this.settings().soundEnabled) return;
-    try {
-      const ctx = this.getAudioCtx();
-      [440, 550].forEach((freq, i) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.15);
-        gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.15);
-        gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + i * 0.15 + 0.05);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.15 + 0.4);
-        osc.start(ctx.currentTime + i * 0.15);
-        osc.stop(ctx.currentTime + i * 0.15 + 0.4);
+      const id = Array.from(n.id).reduce((acc, c) => acc + c.charCodeAt(0), 0) % 100000;
+      await LocalNotifications.schedule({
+        notifications: [{
+          id,
+          title: n.title,
+          body: n.body,
+          sound: 'default',
+          channelId: 'tafiya_notifications',
+        }],
       });
     } catch {}
   }
 
-  playAlertSound(type: 'success' | 'error'): void {
-    if (!this.settings().soundEnabled) return;
-    try {
-      const ctx = this.getAudioCtx();
-      const freqs = type === 'success' ? [523, 659, 784] : [300, 250];
-      freqs.forEach((freq, i) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.type = type === 'success' ? 'sine' : 'sawtooth';
-        osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.12);
-        gain.gain.setValueAtTime(0.4, ctx.currentTime + i * 0.12);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.12 + 0.35);
-        osc.start(ctx.currentTime + i * 0.12);
-        osc.stop(ctx.currentTime + i * 0.12 + 0.35);
-      });
-    } catch {}
+  private showBrowserNotification(n: AppNotification): void {
+    if (this.isNative) return;
+    if (!('Notification' in window)) return;
+    if (Notification.permission !== 'granted') return;
+    new Notification(n.title, { body: n.body, icon: '/customerLogo.png?v=4', tag: n.id });
   }
 
   private loadSettings(): NotificationSettings {
@@ -206,24 +173,9 @@ export class NotificationsService {
 
     this.socket.on('notification:new', (data: AppNotification) => {
       this.addFromWs(data);
-      if (data.type === 'BOOKING_CONFIRMED') {
-        this.playAlertSound('success');
-      } else if (data.type === 'PAYMENT_REJECTED' || data.type === 'BOOKING_CANCELLED') {
-        this.playAlertSound('error');
-      } else {
-        this.playBookingSound();
-      }
+      this.showLocalNotification(data);
       this.showBrowserNotification(data);
     });
-
-    const unlock = () => {
-      this.unlockAudio();
-      this.requestBrowserPermission();
-      document.removeEventListener('click', unlock, true);
-      document.removeEventListener('touchstart', unlock, true);
-    };
-    document.addEventListener('click', unlock, true);
-    document.addEventListener('touchstart', unlock, true);
   }
 
   disconnect(): void {
@@ -231,16 +183,24 @@ export class NotificationsService {
     this.socket = null;
   }
 
-  private showBrowserNotification(n: AppNotification): void {
-    if (!('Notification' in window)) return;
-    if (Notification.permission !== 'granted') return;
-    new Notification(n.title, { body: n.body, icon: '/customerLogo.png?v=4', tag: n.id });
-  }
-
   requestBrowserPermission(): void {
     if (!('Notification' in window)) return;
     if (Notification.permission === 'default') {
       Notification.requestPermission();
     }
+  }
+
+  async requestLocalPermission(): Promise<void> {
+    if (!this.isNative) return;
+    try {
+      await LocalNotifications.requestPermissions();
+      await LocalNotifications.createChannel({
+        id: 'tafiya_notifications',
+        name: 'إشعارات تفية',
+        sound: 'default',
+        importance: 4,
+        vibration: true,
+      });
+    } catch {}
   }
 }

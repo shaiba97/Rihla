@@ -13,7 +13,7 @@
     "apk": "npm run build:mobile && npx cap sync android && cd android && ./gradlew assembleDebug"
   },
   "private": true,
-  "packageManager": "npm@^11.12.0",
+  "packageManager": "npm@11.12.0",
   "dependencies": {
     "@angular/common": "^21.2.7",
     "@angular/compiler": "^21.2.7",
@@ -27,6 +27,7 @@
     "@capacitor/app": "^8.1.0",
     "@capacitor/core": "^8.3.3",
     "@capacitor/ios": "^8.3.3",
+    "@capacitor/local-notifications": "^8.2.1",
     "@capacitor/status-bar": "^8.0.2",
     "@lucide/angular": "^1.16.0",
     "express": "^5.1.0",
