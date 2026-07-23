@@ -102,7 +102,7 @@ export class Bookings implements OnInit, OnDestroy {
 
     const token = this.authStore.token();
     window.open(
-      environment.fileUrl + '/api-customer/tickets/view/' + booking.id + '?token=' + token,
+      environment.fileUrl + '/api-customer/tickets/pdf/' + booking.id + '?token=' + token,
       '_blank',
     );
   }
