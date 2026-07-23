@@ -23,7 +23,7 @@ export class WsService implements OnDestroy {
 
     this.socket = io(environment.wsUrl || undefined, {
       auth: { token },
-      transports: ['websocket', 'polling'],
+      transports: ['polling', 'websocket'],
     });
 
     this.socket.on('connect', () => {

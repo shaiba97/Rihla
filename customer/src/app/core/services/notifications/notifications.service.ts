@@ -193,7 +193,7 @@ export class NotificationsService {
     if (!user) return;
 
     this.socket = io(this.wsUrl, {
-      transports: ['websocket', 'polling'],
+      transports: ['polling', 'websocket'],
     });
 
     this.socket.on('connect', () => {
