@@ -8,6 +8,7 @@ import { SessionService } from '../../services/session/session.service';
 import { ArabicNumberPipe } from '../../pipes/arabic-number/arabic-number-pipe';
 import { formatArabicDateTime, formatArabicTime } from '../../pipes/arabic-number/arabic-number.util';
 import { AuthStoreService } from '../../services/auth-store/auth-store.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-payment-details',
@@ -100,7 +101,14 @@ export class PaymentDetails implements OnInit {
     this.contact.set(s.contact ?? null);
     this.passengers.set(s.passengers ?? []);
     this.sessionSvc.onExpire = () => {
-      this.router.navigate(['../seat', s.trip.id], { relativeTo: this.route });
+      const tripId = s.trip.id;
+      fetch(`${environment.apiUrl.customer}/bookings/unlock-seats`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tripId }),
+      }).catch(() => {}).finally(() => {
+        this.router.navigate(['../home'], { relativeTo: this.route });
+      });
     };
     this.bookingSvc.getActivePaymentAccounts().subscribe({
       next: (accounts: any[]) => {
