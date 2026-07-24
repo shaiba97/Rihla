@@ -8,7 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:customer": "node dist/customer/server/server.mjs",
-    "build:mobile": "ng build --configuration production,mobile && cp dist/customer/browser/index.csr.html dist/customer/browser/index.html",
+    "build:mobile": "node tools/set-env.js && ng build --configuration production,mobile",
     "cap:sync": "npx cap sync",
     "apk": "npm run build:mobile && npx cap sync android && cd android && ./gradlew assembleDebug"
   },

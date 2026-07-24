@@ -35,7 +35,9 @@
                 "app-customer-frontend.onrender.com",
                 "app-backend-gz2l.onrender.com",
                 "rihla-backend-rbh7.onrender.com",
-                "localhost"
+                "localhost",
+                "127.0.0.1",
+                "0.0.0.0"
               ]
             },
             "ssr": {

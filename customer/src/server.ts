@@ -12,6 +12,7 @@ const allowedHosts = [
   'app-backend-gz2l.onrender.com',
   'rihla-backend-rbh7.onrender.com',
   'localhost',
+  '127.0.0.1',
   '0.0.0.0',
 ];
 process.env['NG_ALLOWED_HOSTS'] = allowedHosts.join(',');
