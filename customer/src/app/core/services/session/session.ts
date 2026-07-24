@@ -102,10 +102,11 @@ export class SessionService implements OnDestroy {
   }
 
   private onSessionExpired(): void {
+    const onExpire = this._onExpire;
     this.stopTimer();
     this.clear();
-    if (this._onExpire) {
-      this._onExpire();
+    if (onExpire) {
+      onExpire();
     }
   }
 

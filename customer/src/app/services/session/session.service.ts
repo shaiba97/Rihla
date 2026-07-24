@@ -50,8 +50,9 @@ export class SessionService {
       const remaining = this._expiresAt - Date.now();
       this._remainingMs.set(Math.max(0, remaining));
       if (remaining <= 0) {
+        const onExpire = this._onExpire;
         this.clear();
-        this._onExpire?.();
+        onExpire?.();
       }
     };
     tick();
