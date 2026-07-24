@@ -59,22 +59,18 @@
             <span class="text-[12px] text-[var(--text-secondary)]">الزمن</span>
             <span class="text-[13px] font-semibold text-[var(--text-primary)]">{{ formattedTime() }}</span>
           </div>
-           <div class="flex items-center justify-between">
-             <span class="text-[12px] text-[var(--text-secondary)]">المقاعد</span>
-             <span class="text-[13px] font-semibold text-[var(--text-primary)]">{{ formattedSeats() | arabicNumber }}</span>
-           </div>
             <div class="flex items-center justify-between">
-               <span class="text-[12px] text-[var(--text-secondary)]">سعر التذكرة</span>
-               <span class="text-[13px] font-semibold text-[var(--text-primary)] tabular-nums">{{ (baseAmount() - platformFee()) * selectedSeats().length | arabicNumber }} <span class="text-[11px] font-medium">جنيه</span></span>
-             </div>
-            <div class="flex items-center justify-between">
-               <span class="text-[12px] text-[var(--text-secondary)]">رسوم المنصة</span>
-               <span class="text-[13px] font-semibold text-[var(--text-primary)] tabular-nums">{{ platformFee() * selectedSeats().length | arabicNumber }} <span class="text-[11px] font-medium">جنيه</span></span>
-             </div>
-            <div class="border-t border-[var(--border)] my-1 pt-2 flex items-center justify-between">
-              <span class="text-[13px] font-bold text-[var(--text-primary)]">الإجمالي</span>
-              <span class="text-[18px] font-extrabold text-[var(--primary)] tabular-nums">{{ totalAmount() | arabicNumber }} <span class="text-[11px] font-medium">جنيه</span></span>
+              <span class="text-[12px] text-[var(--text-secondary)]">رقم/ارقام المقعد</span>
+              <span class="text-[13px] font-semibold text-[var(--text-primary)]">{{ formattedSeats() | arabicNumber }}</span>
             </div>
+             <div class="flex items-center justify-between">
+                <span class="text-[12px] text-[var(--text-secondary)]">سعر التذكرة</span>
+                <span class="text-[13px] font-semibold text-[var(--text-primary)] tabular-nums">{{ trip().price | arabicNumber }} <span class="text-[11px] font-medium">جنيه</span></span>
+              </div>
+             <div class="border-t border-[var(--border)] my-1 pt-2 flex items-center justify-between">
+               <span class="text-[13px] font-bold text-[var(--text-primary)]">المجموع</span>
+               <span class="text-[18px] font-extrabold text-[var(--primary)] tabular-nums">{{ totalAmount() | arabicNumber }} <span class="text-[11px] font-medium">جنيه</span></span>
+             </div>
         </div>
 
         <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-4 flex flex-col gap-2">
