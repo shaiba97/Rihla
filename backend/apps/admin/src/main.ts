@@ -37,7 +37,12 @@ async function bootstrap() {
   );
 
   app.enableCors({
-    origin: corsOrigins.length > 0 ? corsOrigins : ['http://localhost:4200', 'http://localhost:4100', 'http://localhost:4000'],
+    origin: (origin: string | undefined, cb: (err: Error | null, allow?: boolean) => void) => {
+      if (!origin || origin.startsWith('http://localhost') || corsOrigins.includes(origin) || corsOrigins.length === 0)
+        cb(null, true);
+      else
+        cb(null, false);
+    },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     allowedHeaders: 'Content-Type, Authorization',
     credentials: true,
