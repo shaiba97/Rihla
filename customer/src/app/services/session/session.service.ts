@@ -3,7 +3,7 @@ import { environment } from '../../../environments/environment';
 import { BookingSession, ContactForm, PassengerForm } from '../../shared/booking-modal/booking-modal/booking.interfaces';
 
 const SESSION_KEY = 'tafiya_booking_session';
-const TIMEOUT_MS = 270000; // 4:30
+const TIMEOUT_MS = 240000; // 4:00
 
 @Injectable({ providedIn: 'root' })
 export class SessionService {

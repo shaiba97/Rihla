@@ -208,8 +208,9 @@ export class BookingModalComponent implements OnInit, OnDestroy {
     this.passengerFormValid.set(this.passengerForm.valid);
     this.passengerForm.statusChanges.subscribe(() => this.passengerFormValid.set(this.passengerForm.valid));
     this.sessionSvc.onExpire = () => {
-      this.currentStep.set('seat');
-      this.selectedSeats.set([]);
+      this.sessionSvc.releaseSeats();
+      this.router.navigate(['/home']);
+      this.closed.emit();
     };
     this.wsCleanups.push(this.ws.on('seat:updated', (data: any) => {
       if (data.tripId === this.tripId()) this.loadBookedSeats();
