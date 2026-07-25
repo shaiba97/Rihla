@@ -116,7 +116,10 @@ export class TripCardComponent {
   bookedSeats = signal<number[]>([]);
   platformFee = signal<number>(0);
 
-  displayPrice = computed(() => Number(this.trip().price ?? 0) + this.platformFee());
+  displayPrice = computed(() => {
+    const p = Number(this.trip().price ?? 0);
+    return p + Math.round(p * this.platformFee() / 100);
+  });
 
   ngOnInit(): void {
     this.getBookedSeats();
@@ -136,8 +139,8 @@ export class TripCardComponent {
   getActiveFee(){
     this.bookingService.getActiveFee().subscribe({
       next: (res: any) => {
-        const amount = Number(res?.amount ?? 0);
-        this.platformFee.set(amount);
+        const pct = Number(res?.percentage ?? 0);
+        this.platformFee.set(pct);
       },
       error: () => {},
     });

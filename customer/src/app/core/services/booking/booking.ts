@@ -365,7 +365,7 @@ export class BookingService {
     );
   }
 
-  getActiveFee(): Observable<{ amount: number; currency: string } | null> {
+  getActiveFee(): Observable<{ percentage: number } | null> {
     return this.http.get<any>(`${this.baseUrl}/active-fee`);
   }
 

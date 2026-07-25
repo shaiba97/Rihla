@@ -33,13 +33,12 @@ export class SelectSeat implements OnInit, OnDestroy {
   bookedSeats = signal<number[]>([]);
   selectedSeats = signal<number[]>([]);
   isLoading = signal<boolean>(true);
-  platformFee = signal<number>(0);
+  platformFeePct = signal<number>(0);
   showLoginPrompt = signal<boolean>(false);
 
-  platformFeeAmount = computed(() => this.platformFee());
-  baseAmount = computed(() => this.platformFeeAmount() + (this.trip()?.price ?? 0));
-
-  totalAmount = computed(() => this.selectedSeats().length * this.baseAmount());
+  baseAmount = computed(() => (this.trip()?.price ?? 0) * this.selectedSeats().length);
+  platformFeeAmount = computed(() => Math.round(this.baseAmount() * this.platformFeePct() / 100));
+  totalAmount = computed(() => this.baseAmount() + this.platformFeeAmount());
 
   seatMap = computed((): Seat[] => {
     const total = this.trip()?.busChairs ?? 45;
@@ -71,7 +70,7 @@ export class SelectSeat implements OnInit, OnDestroy {
     const nav = history.state?.trip;
     if (nav) this.trip.set(nav);
     this.bookingSvc.getActiveFee().subscribe(fee => {
-      if (fee) this.platformFee.set(Number(fee.amount));
+      if (fee) this.platformFeePct.set(Number(fee.percentage));
     });
     this.loadBookedSeats();
     this.sessionSvc.restoreFromStorage().then(state => {

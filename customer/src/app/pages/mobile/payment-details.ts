@@ -143,9 +143,8 @@ export class PaymentDetails implements OnInit {
     const formVal = this.paymentForm.value;
     const seatCount = selectedSeats.length;
     const tripPrice = Number(trip?.price ?? 0);
-    const perSeatFee = this.platformFee();
     const companyAmount = tripPrice * seatCount;
-    const platformFeeAmount = perSeatFee * seatCount;
+    const platformFeeAmount = this.platformFee();
     const totalAmount = companyAmount + platformFeeAmount;
 
     const selectedAccount = this.selectedAccount();

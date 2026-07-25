@@ -135,7 +135,10 @@ export class BookingModalComponent implements OnInit, OnDestroy {
     return this.contactFormValid() && this.passengerFormValid() && this.selectedSeats().length > 0;
   });
 
-  ticketPrice = computed(() => Number(this.price()) + this.platformFee());
+  ticketPrice = computed(() => {
+    const p = Number(this.price());
+    return p + Math.round(p * this.platformFee() / 100);
+  });
   totalPayment = computed(() => this.ticketPrice() * this.selectedSeats().length);
 
   whatsappMessage = computed(() => {
@@ -387,7 +390,7 @@ export class BookingModalComponent implements OnInit, OnDestroy {
           receiptFile: this.receiptFile() ?? undefined,
           totalAmount: this.totalPayment(),
           baseAmount: this.selectedSeats().length * this.price(),
-          platformFeeAmount: this.platformFee(),
+          platformFeeAmount: Math.round((this.selectedSeats().length * this.price()) * this.platformFee() / 100),
           currency: this.currency(),
         }).subscribe({
           next: () => {
