@@ -11,7 +11,9 @@
     "ios": "ng build && npx cap sync && npx cap open ios",
     "cap:sync": "npx cap sync",
     "cap:copy": "npx cap copy",
-    "serve:ssr:company": "node dist/company/server/server.mjs"
+    "serve:ssr:company": "node dist/company/server/server.mjs",
+    "build:customer": "cd customer && npm install && npm run build",
+    "serve:ssr:customer": "node customer/dist/customer/server/server.mjs"
   },
   "private": true,
   "packageManager": "npm@^11.12.0",
