@@ -73,12 +73,18 @@ export class BookingService {
         throw new BadRequestException('هذا المقعد محجوز بالفعل');
       }
 
+      const passengerData = (createBookingDto.passenger ?? [])
+        .filter((p: any) => p && p.name && p.age && p.gender)
+        .map((p: any) => ({ name: String(p.name), age: Number(p.age), gender: String(p.gender) }));
+
       const booking = await this.prisma.booking.create({
         data: {
-          ...createBookingDto,
+          tripId: createBookingDto.tripId,
           seatNumbers: sanitizedSeats,
           customerId: customerId,
-          passenger: createBookingDto.passenger as any,
+          passenger: passengerData as any,
+          passengerContact: createBookingDto.passengerContact,
+          status: createBookingDto.status,
         },
         include: {
           Trip: true,
@@ -190,12 +196,16 @@ export class BookingService {
         const seatCount = sanitizedSeats.length;
         const baseAmount = tripPrice * seatCount;
 
+        const passengerData = (dto.passenger ?? [])
+          .filter((p: any) => p && p.name && p.age && p.gender)
+          .map((p: any) => ({ name: String(p.name), age: Number(p.age), gender: String(p.gender) }));
+
         const booking = await tx.booking.create({
           data: {
             tripId: dto.tripId,
             customerId,
             seatNumbers: sanitizedSeats,
-            passenger: dto.passenger as any,
+            passenger: passengerData as any,
             passengerContact: dto.passengerContact,
             status: BookingStatus.PENDING,
           },
