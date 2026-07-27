@@ -107,7 +107,7 @@ export class BookingService {
         orderBy: { createdAt: 'desc' },
       });
 
-      const platformFeeRate = activeFee ? Number(activeFee.amount) : 0;
+      const platformFeeRate = activeFee ? Number(activeFee.percentage) : 0;
       const platformFeeAmount = platformFeeRate * seatCount;
       const totalAmount = baseAmount + platformFeeAmount;
 
@@ -118,7 +118,7 @@ export class BookingService {
           seatCount,
           baseAmount,
           platformFeeAmount,
-          platformFeeLabel: activeFee?.description || 'رسوم المنصة',
+          platformFeeLabel: activeFee?.label || 'رسوم المنصة',
           platformFeeRate,
           totalAmount,
           currency: trip.price ? 'جنيه' : 'جنيه',
@@ -216,7 +216,7 @@ export class BookingService {
           orderBy: { createdAt: 'desc' },
         });
 
-        const platformFeeRate = activeFee ? Number(activeFee.amount) : 0;
+        const platformFeeRate = activeFee ? Number(activeFee.percentage) : 0;
         const platformFeeAmount = platformFeeRate * seatCount;
         const serverCompanyAmount = baseAmount;
         const serverTotalAmount = baseAmount + platformFeeAmount;

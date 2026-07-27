@@ -77,7 +77,7 @@ export class PaymentService {
       orderBy: { createdAt: 'desc' },
     });
 
-    const platformFeeRate = activeFee ? Number(activeFee.amount) : 0;
+    const platformFeeRate = activeFee ? Number(activeFee.percentage) : 0;
     const platformFeeAmount = platformFeeRate * seatCount;
     const serverCompanyAmount = baseAmount;
     const serverTotalAmount = baseAmount + platformFeeAmount;
