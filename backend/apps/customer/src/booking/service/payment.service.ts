@@ -78,7 +78,7 @@ export class PaymentService {
     });
 
     const platformFeeRate = activeFee ? Number(activeFee.percentage) : 0;
-    const platformFeeAmount = platformFeeRate * seatCount;
+    const platformFeeAmount = Math.round((baseAmount * platformFeeRate) / 100);
     const serverCompanyAmount = baseAmount;
     const serverTotalAmount = baseAmount + platformFeeAmount;
 
