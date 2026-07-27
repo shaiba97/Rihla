@@ -31,15 +31,23 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/responsive/profile').then(m => m.ResponsiveProfile),
       },
       {
+        path: 'awards/pack/:packId',
+        loadComponent: () => import('./pages/awards/pack-detail/pack-detail').then(m => m.PackDetailComponent),
+      },
+      {
         path: 'notifications',
         loadComponent: () => import('./pages/notifications/notifications').then(m => m.NotificationsPage),
       },
-      {
-        path: 'notifications/:id',
-        loadComponent: () => import('./pages/notification-detail/notification-detail').then(m => m.NotificationDetailPage),
-      },
-      {
-        path: 'blogs',
+          {
+            path: 'awards/pack/:packId',
+            loadComponent: () => import('./pages/awards/pack-detail/pack-detail').then(m => m.PackDetailComponent),
+          },
+          {
+            path: 'notifications',
+            loadComponent: () => import('./pages/notifications/notifications').then(m => m.NotificationsPage),
+          },
+          {
+            path: 'blogs',
         loadComponent: () => import('./pages/blog/blog').then(m => m.BlogComponent),
       },
       {
@@ -79,6 +87,10 @@ export const routes: Routes = [
           {
             path: 'profile',
             loadComponent: () => import('./pages/mobile/profile/profile').then(m => m.Profile),
+          },
+          {
+            path: 'awards/pack/:packId',
+            loadComponent: () => import('./pages/awards/pack-detail/pack-detail').then(m => m.PackDetailComponent),
           },
           {
             path: 'notifications',

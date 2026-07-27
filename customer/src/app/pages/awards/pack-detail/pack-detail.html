@@ -1,0 +1,93 @@
+<div dir="rtl" class="min-h-[calc(100vh-4rem)] bg-[var(--bg-base)]">
+  <div class="max-w-2xl mx-auto px-4 md:px-6 py-6 md:py-8 flex flex-col gap-5">
+    <button (click)="goBack()" class="flex items-center gap-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition w-fit">
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      العودة
+    </button>
+
+    @if (loading()) {
+      <div class="flex items-center justify-center py-16">
+        <div class="w-6 h-6 border-2 border-[var(--primary)] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    } @else if (packDetail()) {
+      <div class="bg-[var(--bg-card)] rounded-3xl border border-[var(--border)] p-5 md:p-6 flex flex-col gap-4">
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 rounded-2xl bg-[var(--primary-light)] flex items-center justify-center text-2xl">{{ packDetail()!.icon || '🏆' }}</div>
+          <div class="flex flex-col">
+            <h1 class="text-xl font-extrabold text-[var(--text-primary)]">{{ packDetail()!.title }}</h1>
+            @if (packDetail()!.description) {
+              <p class="text-sm text-[var(--text-secondary)]">{{ packDetail()!.description }}</p>
+            }
+          </div>
+        </div>
+        <div class="flex items-center justify-between px-4 py-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border)]">
+          <span class="text-sm text-[var(--text-secondary)]">قيمة المكافأة</span>
+          <span class="text-lg font-extrabold text-[var(--text-primary)] tabular-nums">{{ formatAmount(packDetail()!.awardValue) }} ج</span>
+        </div>
+        <div class="flex items-center justify-between px-4 py-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border)]">
+          <span class="text-sm text-[var(--text-secondary)]">الحد الأدنى للحجوزات</span>
+          <span class="text-base font-bold text-[var(--text-primary)] tabular-nums">{{ toArabic(packDetail()!.minBookings) }}</span>
+        </div>
+        <div class="flex items-center justify-between px-4 py-3 rounded-xl bg-[var(--bg-base)] border border-[var(--border)]">
+          <span class="text-sm text-[var(--text-secondary)]">حجوزاتك الحالية</span>
+          <span class="text-base font-bold text-[var(--text-primary)] tabular-nums">{{ toArabic(totalBookings()) }}</span>
+        </div>
+      </div>
+
+      @if (error()) {
+        <div class="px-4 py-3 rounded-2xl bg-red-50 border border-red-200 text-sm font-semibold text-red-600">{{ error() }}</div>
+      }
+
+      <div class="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 flex items-start gap-3">
+        <svg class="w-5 h-5 flex-shrink-0 mt-0.5 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <p class="text-sm text-amber-800 leading-relaxed">سيتم مراجعة طلب صرف المكافأة خلال أسبوع من تاريخ التقديم. في حال القبول، سيتم إضافة المبلغ إلى محفظتك.</p>
+      </div>
+
+      @if (awards().length > 0) {
+        <div class="bg-[var(--bg-card)] rounded-3xl border border-[var(--border)] overflow-hidden">
+          <div class="px-5 py-4 border-b border-[var(--border)]">
+            <h2 class="text-base font-bold text-[var(--text-primary)]">سجل المكافآت</h2>
+          </div>
+          <div class="flex flex-col divide-y divide-[var(--border)]">
+            @for (a of awards(); track a.id) {
+              <div class="px-5 py-4 flex items-center justify-between">
+                <div class="flex flex-col">
+                  <span class="text-sm font-bold text-[var(--text-primary)]">{{ a.pack.title }}</span>
+                  <span class="text-xs text-[var(--text-secondary)]">{{ fmtDate(a.createdAt) }}</span>
+                </div>
+                <span class="text-[11px] font-bold px-2.5 py-1 rounded-full"
+                  [class.bg-emerald-100]="a.status === 'APPROVED'"
+                  [class.text-emerald-700]="a.status === 'APPROVED'"
+                  [class.bg-amber-100]="a.status === 'PENDING'"
+                  [class.text-amber-700]="a.status === 'PENDING'"
+                  [class.bg-red-100]="a.status === 'REJECTED'"
+                  [class.text-red-600]="a.status === 'REJECTED'">
+                  {{ statusLabel(a.status) }}
+                </span>
+              </div>
+            }
+          </div>
+        </div>
+      } @else {
+        <div class="bg-[var(--bg-card)] rounded-3xl border border-[var(--border)] p-6 flex flex-col items-center gap-2 text-center">
+          <svg class="w-10 h-10 opacity-30 text-[var(--text-muted)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.5 14a7.5 7.5 0 0 0-5 0"/><path d="m8 21 4-4 4 4"/></svg>
+          <p class="text-sm text-[var(--text-secondary)]">لم يتم تقديم طلب بعد</p>
+        </div>
+      }
+
+      @if (packDetail()!.eligible && !packDetail()!.earned && !packDetail()!.pending) {
+        <button (click)="requestAward()" [disabled]="requesting()"
+          class="flex items-center justify-center gap-2 w-full py-4 rounded-2xl bg-[var(--primary)] text-white font-bold text-sm active:scale-[0.98] transition-all"
+          [class.opacity-60]="requesting()">
+          @if (requesting()) {
+            <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            <span>جاري التقديم...</span>
+          } @else {
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            <span>تقديم طلب صرف المكافأة</span>
+          }
+        </button>
+      }
+    }
+  </div>
+</div>
