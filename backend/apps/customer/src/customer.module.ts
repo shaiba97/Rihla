@@ -6,11 +6,12 @@ import { UsersModule } from './users/users.module';
 import { BookingModule } from './booking/booking.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { BlogModule } from './blog/blog.module';
+import { TicketsModule } from './tickets/tickets.module';
 import { TafiyaWsModule } from '@app/websocket';
 import { MulterExceptionFilter } from './filters/multer-exception.filter';
 
 @Module({
-  imports: [UsersModule, BookingModule, NotificationsModule, BlogModule, TafiyaWsModule],
+  imports: [UsersModule, BookingModule, NotificationsModule, BlogModule, TicketsModule, TafiyaWsModule],
   controllers: [CustomerController],
   providers: [
     CustomerService,
