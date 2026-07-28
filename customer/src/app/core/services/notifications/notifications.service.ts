@@ -199,9 +199,9 @@ export class NotificationsService {
     });
 
     this.socket.on('connect', () => {
-      this.socket!.emit('join:room', { room: `customer:${user.id}` });
+      this.socket!.emit('join:room', `customer:${user.id}`);
       if (user.role === 'ADMIN') {
-        this.socket!.emit('join:room', { room: 'admin' });
+        this.socket!.emit('join:room', 'admin');
       }
       this.fetch();
     });
