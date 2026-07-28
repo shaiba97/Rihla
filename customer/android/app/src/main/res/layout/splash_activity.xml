@@ -23,14 +23,14 @@
     android:layout_gravity="center"
     android:layout_marginBottom="60dp"
     android:src="@drawable/customer_logo"
-    android:contentDescription="رحلة"/>
+    android:contentDescription="تفية"/>
 
   <TextView
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:layout_marginTop="80dp"
-    android:text="رحلة"
+    android:text="تفية"
     android:textColor="#0D9488"
     android:textSize="40sp"
     android:textStyle="bold"
