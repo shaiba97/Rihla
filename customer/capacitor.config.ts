@@ -1,4 +1,3 @@
-// capacitor.config.ts
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
@@ -16,6 +15,10 @@ const config: CapacitorConfig = {
       style: 'DARK',
       backgroundColor: '#0D9488',
       overlaysWebView: false
+    },
+    SplashScreen: {
+      launchShowDuration: 0,
+      launchAutoHide: true,
     }
   },
   android: {
