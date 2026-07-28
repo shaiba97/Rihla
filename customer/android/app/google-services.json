@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "269772285788",
+    "project_id": "tafiya-notifications",
+    "storage_bucket": "tafiya-notifications.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:269772285788:android:5ff0c444db959e01054399",
+        "android_client_info": {
+          "package_name": "com.tafiya.com"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBdimJ4Ttwq3dUxdRHWSqnLFbV0U9eBGTw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

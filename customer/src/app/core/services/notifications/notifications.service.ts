@@ -4,8 +4,10 @@ import { firstValueFrom } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 import { Capacitor } from '@capacitor/core';
 import { LocalNotifications } from '@capacitor/local-notifications';
+import { PushNotifications } from '@capacitor/push-notifications';
 import { environment } from '../../../../environments/environment';
 import { AuthStoreService } from '../../../services/auth-store/auth-store.service';
+import { AudioService } from '../../../services/audio.service';
 
 export interface AppNotification {
   id: string;
@@ -15,6 +17,7 @@ export interface AppNotification {
   data?: Record<string, any>;
   isRead: boolean;
   createdAt: string;
+  hasSound?: boolean;
 }
 
 export interface NotificationSettings {
@@ -35,6 +38,7 @@ const DEFAULT_SETTINGS: NotificationSettings = {
 export class NotificationsService {
   private http = inject(HttpClient);
   private auth = inject(AuthStoreService);
+  private audio = inject(AudioService);
   private api = environment.apiUrl.customer;
   private wsUrl = environment.wsUrl;
 
@@ -57,6 +61,7 @@ export class NotificationsService {
   async init(): Promise<void> {
     await this.fetch();
     this.requestLocalPermission();
+    this.registerPush();
     this.connect();
     this.startPolling();
   }
@@ -106,6 +111,33 @@ export class NotificationsService {
     new Notification(n.title, { body: n.body, icon: '/customerLogo.png?v=4', tag: n.id });
   }
 
+  private async registerPush(): Promise<void> {
+    if (!this.isNative) return;
+    try {
+      const perm = await PushNotifications.requestPermissions();
+      if (perm.receive !== 'granted') return;
+      await PushNotifications.register();
+      PushNotifications.addListener('registration', (token) => {
+        const platform = Capacitor.getPlatform();
+        firstValueFrom(this.http.post(`${this.api}/notifications/device-token`, {
+          token: token.value,
+          platform,
+        })).catch(() => {});
+      });
+      PushNotifications.addListener('pushNotificationReceived', () => {});
+    } catch {}
+  }
+
+  async unregisterPush(): Promise<void> {
+    if (!this.isNative) return;
+    try {
+      const token = (await PushNotifications.getDeliveredNotifications()).notifications;
+      await firstValueFrom(
+        this.http.delete(`${this.api}/notifications/device-token/clear-all`),
+      ).catch(() => {});
+    } catch {}
+  }
+
   private loadSettings(): NotificationSettings {
     try {
       const raw = localStorage.getItem(this.SETTINGS_KEY);
@@ -150,6 +182,9 @@ export class NotificationsService {
   }
 
   private addFromWs(n: AppNotification): void {
+    if (this.settings().soundEnabled && n.hasSound !== false) {
+      this.audio.playNotification();
+    }
     this.notifications.update(list => [n, ...list].slice(0, 50));
   }
 

@@ -1,7 +1,7 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.rihla.app',
+  appId: 'com.tafiya.com',
   appName: 'تفية',
   webDir: 'dist/customer/browser',
   server: {
@@ -19,6 +19,9 @@ const config: CapacitorConfig = {
     SplashScreen: {
       launchShowDuration: 0,
       launchAutoHide: true,
+    },
+    PushNotifications: {
+      presentationOptions: ['alert', 'sound', 'badge'],
     }
   },
   android: {
