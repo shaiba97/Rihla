@@ -1,5 +1,19 @@
 
+@if (!splashDone()) {
+  <app-splash-screen (done)="onSplashDone()" />
+}
 
-<main class="min-h-screen bg-[var(--bg-base)]">
-  <router-outlet />
-</main>
+@if (showOnboarding()) {
+  <app-onboarding-screen (done)="showOnboarding.set(false)" />
+}
+
+@if (splashDone() && !showOnboarding()) {
+  <div
+    [style.visibility]="'visible'"
+    [style.opacity]="'1'"
+  >
+    <main class="min-h-screen bg-[var(--bg-base)]">
+      <router-outlet />
+    </main>
+  </div>
+}
