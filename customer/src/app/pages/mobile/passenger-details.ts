@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit, computed } from '@angular/core';
+import { Component, signal, inject, OnInit, OnDestroy, computed } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormArray, ReactiveFormsModule, Validators, AbstractControl } from '@angular/forms';
@@ -14,12 +14,14 @@ import { AuthStoreService } from '../../services/auth-store/auth-store.service';
   imports: [ReactiveFormsModule, NgClass, ArabicNumberPipe, LucideArrowRight, LucideUser, LucideSmartphone, LucideAlertCircle, LucideLogIn],
   templateUrl: './passenger-details.html',
 })
-export class PassengerDetails implements OnInit {
+export class PassengerDetails implements OnInit, OnDestroy {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private fb = inject(FormBuilder);
   private sessionSvc = inject(SessionService);
   private authStore = inject(AuthStoreService);
+
+  private onPop = (): void => { this.sessionSvc.exit(this.trip()?.id); };
 
   trip = signal<any>(null);
   selectedSeats = signal<number[]>([]);
@@ -43,6 +45,7 @@ export class PassengerDetails implements OnInit {
       this.showLoginPrompt.set(true);
       return;
     }
+    window.addEventListener('popstate', this.onPop);
     const s = history.state;
     this.trip.set(s?.trip);
     this.selectedSeats.set(s?.selectedSeats ?? []);
@@ -67,6 +70,10 @@ export class PassengerDetails implements OnInit {
     if (!this.canProceed()) return;
     await this.sessionSvc.updateStep('payment');
     this.router.navigate(['../payment'], { relativeTo: this.route, state: { trip: this.trip(), selectedSeats: this.selectedSeats(), baseAmount: this.baseAmount(), platformFee: this.platformFee(), totalAmount: this.totalAmount(), contact: this.contactGroup.value, passengers: this.passengersArray.value } });
+  }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('popstate', this.onPop);
   }
 
   goToLogin(): void {

@@ -2,10 +2,11 @@ import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { SplashScreen } from './shared/splash-screen/splash-screen';
 import { OnboardingScreen } from './shared/onboarding-screen/onboarding-screen';
+import { OfflineScreen } from './shared/offline-screen/offline-screen';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, SplashScreen, OnboardingScreen],
+  imports: [RouterOutlet, SplashScreen, OnboardingScreen, OfflineScreen],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

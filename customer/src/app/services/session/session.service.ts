@@ -167,6 +167,23 @@ export class SessionService {
     this._session.set({ ...s, passengers });
   }
 
+  readonly exitWarning = signal<string | null>(null);
+
+  async exit(tripId?: string): Promise<void> {
+    const id = tripId || this._tripId;
+    if (id) {
+      try {
+        await fetch(`${this.apiUrl}/bookings/unlock-seats`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...this.authHeader() },
+          body: JSON.stringify({ tripId: id }),
+        });
+      } catch { /* ignore */ }
+    }
+    this.exitWarning.set('يُرجى إكمال الحجز حتى النهاية عند العودة لتجنب فقدان المقعد');
+    this.clear();
+  }
+
   clear(): void {
     if (this._timerInterval !== null) {
       clearInterval(this._timerInterval);

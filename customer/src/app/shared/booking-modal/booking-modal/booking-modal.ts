@@ -346,7 +346,7 @@ export class BookingModalComponent implements OnInit, OnDestroy {
   }
 
   onClose(): void {
-    this.sessionSvc.clear();
+    this.sessionSvc.exit(this.tripId());
     this.closed.emit();
   }
 

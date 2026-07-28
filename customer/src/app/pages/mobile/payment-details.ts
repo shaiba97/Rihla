@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit, computed } from '@angular/core';
+import { Component, signal, inject, OnInit, OnDestroy, computed } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -15,13 +15,15 @@ import { environment } from '../../../environments/environment';
   imports: [ReactiveFormsModule, ArabicNumberPipe, LucideArrowRight, LucideClock, LucideUpload, LucideCreditCard, LucideCopy, LucideCheck, LucideLogIn, LucideCheckCircle],
   templateUrl: './payment-details.html',
 })
-export class PaymentDetails implements OnInit {
+export class PaymentDetails implements OnInit, OnDestroy {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private fb = inject(FormBuilder);
   private bookingSvc = inject(BookingService);
   private sessionSvc = inject(SessionService);
   private authStore = inject(AuthStoreService);
+
+  private onPop = (): void => { this.sessionSvc.exit(this.trip()?.id); };
 
   trip = signal<any>(null);
   selectedSeats = signal<number[]>([]);
@@ -88,6 +90,7 @@ export class PaymentDetails implements OnInit {
       this.showLoginPrompt.set(true);
       return;
     }
+    window.addEventListener('popstate', this.onPop);
     const s = history.state;
     if (!s?.trip || !s?.selectedSeats) {
       this.router.navigate(['../home'], { relativeTo: this.route });
@@ -102,13 +105,8 @@ export class PaymentDetails implements OnInit {
     this.passengers.set(s.passengers ?? []);
     this.sessionSvc.onExpire = () => {
       const tripId = s.trip.id;
-      fetch(`${environment.apiUrl.customer}/bookings/unlock-seats`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tripId }),
-      }).catch(() => {}).finally(() => {
-        this.router.navigate(['../home'], { relativeTo: this.route });
-      });
+      this.sessionSvc.exit(tripId);
+      this.router.navigate(['../home'], { relativeTo: this.route });
     };
     this.bookingSvc.getActivePaymentAccounts().subscribe({
       next: (accounts: any[]) => {
@@ -172,10 +170,16 @@ export class PaymentDetails implements OnInit {
     });
   }
 
+  ngOnDestroy(): void {
+    window.removeEventListener('popstate', this.onPop);
+  }
+
   goToLogin(): void {
+    this.sessionSvc.exit(this.trip()?.id);
     this.router.navigate(['/login']);
   }
   goHome(): void {
+    this.sessionSvc.exit(this.trip()?.id);
     this.router.navigate(['/home']);
   }
 

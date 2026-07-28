@@ -28,6 +28,9 @@ export class SelectSeat implements OnInit, OnDestroy {
 
   private _tripId = '';
   private wsCleanups: (() => void)[] = [];
+  private onPop = (): void => { this.sessionSvc.exit(this._tripId); };
+
+  exitWarning = this.sessionSvc.exitWarning;
 
   trip = signal<any>(null);
   bookedSeats = signal<number[]>([]);
@@ -81,6 +84,8 @@ export class SelectSeat implements OnInit, OnDestroy {
     this.wsCleanups.push(this.ws.on('seat:updated', (data: any) => {
       if (data.tripId === this._tripId) this.loadBookedSeats();
     }));
+    window.addEventListener('popstate', this.onPop);
+    if (this._tripId) this.sessionSvc.exitWarning.set(null);
   }
 
   private loadBookedSeats(): void {
@@ -92,6 +97,7 @@ export class SelectSeat implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.wsCleanups.forEach(fn => fn());
+    window.removeEventListener('popstate', this.onPop);
   }
 
   async toggleSeat(seat: Seat): Promise<void> {
@@ -128,5 +134,8 @@ export class SelectSeat implements OnInit, OnDestroy {
   goToLogin(): void {
     this.router.navigate(['/login']);
   }
-  goBack(): void { history.back(); }
+  goBack(): void {
+    this.sessionSvc.exit(this._tripId);
+    this.router.navigate(['/home']);
+  }
 }
