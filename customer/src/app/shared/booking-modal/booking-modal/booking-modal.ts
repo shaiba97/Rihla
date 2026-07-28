@@ -135,10 +135,7 @@ export class BookingModalComponent implements OnInit, OnDestroy {
     return this.contactFormValid() && this.passengerFormValid() && this.selectedSeats().length > 0;
   });
 
-  ticketPrice = computed(() => {
-    const p = Number(this.price());
-    return p + Math.round(p * this.platformFee() / 100);
-  });
+  ticketPrice = computed(() => Number(this.price()));
   totalPayment = computed(() => this.ticketPrice() * this.selectedSeats().length);
 
   whatsappMessage = computed(() => {

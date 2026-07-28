@@ -38,7 +38,7 @@ export class SelectSeat implements OnInit, OnDestroy {
 
   baseAmount = computed(() => (this.trip()?.price ?? 0) * this.selectedSeats().length);
   platformFeeAmount = computed(() => Math.round(this.baseAmount() * this.platformFeePct() / 100));
-  totalAmount = computed(() => this.baseAmount() + this.platformFeeAmount());
+  totalAmount = computed(() => this.baseAmount());
 
   seatMap = computed((): Seat[] => {
     const total = this.trip()?.busChairs ?? 45;

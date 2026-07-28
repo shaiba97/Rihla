@@ -3,8 +3,8 @@
   <color name="colorPrimary">#0D9488</color>
   <color name="colorPrimaryDark">#0F766E</color>
   <color name="colorAccent">#5EEAD4</color>
-  <color name="splash_bg">#0A0F0D</color>
+  <color name="splash_bg">#FFFFFF</color>
   <color name="splash_primary">#0D9488</color>
-  <color name="splash_text">#F0FDFA</color>
-  <color name="splash_muted">#5EEAD4</color>
+  <color name="splash_text">#0D9488</color>
+  <color name="splash_muted">#64748B</color>
 </resources>

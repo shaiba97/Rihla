@@ -74,8 +74,8 @@ export class TicketsController {
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     font-family: system-ui, -apple-system, sans-serif;
-    background: #f1f5f9;
-    color: #1e293b;
+    background: #f4f4f4;
+    color: #134E4A;
     padding: 16px;
     display: flex;
     justify-content: center;
@@ -89,7 +89,7 @@ export class TicketsController {
     box-shadow: 0 4px 24px rgba(0,0,0,0.08);
   }
   .header {
-    background: #4F46E5;
+    background: #0D9488;
     color: #fff;
     padding: 20px;
     text-align: center;
@@ -97,14 +97,14 @@ export class TicketsController {
   .header h1 { font-size: 20px; font-weight: 800; }
   .header p { font-size: 12px; opacity: 0.85; margin-top: 4px; }
   .body { padding: 16px 20px; }
-  .row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e2e8f0; font-size: 13px; }
+  .row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #CCFBF1; font-size: 13px; }
   .row:last-child { border-bottom: none; }
-  .label { color: #64748b; }
+  .label { color: #0F766E; }
   .value { font-weight: 600; text-align: left; }
-  .section-title { font-size: 14px; font-weight: 700; color: #4F46E5; margin: 12px 0 8px; }
-  .passenger { background: #f8fafc; border-radius: 12px; padding: 10px 14px; margin-bottom: 8px; }
-  .passenger .row { border-bottom-color: #e2e8f0; padding: 4px 0; }
-  .footer { background: #f1f5f9; padding: 12px 20px; text-align: center; font-size: 11px; color: #94a3b8; }
+  .section-title { font-size: 14px; font-weight: 700; color: #0D9488; margin: 12px 0 8px; }
+  .passenger { background: #CCFBF1; border-radius: 12px; padding: 10px 14px; margin-bottom: 8px; }
+  .passenger .row { border-bottom-color: #CCFBF1; padding: 4px 0; }
+  .footer { background: #f4f4f4; padding: 12px 20px; text-align: center; font-size: 11px; color: #0F766E; }
   .badge {
     display: inline-block;
     padding: 2px 10px;
@@ -112,8 +112,8 @@ export class TicketsController {
     font-size: 11px;
     font-weight: 700;
   }
-  .badge-success { background: #dcfce7; color: #166534; }
-  .amount { font-size: 16px; font-weight: 800; color: #4F46E5; }
+  .badge-success { background: #CCFBF1; color: #0D9488; }
+  .amount { font-size: 16px; font-weight: 800; color: #0D9488; }
 </style>
 </head>
 <body>

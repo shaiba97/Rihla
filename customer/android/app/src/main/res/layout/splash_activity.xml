@@ -3,7 +3,7 @@
   xmlns:android="http://schemas.android.com/apk/res/android"
   android:layout_width="match_parent"
   android:layout_height="match_parent"
-  android:background="#0A0F0D">
+  android:background="#FFFFFF">
 
   <View
     android:layout_width="280dp"
@@ -22,7 +22,7 @@
     android:layout_height="100dp"
     android:layout_gravity="center"
     android:layout_marginBottom="60dp"
-    android:src="@drawable/splash_logo"
+    android:src="@drawable/customer_logo"
     android:contentDescription="رحلة"/>
 
   <TextView
@@ -31,7 +31,7 @@
     android:layout_gravity="center"
     android:layout_marginTop="80dp"
     android:text="رحلة"
-    android:textColor="#F0FDFA"
+    android:textColor="#0D9488"
     android:textSize="40sp"
     android:textStyle="bold"
     android:fontFamily="sans-serif"
@@ -44,7 +44,7 @@
     android:layout_gravity="center"
     android:layout_marginTop="140dp"
     android:text="النقل البري في السودان"
-    android:textColor="#5EEAD4"
+    android:textColor="#64748B"
     android:textSize="14sp"
     android:fontFamily="sans-serif"
     android:gravity="center"

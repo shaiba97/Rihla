@@ -17,10 +17,11 @@
     <item name="android:background">@drawable/splash</item>
   </style>
 
-  <style name="Theme.App.SplashScreen" parent="Theme.AppCompat.NoActionBar">
-    <item name="android:windowBackground">@color/splash_bg</item>
-    <item name="android:statusBarColor">@color/splash_bg</item>
-    <item name="android:navigationBarColor">@color/splash_bg</item>
+  <style name="Theme.App.SplashScreen" parent="Theme.AppCompat.Light.NoActionBar">
+    <item name="android:windowBackground">@android:color/white</item>
+    <item name="android:statusBarColor">@android:color/white</item>
+    <item name="android:navigationBarColor">@android:color/white</item>
+    <item name="android:windowLightStatusBar">true</item>
     <item name="android:windowFullscreen">true</item>
   </style>
 </resources>
