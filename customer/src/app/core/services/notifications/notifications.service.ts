@@ -51,6 +51,7 @@ export class NotificationsService {
   unreadCount = computed(() => this.notifications().filter(n => !n.isRead).length);
 
   private pollTimer: ReturnType<typeof setInterval> | null = null;
+  private nativeInitialized = false;
 
   constructor() {
     if (typeof window !== 'undefined') {
@@ -195,7 +196,11 @@ export class NotificationsService {
     if (!user) return;
 
     this.socket = io(this.wsUrl, {
-      transports: ['polling', 'websocket'],
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 10000,
     });
 
     this.socket.on('connect', () => {
@@ -204,6 +209,12 @@ export class NotificationsService {
         this.socket!.emit('join:room', 'admin');
       }
       this.fetch();
+      this.startPolling();
+      if (!this.nativeInitialized && this.isNative) {
+        this.nativeInitialized = true;
+        this.requestLocalPermission();
+        this.registerPush();
+      }
     });
 
     this.socket.on('notification:new', (data: AppNotification) => {
@@ -216,6 +227,12 @@ export class NotificationsService {
   disconnect(): void {
     this.socket?.disconnect();
     this.socket = null;
+    this.stopPolling();
+  }
+
+  reconnect(): void {
+    this.disconnect();
+    this.connect();
   }
 
   requestBrowserPermission(): void {
