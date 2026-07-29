@@ -49,7 +49,7 @@ export class MobileShell implements OnInit, OnDestroy {
   });
   isProfileActive = computed(() => {
     const url = this.currentUrl();
-    return url.startsWith('/m/profile') || url.startsWith('/m/login') || url.startsWith('/m/register');
+    return url.startsWith('/m/profile') || url.startsWith('/m/awards') || url.startsWith('/m/login') || url.startsWith('/m/register');
   });
   isNotifsActive = computed(() => {
     const url = this.currentUrl();
