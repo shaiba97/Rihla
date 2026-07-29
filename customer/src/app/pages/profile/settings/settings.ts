@@ -22,7 +22,7 @@ export class ProfileSettings {
   saveError = signal('');
   saveSuccess = signal('');
 
-  back() { this.router.navigate(['/m/profile']); }
+  back() { this.router.navigate([this.router.url.startsWith('/m/') ? '/m/profile' : '/profile']); }
 
   startEdit() {
     this.editName.set(this.customerName());

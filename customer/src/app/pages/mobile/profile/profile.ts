@@ -18,9 +18,11 @@ export class Profile {
   showConfirmDelete = signal<boolean>(false);
   deleteError = signal<string>('');
 
-  goToAwards() { this.router.navigate(['/m/awards']); }
-  goToSettings() { this.router.navigate(['/m/profile/settings']); }
-  login(): void { this.router.navigate(['/m/login']); }
+  private p = (path: string) => this.router.url.startsWith('/m/') ? `/m${path}` : path;
+
+  goToAwards() { this.router.navigate([this.p('/awards')]); }
+  goToSettings() { this.router.navigate([this.p('/profile/settings')]); }
+  login(): void { this.router.navigate([this.p('/login')]); }
   logout(): void { this.authStore.logout(); }
 
   openDeleteConfirm(): void { this.showConfirmDelete.set(true); this.deleteError.set(''); }
