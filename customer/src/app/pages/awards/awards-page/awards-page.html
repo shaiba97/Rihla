@@ -1,0 +1,40 @@
+<div dir="rtl" class="min-h-[calc(100vh-4rem)] bg-[var(--bg-base)]">
+  <div class="max-w-4xl mx-auto px-4 md:px-6 py-6 md:py-8">
+    <button (click)="back()" class="flex items-center gap-1.5 text-sm font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors mb-4">
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      <span>العودة</span>
+    </button>
+
+    <h1 class="text-2xl font-extrabold text-[var(--text-primary)] mb-6">المكافآت</h1>
+
+    @if (loading()) {
+      <div class="flex items-center justify-center py-16">
+        <div class="w-6 h-6 border-2 border-[var(--primary)] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    } @else if (packs().length === 0) {
+      <p class="text-sm text-[var(--text-secondary)] text-center py-8">لا توجد مكافآت متاحة حالياً</p>
+    } @else {
+      <div dir="ltr" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        @for (pack of packs(); track pack.id) {
+          <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-4 flex flex-col gap-3">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-lg bg-[var(--primary-light)] flex items-center justify-center flex-shrink-0">
+                <span class="text-sm" [innerHTML]="pack.icon"></span>
+              </div>
+              <span class="text-sm font-bold text-[var(--text-primary)]">{{ pack.title }}</span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span class="text-xl font-extrabold text-[var(--text-primary)] tabular-nums">{{ formatAmount(pack.awardValue) }}</span>
+              <span class="text-xs font-medium text-[var(--text-secondary)]">ج.س</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-xs text-[var(--text-secondary)]">يحتاج</span>
+              <span class="text-sm font-bold text-[var(--text-primary)] tabular-nums">{{ toArabic(pack.minBookings) }}</span>
+              <span class="text-xs text-[var(--text-secondary)]">حجز</span>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>
