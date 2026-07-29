@@ -16,8 +16,10 @@ export class ProfileSettings {
   customerPhone = computed(() => this.authStore.customerPhone());
   customerEmail = computed(() => this.authStore.customerEmail());
 
-  editMode = signal(false);
   editName = signal('');
+  editPhone = signal('');
+  editEmail = signal('');
+  editMode = signal(false);
   isSaving = signal(false);
   saveError = signal('');
   saveSuccess = signal('');
@@ -26,6 +28,8 @@ export class ProfileSettings {
 
   startEdit() {
     this.editName.set(this.customerName());
+    this.editPhone.set(this.customerPhone());
+    this.editEmail.set(this.customerEmail());
     this.editMode.set(true);
     this.saveError.set('');
     this.saveSuccess.set('');
@@ -39,20 +43,22 @@ export class ProfileSettings {
   save() {
     const name = this.editName().trim();
     if (!name) { this.saveError.set('يرجى إدخال الاسم'); return; }
+    const phone = this.editPhone().trim() || undefined;
+    const email = this.editEmail().trim() || undefined;
     this.isSaving.set(true);
     this.saveError.set('');
     this.saveSuccess.set('');
-    this.authStore.updateProfile({ name }).subscribe({
+    this.authStore.updateProfile({ name, phone, email }).subscribe({
       next: () => {
-        this.authStore.updateLocalProfile({ name });
+        this.authStore.updateLocalProfile({ name, phone, email });
         this.isSaving.set(false);
         this.editMode.set(false);
-        this.saveSuccess.set('تم التحديث بنجاح');
+        this.saveSuccess.set('تم تحديث البيانات بنجاح');
         setTimeout(() => this.saveSuccess.set(''), 3000);
       },
       error: (err: any) => {
         this.isSaving.set(false);
-        this.saveError.set(err?.error?.message ?? 'فشل التحديث');
+        this.saveError.set(err?.error?.message ?? 'فشل تحديث البيانات');
       },
     });
   }

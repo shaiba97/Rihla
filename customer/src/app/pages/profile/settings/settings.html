@@ -15,6 +15,7 @@
       <p class="text-sm font-semibold text-red-600 bg-red-50 border border-red-200 px-4 py-3 rounded-2xl mb-4">{{ saveError() }}</p>
     }
 
+    <!-- General Info -->
     <div class="bg-[var(--bg-card)] rounded-3xl border border-[var(--border)] overflow-hidden">
       <div class="px-5 py-4 border-b border-[var(--border)]">
         <h2 class="text-sm font-bold text-[var(--text-primary)]">معلومات عامة</h2>
@@ -23,40 +24,67 @@
         <div>
           <label class="text-xs font-medium text-[var(--text-secondary)] block mb-1.5">الاسم الكامل</label>
           @if (editMode()) {
-            <div class="flex items-center gap-2">
-              <input type="text" [ngModel]="editName()" (ngModelChange)="editName.set($event)"
-                class="flex-1 px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-base)] text-sm font-semibold text-[var(--text-primary)] outline-none focus:border-[var(--primary)]"
-                placeholder="الاسم">
-              <button (click)="save()" [disabled]="isSaving()"
-                class="px-4 py-2.5 rounded-xl bg-[var(--primary)] text-white text-sm font-bold active:scale-[0.98] transition-all"
-                [class.opacity-60]="isSaving()">{{ isSaving() ? '...' : 'حفظ' }}</button>
-              <button (click)="cancelEdit()"
-                class="px-4 py-2.5 rounded-xl border border-[var(--border)] text-[var(--text-secondary)] text-sm font-bold active:scale-[0.98] transition-all">إلغاء</button>
-            </div>
+            <input type="text" [ngModel]="editName()" (ngModelChange)="editName.set($event)"
+              class="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-base)] text-sm font-semibold text-[var(--text-primary)] outline-none focus:border-[var(--primary)]"
+              placeholder="الاسم">
           } @else {
             <div class="flex items-center justify-between">
               <span class="text-sm font-semibold text-[var(--text-primary)]">{{ customerName() }}</span>
-              <button (click)="startEdit()" class="text-xs font-bold text-[var(--primary)] active:scale-[0.98] transition-all">تعديل</button>
             </div>
           }
         </div>
       </div>
     </div>
 
+    <!-- Protection -->
     <div class="bg-[var(--bg-card)] rounded-3xl border border-[var(--border)] overflow-hidden mt-4">
       <div class="px-5 py-4 border-b border-[var(--border)]">
         <h2 class="text-sm font-bold text-[var(--text-primary)]">الحماية</h2>
       </div>
       <div class="p-5 flex flex-col gap-4">
-        <div>
-          <label class="text-xs font-medium text-[var(--text-secondary)] block mb-1.5">رقم الهاتف</label>
-          <span class="text-sm font-semibold text-[var(--text-primary)]" dir="ltr">{{ customerPhone() || '—' }}</span>
-        </div>
-        <div>
-          <label class="text-xs font-medium text-[var(--text-secondary)] block mb-1.5">البريد الإلكتروني</label>
-          <span class="text-sm font-semibold text-[var(--text-primary)]">{{ customerEmail() || '—' }}</span>
-        </div>
+        @if (editMode()) {
+          <div>
+            <label class="text-xs font-medium text-[var(--text-secondary)] block mb-1.5">رقم الهاتف</label>
+            <input type="tel" [ngModel]="editPhone()" (ngModelChange)="editPhone.set($event)"
+              class="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-base)] text-sm font-semibold text-[var(--text-primary)] outline-none focus:border-[var(--primary)]"
+              placeholder="رقم الهاتف" dir="ltr">
+          </div>
+          <div>
+            <label class="text-xs font-medium text-[var(--text-secondary)] block mb-1.5">البريد الإلكتروني</label>
+            <input type="email" [ngModel]="editEmail()" (ngModelChange)="editEmail.set($event)"
+              class="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-base)] text-sm font-semibold text-[var(--text-primary)] outline-none focus:border-[var(--primary)]"
+              placeholder="البريد الإلكتروني">
+          </div>
+        } @else {
+          <div>
+            <label class="text-xs font-medium text-[var(--text-secondary)] block mb-1.5">رقم الهاتف</label>
+            <span class="text-sm font-semibold text-[var(--text-primary)]" dir="ltr">{{ customerPhone() || '—' }}</span>
+          </div>
+          <div>
+            <label class="text-xs font-medium text-[var(--text-secondary)] block mb-1.5">البريد الإلكتروني</label>
+            <span class="text-sm font-semibold text-[var(--text-primary)]">{{ customerEmail() || '—' }}</span>
+          </div>
+        }
       </div>
     </div>
+
+    @if (editMode()) {
+      <div class="flex items-center gap-2 mt-6">
+        <button (click)="save()" [disabled]="isSaving()"
+          class="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-[var(--primary)] text-white font-bold text-sm active:scale-[0.98] transition-all"
+          [class.opacity-60]="isSaving()">
+          <span>{{ isSaving() ? 'جاري الحفظ...' : 'حفظ التغييرات' }}</span>
+        </button>
+        <button (click)="cancelEdit()"
+          class="px-5 py-3.5 rounded-2xl border border-[var(--border)] text-[var(--text-secondary)] font-bold text-sm active:scale-[0.98] transition-all">
+          إلغاء
+        </button>
+      </div>
+    } @else {
+      <button (click)="startEdit()" class="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl border border-[var(--border)] text-[var(--text-primary)] font-bold text-sm active:scale-[0.98] transition-all mt-6">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+        <span>تعديل البيانات</span>
+      </button>
+    }
   </div>
 </div>
