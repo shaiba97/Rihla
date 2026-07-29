@@ -9,7 +9,7 @@
       <app-topbar class="max-md:hidden" (toggleSidebar)="toggleSidebar()"></app-topbar>
 
       <!-- MOBILE TOPBAR (hidden on desktop) -->
-      <header class="max-md:flex md:hidden flex-shrink-0 bg-[var(--bg-card)] border-b border-[var(--border)] px-4 h-14 flex items-center justify-between z-30 shadow-[var(--shadow-sm)]">
+      <header class="max-md:flex md:hidden flex-shrink-0 bg-[var(--bg-card)] border-b border-[var(--border)] h-14 flex items-center justify-between z-30 shadow-[var(--shadow-sm)]">
         <span class="text-base font-bold text-[var(--text-primary)]">تفية</span>
         <button (click)="themeService.toggle()" class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-[var(--bg-base)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-150">
           @if (themeService.isDark()) { <svg lucideSun class="w-4 h-4 text-amber-500"></svg> } @else { <svg lucideMoon class="w-4 h-4"></svg> }
@@ -17,7 +17,7 @@
       </header>
 
       <!-- SINGLE ROUTER-OUTLET for both views -->
-      <main class="flex-1 overflow-y-auto p-6 max-md:pb-16 bg-[var(--bg-base)]">
+      <main class="flex-1 overflow-y-auto max-md:px-0 p-6 max-md:pb-16 bg-[var(--bg-base)]">
         <router-outlet></router-outlet>
       </main>
 
