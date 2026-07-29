@@ -31,14 +31,6 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/responsive/profile').then(m => m.ResponsiveProfile),
       },
       {
-        path: 'awards',
-        loadComponent: () => import('./pages/awards/awards-page/awards-page').then(m => m.AwardsPage),
-      },
-      {
-        path: 'profile/settings',
-        loadComponent: () => import('./pages/profile/settings/settings').then(m => m.ProfileSettings),
-      },
-      {
         path: 'awards/pack/:packId',
         loadComponent: () => import('./pages/awards/pack-detail/pack-detail').then(m => m.PackDetailComponent),
       },

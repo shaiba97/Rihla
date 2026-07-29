@@ -21,11 +21,7 @@ export class AwardsPage implements OnInit {
     });
   }
 
-  back() {
-    const segments = this.router.url.split('/');
-    const prefix = segments[0] === 'm' ? '/m/profile' : '/profile';
-    this.router.navigate([prefix]);
-  }
+  back() { this.router.navigate(['/m/profile']); }
 
   toArabic(n: number | string): string { return String(n).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[+d]); }
   formatAmount(n: number | string): string { return this.toArabic(Math.round(Number(n)).toLocaleString('en')); }

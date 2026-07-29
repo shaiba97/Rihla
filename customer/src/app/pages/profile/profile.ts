@@ -18,8 +18,8 @@ export class ProfileComponent {
   showConfirmDelete = signal<boolean>(false);
   deleteError = signal<string>('');
 
-  goToAwards() { this.router.navigate(['/awards']); }
-  goToSettings() { this.router.navigate(['/profile/settings']); }
+  goToAwards() { this.router.navigate(['/m/awards']); }
+  goToSettings() { this.router.navigate(['/m/profile/settings']); }
   login(): void { this.router.navigate(['/login']); }
   logout(): void { this.authStore.logout(); }
 
