@@ -6,13 +6,67 @@
           <div class="w-20 h-20 rounded-full bg-gradient-to-br from-[var(--primary)] to-[var(--primary-hover)] flex items-center justify-center">
             <svg class="w-10 h-10 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           </div>
-          <span class="text-lg font-bold text-[var(--text-primary)]">{{ customerName() }}</span>
+
+          @if (editMode()) {
+            <div class="flex flex-col gap-2 px-4 w-full max-w-xs">
+              <input type="text" [ngModel]="editName()" (ngModelChange)="editName.set($event)"
+                class="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-base)] text-[14px] font-semibold text-[var(--text-primary)] outline-none focus:border-[var(--primary)] text-center"
+                placeholder="الاسم">
+              <div class="flex items-center gap-2 px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-base)]">
+                <input type="tel" [ngModel]="editPhone()" (ngModelChange)="editPhone.set($event)"
+                  class="flex-1 bg-transparent outline-none text-[14px] font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] text-center"
+                  placeholder="رقم الهاتف" dir="ltr">
+              </div>
+              <div class="flex items-center gap-2 px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg-base)]">
+                <input type="email" [ngModel]="editEmail()" (ngModelChange)="editEmail.set($event)"
+                  class="flex-1 bg-transparent outline-none text-[14px] font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] text-center"
+                  placeholder="البريد الإلكتروني">
+              </div>
+            </div>
+          } @else {
+            <span class="text-lg font-bold text-[var(--text-primary)]">{{ customerName() }}</span>
+            @if (customerEmail()) {
+              <span class="text-sm text-[var(--text-secondary)]">{{ customerEmail() }}</span>
+            }
+            <span class="text-sm text-[var(--text-secondary)]" dir="ltr">{{ customerPhone() }}</span>
+          }
         </div>
 
+        @if (saveSuccess()) {
+          <div class="px-4 mb-2">
+            <p class="text-center text-[13px] font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 px-4 py-2.5 rounded-xl">{{ saveSuccess() }}</p>
+          </div>
+        }
+
+        @if (saveError()) {
+          <div class="px-4 mb-2">
+            <p class="text-center text-[13px] font-semibold text-red-600 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 px-4 py-2.5 rounded-xl">{{ saveError() }}</p>
+          </div>
+        }
+
         <div class="p-4 flex flex-col gap-2">
+          @if (editMode()) {
+            <div class="flex items-center gap-2">
+              <button (click)="saveProfile()" [disabled]="isSaving()"
+                class="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-[var(--primary)] text-white font-bold text-sm active:scale-[0.98] transition-all"
+                [class.opacity-60]="isSaving()">
+                <span>{{ isSaving() ? 'جاري الحفظ...' : 'حفظ' }}</span>
+              </button>
+              <button (click)="cancelEdit()"
+                class="px-5 py-3.5 rounded-2xl border border-[var(--border)] text-[var(--text-secondary)] font-bold text-sm active:scale-[0.98] transition-all">
+                إلغاء
+              </button>
+            </div>
+          } @else {
+            <button (click)="startEdit()" class="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl border border-[var(--border)] text-[var(--text-primary)] font-bold text-sm active:scale-[0.98] transition-all">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+              <span>تعديل البيانات</span>
+            </button>
+          }
+
           <button (click)="goToAwards()" class="flex items-center justify-between w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-base)] border border-[var(--border)] active:scale-[0.99] transition-all">
             <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center">
+              <div class="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-950/20 flex items-center justify-center">
                 <svg class="w-[18px] h-[18px] text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
               </div>
               <span class="text-sm font-bold text-[var(--text-primary)]">المكافآت</span>
@@ -22,7 +76,7 @@
 
           <button (click)="goToSettings()" class="flex items-center justify-between w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-base)] border border-[var(--border)] active:scale-[0.99] transition-all">
             <div class="flex items-center gap-3">
-              <div class="w-9 h-9 rounded-xl bg-indigo-100 flex items-center justify-center">
+              <div class="w-9 h-9 rounded-xl bg-indigo-100 dark:bg-indigo-950/20 flex items-center justify-center">
                 <svg class="w-[18px] h-[18px] text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
               </div>
               <span class="text-sm font-bold text-[var(--text-primary)]">الملف الشخصي</span>
