@@ -31,6 +31,23 @@ export interface PackDetailResponse {
   totalBookings: number;
 }
 
+export interface Earnings {
+  totalEarnings: number;
+  withdrawn: number;
+  available: number;
+}
+
+export interface WithdrawalRequest {
+  id: string;
+  bankName: string;
+  accountHolder: string;
+  accountNumber: string;
+  amount: number;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  receiptFile?: string;
+  createdAt: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AwardsService {
   private http = inject(HttpClient);
@@ -50,5 +67,17 @@ export class AwardsService {
 
   getPackDetail(packId: string): Observable<PackDetailResponse> {
     return this.http.get<PackDetailResponse>(`${this.api}/awards/pack/${packId}`);
+  }
+
+  getEarnings(): Observable<Earnings> {
+    return this.http.get<Earnings>(`${this.api}/awards/earnings`);
+  }
+
+  createWithdrawRequest(data: { bankName: string; accountHolder: string; accountNumber: string }): Observable<any> {
+    return this.http.post(`${this.api}/awards/withdraw`, data);
+  }
+
+  getWithdrawals(): Observable<WithdrawalRequest[]> {
+    return this.http.get<WithdrawalRequest[]>(`${this.api}/awards/withdrawals`);
   }
 }
