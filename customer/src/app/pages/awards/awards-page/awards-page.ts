@@ -31,8 +31,8 @@ export class AwardsPage implements OnInit {
       error: () => { this.loading.set(false); },
     });
     this.awardsSvc.getEarnings().subscribe({
-      next: (e) => { this.earnings.set(e); },
-      error: () => {},
+      next: (e) => { this.earnings.set(e ?? { totalEarnings: 0, withdrawn: 0, available: 0 }); },
+      error: () => { this.earnings.set({ totalEarnings: 0, withdrawn: 0, available: 0 }); },
     });
   }
 
