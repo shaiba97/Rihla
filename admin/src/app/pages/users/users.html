@@ -40,14 +40,16 @@
             <thead>
               <tr class="bg-[var(--bg-base)] border-b border-[var(--border)]">
                 <th class="text-right px-5 py-3.5 text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">المستخدم</th>
-                <th class="text-right px-5 py-3.5 text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">جهة الاتصال</th>
+                <th class="text-right px-5 py-3.5 text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider w-[160px]">جهة الاتصال</th>
                 <th class="text-right px-5 py-3.5 text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">الدور</th>
                 @if (roleFilter() === 'USER') {
                   <th class="text-right px-5 py-3.5 text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">الحجوزات</th>
+                  <th class="text-right px-5 py-3.5 text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">المكافأة</th>
                   <th class="text-right px-5 py-3.5 text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">الإجراءات</th>
                 } @else if (roleFilter() === 'COMPANY') {
                   <th class="text-right px-5 py-3.5 text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">الرحلات</th>
                   <th class="text-right px-5 py-3.5 text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">الحافلات</th>
+                  <th class="text-right px-5 py-3.5 text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">الأرباح</th>
                   <th class="text-right px-5 py-3.5 text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">الإجراءات</th>
                 } @else {
                   <th class="text-right px-5 py-3.5 text-xs font-bold text-[var(--text-muted)] uppercase tracking-wider">الإجراءات</th>
@@ -67,12 +69,19 @@
                       </div>
                     </div>
                   </td>
-                  <td class="px-5 py-3.5"><span class="text-sm text-[var(--text-secondary)]" dir="ltr">{{ u.phone || u.email || '—' }}</span></td>
+                  <td class="px-5 py-3.5 w-[160px]"><span class="text-sm text-[var(--text-secondary)] truncate block" dir="ltr">{{ u.phone || u.email || '—' }}</span></td>
                   <td class="px-5 py-3.5">
                     <span class="inline-block px-2.5 py-1 rounded-lg text-xs font-bold" [ngClass]="roleBadgeClass(u.role)">{{ roleLabel(u.role) }}</span>
                   </td>
                   @if (roleFilter() === 'USER') {
                     <td class="px-5 py-3.5"><span class="text-sm font-semibold text-[var(--text-primary)]">{{ toArabic(u._count?.Booking ?? 0) }}</span></td>
+                    <td class="px-5 py-3.5">
+                      @if (u.awards != null) {
+                        <span class="text-sm font-semibold text-emerald-600">{{ toArabic(u.awards) }}</span>
+                      } @else {
+                        <span class="text-xs text-[var(--text-muted)]">—</span>
+                      }
+                    </td>
                     <td class="px-5 py-3.5">
                       <div class="flex items-center gap-1.5">
                         <button (click)="$event.stopPropagation(); openEdit(u)" class="w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--border)] text-[var(--text-muted)] hover:border-blue-300 hover:text-blue-500 hover:bg-blue-50 transition-all">
@@ -86,6 +95,13 @@
                   } @else if (roleFilter() === 'COMPANY') {
                     <td class="px-5 py-3.5"><span class="text-sm font-semibold text-[var(--text-primary)]">{{ toArabic(u._count?.Trip ?? 0) }}</span></td>
                     <td class="px-5 py-3.5"><span class="text-sm font-semibold text-[var(--text-primary)]">{{ toArabic(u._count?.Bus ?? 0) }}</span></td>
+                    <td class="px-5 py-3.5">
+                      @if (u.profits != null) {
+                        <span class="text-sm font-semibold text-emerald-600">{{ toArabic(u.profits) }}</span>
+                      } @else {
+                        <span class="text-xs text-[var(--text-muted)]">—</span>
+                      }
+                    </td>
                     <td class="px-5 py-3.5">
                       <div class="flex items-center gap-1.5">
                         <button (click)="$event.stopPropagation(); openEdit(u)" class="w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--border)] text-[var(--text-muted)] hover:border-blue-300 hover:text-blue-500 hover:bg-blue-50 transition-all">
@@ -114,16 +130,39 @@
           </table>
         </div>
         <div class="flex items-center justify-between px-5 py-3 border-t border-[var(--border)] bg-[var(--bg-base)]">
-          <span class="text-xs text-[var(--text-muted)]">إجمالي {{ toArabic(total()) }} مستخدم</span>
-          <div class="flex items-center gap-1">
-            <button (click)="goPage(page() - 1)" [disabled]="page() <= 1" class="w-7 h-7 flex items-center justify-center rounded-lg border border-[var(--border)] text-[var(--text-secondary)] disabled:opacity-30 hover:bg-[var(--bg-card)] transition-all">
-              <svg lucideChevronRight class="w-3.5 h-3.5"></svg>
-            </button>
-            @for (p of [].constructor(pages()); track $index) {
-              <button (click)="goPage($index + 1)" class="w-7 h-7 rounded-lg text-xs font-bold transition-all" [ngClass]="page() === $index + 1 ? 'bg-[var(--text-primary)] text-white' : 'text-[var(--text-secondary)] hover:bg-[var(--bg-card)]'">{{ toArabic($index + 1) }}</button>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-[var(--text-muted)]">إجمالي {{ toArabic(total()) }}</span>
+            @if (isLoading()) {
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            } @else {
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
             }
-            <button (click)="goPage(page() + 1)" [disabled]="page() >= pages()" class="w-7 h-7 flex items-center justify-center rounded-lg border border-[var(--border)] text-[var(--text-secondary)] disabled:opacity-30 hover:bg-[var(--bg-card)] transition-all">
-              <svg lucideChevronLeft class="w-3.5 h-3.5"></svg>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button (click)="goPage(page() - 1)" [disabled]="page() <= 1" class="w-8 h-8 flex items-center justify-center rounded-xl border border-[var(--border)] text-[var(--text-secondary)] disabled:opacity-30 hover:bg-[var(--bg-card)] hover:border-[var(--text-primary)] transition-all active:scale-90">
+              <svg lucideChevronRight class="w-4 h-4"></svg>
+            </button>
+            @if (pages() > 7) {
+              @if (page() > 3) {
+                <button (click)="goPage(1)" class="w-8 h-8 rounded-xl text-xs font-bold transition-all text-[var(--text-secondary)] hover:bg-[var(--bg-card)] hover:border-[var(--border)] border border-transparent active:scale-90">{{ toArabic(1) }}</button>
+                <span class="text-xs text-[var(--text-muted)] px-0.5">...</span>
+              }
+              @for (p of getVisiblePages(); track p) {
+                <button (click)="goPage(p)" class="w-8 h-8 rounded-xl text-xs font-bold transition-all active:scale-90 border"
+                  [ngClass]="page() === p ? 'bg-[var(--text-primary)] text-white border-[var(--text-primary)] shadow-[0_2px_8px_-2px_rgba(79,70,229,0.3)]' : 'text-[var(--text-secondary)] border-transparent hover:bg-[var(--bg-card)] hover:border-[var(--border)]'">{{ toArabic(p) }}</button>
+              }
+              @if (page() < pages() - 2) {
+                <span class="text-xs text-[var(--text-muted)] px-0.5">...</span>
+                <button (click)="goPage(pages())" class="w-8 h-8 rounded-xl text-xs font-bold transition-all text-[var(--text-secondary)] hover:bg-[var(--bg-card)] hover:border-[var(--border)] border border-transparent active:scale-90">{{ toArabic(pages()) }}</button>
+              }
+            } @else {
+              @for (p of [].constructor(pages()); track $index) {
+                <button (click)="goPage($index + 1)" class="w-8 h-8 rounded-xl text-xs font-bold transition-all active:scale-90 border"
+                  [ngClass]="page() === $index + 1 ? 'bg-[var(--text-primary)] text-white border-[var(--text-primary)] shadow-[0_2px_8px_-2px_rgba(79,70,229,0.3)]' : 'text-[var(--text-secondary)] border-transparent hover:bg-[var(--bg-card)] hover:border-[var(--border)]'">{{ toArabic($index + 1) }}</button>
+              }
+            }
+            <button (click)="goPage(page() + 1)" [disabled]="page() >= pages()" class="w-8 h-8 flex items-center justify-center rounded-xl border border-[var(--border)] text-[var(--text-secondary)] disabled:opacity-30 hover:bg-[var(--bg-card)] hover:border-[var(--text-primary)] transition-all active:scale-90">
+              <svg lucideChevronLeft class="w-4 h-4"></svg>
             </button>
           </div>
         </div>

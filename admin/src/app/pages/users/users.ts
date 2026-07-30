@@ -1,6 +1,6 @@
 import { Component, signal, inject, OnInit } from '@angular/core';
 import { NgClass } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { LucideSearch, LucideTrash2, LucideAlertCircle, LucideChevronLeft, LucideChevronRight, LucideUsers, LucideLoaderCircle, LucidePen, LucideX, LucideUserPlus } from '@lucide/angular';
 import { AdminUsersService } from '../../core/services/admin-users/admin-users.service';
@@ -18,6 +18,7 @@ export class UsersComponent implements OnInit {
   private busSvc = inject(BusesService);
   private tripSvc = inject(Trips);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   users = signal<any[]>([]);
   total = signal(0);
@@ -47,7 +48,15 @@ export class UsersComponent implements OnInit {
     { value: 'COMPANY', label: 'شركة' },
   ];
 
-  ngOnInit() { this.load(); }
+  ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      const r = params['role'];
+      const p = params['page'];
+      if (r && ['USER', 'ADMIN', 'COMPANY'].includes(r)) this.roleFilter.set(r);
+      if (p) this.page.set(Number(p));
+      this.load();
+    });
+  }
 
   load(): void {
     this.isLoading.set(true);
@@ -84,8 +93,19 @@ export class UsersComponent implements OnInit {
   }
 
   onSearch(val: string): void { this.search.set(val); this.page.set(1); this.load(); }
-  setRole(r: string): void { this.roleFilter.set(r); this.page.set(1); this.load(); }
-  goPage(p: number): void { if (p >= 1 && p <= this.pages()) { this.page.set(p); this.load(); } }
+  setRole(r: string): void {
+    this.roleFilter.set(r);
+    this.page.set(1);
+    this.router.navigate([], { queryParams: { role: r, page: 1 }, queryParamsHandling: 'merge', replaceUrl: true });
+    this.load();
+  }
+  goPage(p: number): void {
+    if (p >= 1 && p <= this.pages()) {
+      this.page.set(p);
+      this.router.navigate([], { queryParams: { page: p }, queryParamsHandling: 'merge', replaceUrl: true });
+      this.load();
+    }
+  }
 
   goToUser(id: string): void { this.router.navigate(['/users', id]); }
 
@@ -173,4 +193,15 @@ export class UsersComponent implements OnInit {
   }
 
   toArabic(n: number): string { return String(n).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[+d]); }
+
+  getVisiblePages(): number[] {
+    const total = this.pages();
+    const current = this.page();
+    if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+    const pages: number[] = [];
+    const start = Math.max(2, current - 1);
+    const end = Math.min(total - 1, current + 1);
+    for (let i = start; i <= end; i++) pages.push(i);
+    return pages;
+  }
 }
