@@ -1,72 +1,74 @@
-<div dir="rtl" class="min-h-[calc(100vh-4rem)] bg-[var(--bg-base)]">
-  <div class="max-w-4xl mx-auto px-4 md:px-6 py-6 md:py-8">
+<div dir="rtl" class="min-h-[calc(100vh-4rem)] bg-[var(--bg-base)] flex flex-col">
+  <div class="max-w-4xl mx-auto px-4 md:px-6 py-6 md:py-8 w-full flex-1 flex flex-col gap-6 md:gap-8">
 
-    <button (click)="back()" class="flex items-center gap-1.5 text-sm font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors mb-4">
+    <button (click)="back()" class="flex items-center gap-1.5 text-sm font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
       <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
       <span>العودة</span>
     </button>
 
-    <h1 class="text-2xl font-extrabold text-[var(--text-primary)] mb-6">المكافآت</h1>
+    <h1 class="text-2xl font-extrabold text-[var(--text-primary)]">المكافآت</h1>
 
     @if (submitSuccess()) {
-      <div class="mb-4 px-4 py-3 rounded-2xl bg-emerald-50 border-[1.5px] border-emerald-200 text-sm font-bold text-emerald-600 text-center">{{ submitSuccess() }}</div>
+      <div class="px-4 py-3 rounded-2xl bg-emerald-50 border-[1.5px] border-emerald-200 text-sm font-bold text-emerald-600 text-center">{{ submitSuccess() }}</div>
     }
 
-    <!-- Section 1: Earnings Card -->
+    <!-- Section 1: Earnings Card - taller -->
     @if (earnings()) {
-      <div class="bg-gradient-to-br from-[var(--primary)] to-[var(--primary-hover)] rounded-3xl p-5 md:p-7 flex items-center justify-between gap-4 mb-5" style="box-shadow: 0 6px 24px -6px rgba(79,70,229,0.25);">
-        <div class="flex flex-col gap-0.5">
-          <span class="text-[11px] font-bold text-white/70">الرصيد المتاح للسحب</span>
+      <div class="bg-gradient-to-br from-[var(--primary)] to-[var(--primary-hover)] rounded-3xl p-6 md:p-8 flex items-center justify-between gap-4" style="box-shadow: 0 6px 24px -6px rgba(79,70,229,0.25);">
+        <div class="flex flex-col gap-1.5">
+          <span class="text-xs font-bold text-white/70">الرصيد المتاح للسحب</span>
           <div class="flex items-baseline gap-1.5">
-            <span class="text-3xl md:text-4xl font-extrabold text-white tabular-nums">{{ formatAmount(availableAmount()) }}</span>
-            <span class="text-sm font-bold text-white/70">ج.س</span>
+            <span class="text-4xl md:text-5xl font-extrabold text-white tabular-nums">{{ formatAmount(availableAmount()) }}</span>
+            <span class="text-base font-bold text-white/70">ج.س</span>
           </div>
-          <div class="flex items-center gap-3 mt-0.5">
-            <span class="text-[10px] text-white/50">الإجمالي: <span class="font-bold text-white/70 tabular-nums">{{ formatAmount(earnings()!.totalEarnings) }}</span></span>
-            <span class="text-[10px] text-white/50">تم السحب: <span class="font-bold text-white/70 tabular-nums">{{ formatAmount(earnings()!.withdrawn) }}</span></span>
+          <div class="flex items-center gap-4 mt-1">
+            <span class="text-xs text-white/50">الإجمالي: <span class="font-bold text-white/70 tabular-nums">{{ formatAmount(earnings()!.totalEarnings) }}</span></span>
+            <span class="text-xs text-white/50">تم السحب: <span class="font-bold text-white/70 tabular-nums">{{ formatAmount(earnings()!.withdrawn) }}</span></span>
           </div>
         </div>
-        <div class="w-11 h-11 md:w-14 md:h-14 rounded-2xl bg-white/15 flex items-center justify-center flex-shrink-0">
-          <svg class="w-6 h-6 md:w-7 md:h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <div class="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-white/15 flex items-center justify-center flex-shrink-0">
+          <svg class="w-7 h-7 md:w-8 md:h-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
           </svg>
         </div>
       </div>
     }
 
-    <!-- Section 2: Award Packs Grid - always 3 columns -->
-    @if (loading()) {
-      <div class="flex items-center justify-center py-16">
-        <div class="w-6 h-6 border-[1.5px] border-[var(--primary)] border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    } @else if (packs().length === 0) {
-      <p class="text-sm text-[var(--text-secondary)] text-center py-8">لا توجد مكافآت متاحة حالياً</p>
-    } @else {
-      <div class="grid grid-cols-3 gap-2 md:gap-3">
-        @for (pack of packs(); track pack.id) {
-          <div class="bg-[var(--bg-card)] rounded-2xl border-[1.5px] border-[var(--border)] p-3 md:p-4 flex flex-col gap-1.5 md:gap-2 active:scale-[0.97]" style="transition: transform 0.2s cubic-bezier(0.16,1,0.3,1);">
-            <div class="flex items-center gap-1.5 md:gap-2">
-              <div class="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-[var(--primary-light)] flex items-center justify-center flex-shrink-0">
-                <span class="text-[11px] md:text-sm" [innerHTML]="pack.icon"></span>
+    <!-- Section 2: Award Packs Grid - fills remaining space to push withdraw to bottom -->
+    <div class="flex-1">
+      @if (loading()) {
+        <div class="flex items-center justify-center py-16">
+          <div class="w-6 h-6 border-[1.5px] border-[var(--primary)] border-t-transparent rounded-full animate-spin"></div>
+        </div>
+      } @else if (packs().length === 0) {
+        <p class="text-sm text-[var(--text-secondary)] text-center py-8">لا توجد مكافآت متاحة حالياً</p>
+      } @else {
+        <div class="grid grid-cols-3 gap-2 md:gap-3">
+          @for (pack of packs(); track pack.id) {
+            <div class="bg-[var(--bg-card)] rounded-2xl border-[1.5px] border-[var(--border)] p-3 md:p-4 flex flex-col gap-1.5 md:gap-2 active:scale-[0.97]" style="transition: transform 0.2s cubic-bezier(0.16,1,0.3,1);">
+              <div class="flex items-center gap-1.5 md:gap-2">
+                <div class="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-[var(--primary-light)] flex items-center justify-center flex-shrink-0">
+                  <span class="text-[11px] md:text-sm" [innerHTML]="pack.icon"></span>
+                </div>
+                <span class="text-[11px] md:text-sm font-bold text-[var(--text-primary)] truncate">{{ pack.title }}</span>
               </div>
-              <span class="text-[11px] md:text-sm font-bold text-[var(--text-primary)] truncate">{{ pack.title }}</span>
+              <div class="flex flex-col gap-0">
+                <span class="text-base md:text-xl font-extrabold text-[var(--text-primary)] tabular-nums">{{ formatAmount(pack.awardValue) }}</span>
+                <span class="text-[9px] md:text-xs font-medium text-[var(--text-secondary)]">ج.س قيمة المكافأة</span>
+              </div>
+              <div class="flex items-center gap-1 md:gap-1.5">
+                <span class="text-[9px] md:text-xs text-[var(--text-secondary)]">يحتاج</span>
+                <span class="text-[11px] md:text-sm font-bold text-[var(--text-primary)] tabular-nums">{{ toArabic(pack.minBookings) }}</span>
+                <span class="text-[9px] md:text-xs text-[var(--text-secondary)]">حجز</span>
+              </div>
             </div>
-            <div class="flex flex-col gap-0">
-              <span class="text-base md:text-xl font-extrabold text-[var(--text-primary)] tabular-nums">{{ formatAmount(pack.awardValue) }}</span>
-              <span class="text-[9px] md:text-xs font-medium text-[var(--text-secondary)]">ج.س قيمة المكافأة</span>
-            </div>
-            <div class="flex items-center gap-1 md:gap-1.5">
-              <span class="text-[9px] md:text-xs text-[var(--text-secondary)]">يحتاج</span>
-              <span class="text-[11px] md:text-sm font-bold text-[var(--text-primary)] tabular-nums">{{ toArabic(pack.minBookings) }}</span>
-              <span class="text-[9px] md:text-xs text-[var(--text-secondary)]">حجز</span>
-            </div>
-          </div>
-        }
-      </div>
-    }
+          }
+        </div>
+      }
+    </div>
 
-    <!-- Section 3: Withdraw -->
-    <div class="mt-5 md:mt-6">
+    <!-- Section 3: Withdraw - pushed to bottom -->
+    <div class="mt-auto">
       @if (showWithdrawForm()) {
         <div class="bg-[var(--bg-card)] rounded-3xl border-[1.5px] border-[var(--border)] p-5 md:p-6 flex flex-col gap-4">
           <h2 class="text-sm font-bold text-[var(--text-primary)]">طلب سحب الأرباح</h2>
@@ -110,9 +112,9 @@
         </div>
       } @else {
         <button (click)="openWithdraw()" [disabled]="availableAmount() <= 0"
-          class="flex items-center justify-center gap-2 w-full py-4 rounded-3xl border-[1.5px] border-[var(--primary)] text-[var(--primary)] font-bold text-sm transition-all active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed"
+          class="flex items-center justify-center gap-2 w-full py-5 rounded-3xl border-[1.5px] border-[var(--primary)] text-[var(--primary)] font-bold text-sm transition-all active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed"
           style="transition: all 0.2s cubic-bezier(0.16,1,0.3,1);">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 17 2 12 7 7"/><polyline points="17 7 22 12 17 17"/><line x1="12" y1="2" x2="12" y2="22"/></svg>
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 17 2 12 7 7"/><polyline points="17 7 22 12 17 17"/><line x1="12" y1="2" x2="12" y2="22"/></svg>
           <span>سحب الأرباح</span>
         </button>
       }
