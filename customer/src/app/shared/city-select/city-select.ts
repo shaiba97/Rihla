@@ -167,7 +167,7 @@ export class CitySelectComponent {
   }
 
   handleClick(city: string, event: MouseEvent | TouchEvent): void {
-    event.preventDefault();
+    if (event.type === 'mousedown') event.preventDefault();
     this.select(city);
   }
 
