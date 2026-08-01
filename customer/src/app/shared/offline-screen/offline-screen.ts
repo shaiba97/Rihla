@@ -20,7 +20,7 @@ import { Component, signal, ChangeDetectionStrategy, OnDestroy } from '@angular/
         </div>
         <h2 class="offline-title">لا يوجد اتصال</h2>
         <p class="offline-text">يرجى التحقق من اتصالك بالإنترنت</p>
-        <button class="offline-btn" (click)="retry()">إعادة المحاولة</button>
+        <button class="offline-btn" type="button" (click)="retry()">إعادة المحاولة</button>
       </div>
     }
   `,

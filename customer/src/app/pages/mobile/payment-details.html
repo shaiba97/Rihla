@@ -1,48 +1,48 @@
 @if (showLoginPrompt()) {
-  <div dir="rtl" class="min-h-screen bg-[var(--bg-base)] flex flex-col items-center justify-center px-6 gap-5 text-center">
+  <section dir="rtl" class="min-h-screen bg-[var(--bg-base)] flex flex-col items-center justify-center px-6 gap-5 text-center">
     <div class="w-16 h-16 rounded-full bg-[var(--primary-light)] flex items-center justify-center">
-      <svg lucideLogIn class="w-8 h-8 text-[var(--primary)]"></svg>
+      <svg lucideLogIn class="w-8 h-8 text-[var(--primary)]" aria-hidden="true"></svg>
     </div>
     <h1 class="text-xl font-extrabold text-[var(--text-primary)]">يجب تسجيل الدخول أولاً لحجز مقعد</h1>
     <p class="text-sm text-[var(--text-secondary)]">يرجى تسجيل الدخول للمتابعة</p>
-    <button (click)="goToLogin()" class="flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-bold text-[15px] active:scale-95 transition-all shadow-lg">
-      <svg lucideLogIn class="w-5 h-5"></svg>
+    <button type="button" (click)="goToLogin()" class="flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-bold text-[15px] active:scale-95 transition-all shadow-lg">
+      <svg lucideLogIn class="w-5 h-5" aria-hidden="true"></svg>
       <span>تسجيل الدخول</span>
     </button>
-  </div>
+  </section>
 } @else {
   @if (submitSuccess()) {
-  <div dir="rtl" class="min-h-screen bg-[var(--bg-base)] flex flex-col items-center justify-center px-6 gap-5 text-center">
+  <section dir="rtl" class="min-h-screen bg-[var(--bg-base)] flex flex-col items-center justify-center px-6 gap-5 text-center">
     <div class="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center">
-      <svg lucideCheckCircle class="w-8 h-8 text-emerald-600"></svg>
+      <svg lucideCheckCircle class="w-8 h-8 text-emerald-600" aria-hidden="true"></svg>
     </div>
     <h1 class="text-xl font-extrabold text-[var(--text-primary)]">سيتم تأكيد الحجز خلال {{ 5 | arabicNumber }} دقائق فقط!</h1>
     <p class="text-sm text-[var(--text-secondary)]">سيتم إرسال التذكرة على واتساب</p>
-    <button (click)="goHome()" class="mt-4 px-8 py-3.5 rounded-2xl bg-[var(--primary)] text-white font-bold text-[15px] active:scale-95 transition-all">العودة للرئيسية</button>
-  </div>
+    <button type="button" (click)="goHome()" class="mt-4 px-8 py-3.5 rounded-2xl bg-[var(--primary)] text-white font-bold text-[15px] active:scale-95 transition-all">العودة للرئيسية</button>
+  </section>
 } @else {
-  <div dir="rtl" class="min-h-screen bg-[var(--bg-base)] flex flex-col">
-    <div class="bg-[var(--bg-card)] px-4 py-3 border-b border-[var(--border)] flex items-center gap-3 sticky top-0 z-20">
-      <button (click)="goBack()" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[var(--bg-base)]"><svg lucideArrowRight class="w-5 h-5 text-[var(--text-primary)]"></svg></button>
-      <span class="text-[16px] font-bold text-[var(--text-primary)]">الدفع</span>
+  <section dir="rtl" class="min-h-screen bg-[var(--bg-base)] flex flex-col">
+    <header class="bg-[var(--bg-card)] px-4 py-3 border-b border-[var(--border)] flex items-center gap-3 sticky top-0 z-20">
+      <button type="button" (click)="goBack()" aria-label="العودة" class="w-9 h-9 flex items-center justify-center rounded-full hover:bg-[var(--bg-base)]"><svg lucideArrowRight class="w-5 h-5 text-[var(--text-primary)]" aria-hidden="true"></svg></button>
+      <h1 class="text-[16px] font-bold text-[var(--text-primary)]">الدفع</h1>
       <div class="mr-auto flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200" [class.bg-red-50]="isExpired()" [class.border-red-200]="isExpired()">
-        <svg lucideClock class="w-3.5 h-3.5" [class.text-amber-500]="!isExpired()" [class.text-red-500]="isExpired()"></svg>
+        <svg lucideClock class="w-3.5 h-3.5" [class.text-amber-500]="!isExpired()" [class.text-red-500]="isExpired()" aria-hidden="true"></svg>
         <span class="text-[11px] font-bold tabular-nums" [class.text-amber-600]="!isExpired()" [class.text-red-600]="isExpired()">{{ remainingTime() }}</span>
       </div>
-    </div>
+    </header>
 
     @if (isExpired()) {
       <div class="flex-1 flex flex-col items-center justify-center px-6 gap-3 text-center">
-        <svg lucideAlertCircle class="w-12 h-12 text-red-400"></svg>
+        <svg lucideAlertCircle class="w-12 h-12 text-red-400" aria-hidden="true"></svg>
         <p class="text-sm font-bold text-[var(--text-primary)]">انتهت صلاحية الجلسة</p>
         <p class="text-[13px] text-[var(--text-secondary)]">الرجاء العودة واختيار المقاعد مرة أخرى</p>
-        <button (click)="goHome()" class="mt-2 px-8 py-3 rounded-2xl bg-[var(--primary)] text-white font-bold text-[14px] active:scale-95 transition-all">العودة للرئيسية</button>
+        <button type="button" (click)="goHome()" class="mt-2 px-8 py-3 rounded-2xl bg-[var(--primary)] text-white font-bold text-[14px] active:scale-95 transition-all">العودة للرئيسية</button>
       </div>
     } @else {
       <div class="flex-1 overflow-y-auto px-4 py-5 flex flex-col gap-4 pb-36">
 
-        <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-4 flex flex-col gap-2">
-          <span class="text-[13px] font-bold text-[var(--text-primary)]">ملخص الحجز</span>
+        <section class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-4 flex flex-col gap-2" aria-label="ملخص الحجز">
+          <h2 class="text-[13px] font-bold text-[var(--text-primary)]">ملخص الحجز</h2>
           <div class="flex items-center justify-between">
             <span class="text-[12px] text-[var(--text-secondary)]">من</span>
             <span class="text-[13px] font-semibold text-[var(--text-primary)]">{{ trip().boardingCity }}</span>
@@ -71,29 +71,29 @@
                <span class="text-[13px] font-bold text-[var(--text-primary)]">المجموع</span>
                <span class="text-[18px] font-extrabold text-[var(--primary)] tabular-nums">{{ totalAmount() | arabicNumber }} <span class="text-[11px] font-medium">جنيه</span></span>
              </div>
-        </div>
+        </section>
 
-        <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-4 flex flex-col gap-2">
-          <span class="text-[13px] font-bold text-[var(--text-primary)]">جهة الاتصال</span>
+        <section class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-4 flex flex-col gap-2" aria-label="جهة الاتصال">
+          <h2 class="text-[13px] font-bold text-[var(--text-primary)]">جهة الاتصال</h2>
           <span class="text-[13px] text-[var(--text-secondary)]">{{ contact()?.countryCode ?? '+249' }}{{ contact()?.whatsappNumber ?? '' }}</span>
-        </div>
+        </section>
 
-        <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-4 flex flex-col gap-2">
-          <span class="text-[13px] font-bold text-[var(--text-primary)]">الركاب</span>
+        <section class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-4 flex flex-col gap-2" aria-label="الركاب">
+          <h2 class="text-[13px] font-bold text-[var(--text-primary)]">الركاب</h2>
           @for (p of passengers(); track $index; let i = $index) {
             <div class="flex items-center justify-between py-1">
               <span class="text-[13px] text-[var(--text-secondary)]">{{ p.name }}</span>
               <span class="text-[11px] text-[var(--text-secondary)] bg-[var(--primary)] text-white px-2 py-0.5 rounded-full font-bold">مقعد {{ selectedSeats()[i] | arabicNumber }}</span>
             </div>
           }
-        </div>
+        </section>
 
-        <div [formGroup]="paymentForm" class="flex flex-col gap-4">
+        <form [formGroup]="paymentForm" class="flex flex-col gap-4">
           <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-4 flex flex-col gap-3">
-            <span class="text-[13px] font-bold text-[var(--text-primary)] flex items-center gap-2"><svg lucideCreditCard class="w-4 h-4 text-[var(--primary)]"></svg>طريقة الدفع</span>
+            <span class="text-[13px] font-bold text-[var(--text-primary)] flex items-center gap-2"><svg lucideCreditCard class="w-4 h-4 text-[var(--primary)]" aria-hidden="true"></svg>طريقة الدفع</span>
             <div class="grid grid-cols-4 gap-2">
               @for (pm of paymentMethods(); track pm.id) {
-                <button type="button" (click)="paymentForm.get('paymentMethod')?.setValue(pm.id)" class="py-2.5 rounded-xl border-2 text-[12px] font-semibold transition-all duration-150 active:scale-95"
+                <button type="button" (click)="paymentForm.get('paymentMethod')?.setValue(pm.id)" [attr.aria-pressed]="paymentForm.get('paymentMethod')?.value === pm.id" class="py-2.5 rounded-xl border-2 text-[12px] font-semibold transition-all duration-150 active:scale-95"
                   [class.border-[var(--primary)]]="paymentForm.get('paymentMethod')?.value === pm.id"
                   [class.bg-[var(--primary-light)]]="paymentForm.get('paymentMethod')?.value === pm.id"
                   [class.text-[var(--primary)]]="paymentForm.get('paymentMethod')?.value === pm.id"
@@ -107,18 +107,18 @@
           </div>
 
           <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-4 flex flex-col gap-3">
-            <span class="text-[13px] font-bold text-[var(--text-primary)]">حسابات الدفع</span>
+            <h2 class="text-[13px] font-bold text-[var(--text-primary)]">حسابات الدفع</h2>
             @if (selectedAccountNumber()) {
               <div class="flex items-center justify-between px-3 py-2.5 rounded-xl bg-[var(--bg-base)] border border-[var(--border)]">
                 <div class="flex flex-col">
                   <span class="text-[11px] text-[var(--text-secondary)]">{{ selectedAccountBank() }}</span>
                   <span class="text-[15px] font-bold text-[var(--text-primary)] tracking-wider" dir="ltr">{{ selectedAccountNumber() | arabicNumber }}</span>
                 </div>
-                <button (click)="copyAccountNumber()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[var(--primary-light)] transition-all flex-shrink-0">
+                <button type="button" (click)="copyAccountNumber()" aria-label="نسخ رقم الحساب" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[var(--primary-light)] transition-all flex-shrink-0">
                   @if (copied()) {
-                    <svg lucideCheck class="w-4 h-4 text-emerald-500"></svg>
+                    <svg lucideCheck class="w-4 h-4 text-emerald-500" aria-hidden="true"></svg>
                   } @else {
-                    <svg lucideCopy class="w-4 h-4 text-[var(--text-secondary)]"></svg>
+                    <svg lucideCopy class="w-4 h-4 text-[var(--text-secondary)]" aria-hidden="true"></svg>
                   }
                 </button>
               </div>
@@ -129,24 +129,24 @@
           </div>
 
           <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-4 flex flex-col gap-3">
-            <span class="text-[13px] font-bold text-[var(--text-primary)]">بيانات الدفع</span>
+            <h2 class="text-[13px] font-bold text-[var(--text-primary)]">بيانات الدفع</h2>
             <input type="number" formControlName="transactionId" placeholder="رقم العملية *" class="w-full px-4 py-3 rounded-xl border bg-[var(--bg-base)] text-[14px] font-semibold text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] placeholder:font-normal outline-none transition-all"
               [class.border-red-400]="invalid(paymentForm.get('transactionId'))"
               [class.border-[var(--border)]]="!invalid(paymentForm.get('transactionId'))"
               [class.focus:border-[var(--primary)]]="!invalid(paymentForm.get('transactionId'))">
             <div class="flex flex-col gap-2">
               <label class="flex items-center gap-3 px-4 py-4 rounded-xl border-2 border-dashed border-[var(--border)] bg-[var(--bg-base)] cursor-pointer active:scale-[0.98] transition-all hover:border-[var(--primary)]">
-                <svg lucideUpload class="w-5 h-5 text-[var(--primary)] flex-shrink-0"></svg>
+                <svg lucideUpload class="w-5 h-5 text-[var(--primary)] flex-shrink-0" aria-hidden="true"></svg>
                 <span class="text-[13px] font-semibold text-[var(--text-secondary)]">{{ receiptFileName() || 'إرفاق إيصال الدفع *' }}</span>
                 <input type="file" accept="image/*" (change)="onFileSelected($event)" class="hidden">
               </label>
             </div>
           </div>
-        </div>
+        </form>
 
         @if (submitError()) {
           <div class="flex items-center gap-2 px-4 py-3 rounded-xl bg-red-50 border border-red-200">
-            <svg lucideAlertCircle class="w-4 h-4 text-red-500 flex-shrink-0"></svg>
+            <svg lucideAlertCircle class="w-4 h-4 text-red-500 flex-shrink-0" aria-hidden="true"></svg>
             <span class="text-[12px] font-semibold text-red-600">{{ submitError() }}</span>
           </div>
         }
@@ -157,7 +157,7 @@
             <span class="text-[11px] text-[var(--text-secondary)]">{{ selectedSeats().length | arabicNumber }} مقعد</span>
             <span class="text-[18px] font-extrabold text-[var(--primary)] leading-tight tabular-nums">{{ totalAmount() | arabicNumber }} <span class="text-[11px] font-medium">جنيه</span></span>
           </div>
-        <button (click)="onSubmit()" [disabled]="isSubmitting()" class="flex items-center gap-2 px-6 py-3.5 rounded-2xl font-bold text-[15px] active:scale-95 transition-all duration-150 flex-shrink-0"
+        <button type="button" (click)="onSubmit()" [disabled]="isSubmitting()" class="flex items-center gap-2 px-6 py-3.5 rounded-2xl font-bold text-[15px] active:scale-95 transition-all duration-150 flex-shrink-0"
           [class.bg-[var(--primary)]]="canSubmit()"
           [class.text-white]="canSubmit()"
           [class.shadow-lg]="canSubmit()"
@@ -172,6 +172,6 @@
         </button>
       </div>
     }
-  </div>
+  </section>
   }
 }

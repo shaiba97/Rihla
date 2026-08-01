@@ -1,4 +1,4 @@
-<div dir="rtl" class="min-h-[calc(100vh-4rem)] bg-[var(--bg-base)]">
+<section dir="rtl" class="min-h-[calc(100vh-4rem)] bg-[var(--bg-base)]">
   <div class="max-w-3xl mx-auto px-4 md:px-6 py-6 md:py-8">
 
     @if (loading()) {
@@ -7,32 +7,32 @@
       </div>
     } @else if (notif(); as n) {
       <!-- HEADER -->
-      <div class="flex items-center justify-between mb-6">
+      <header class="flex items-center justify-between mb-6">
         <div class="flex items-center gap-3">
-          <button (click)="goBack()"
+          <button type="button" (click)="goBack()"
             class="w-9 h-9 flex items-center justify-center rounded-xl
                    hover:bg-[var(--primary-light)] text-[var(--text-secondary)]
                    hover:text-[var(--primary)] transition-all cursor-pointer">
-            <svg lucideArrowRight class="w-5 h-5"></svg>
+            <svg lucideArrowRight class="w-5 h-5" role="img" aria-label="العودة"></svg>
           </button>
           <h1 class="text-xl font-extrabold text-[var(--text-primary)]">تفاصيل الإشعار</h1>
         </div>
-        <button (click)="deleteNotif()"
+        <button type="button" (click)="deleteNotif()"
           class="w-9 h-9 flex items-center justify-center rounded-xl
                  hover:bg-[var(--danger-light)] text-[var(--text-secondary)]
                  hover:text-[var(--danger)] transition-all cursor-pointer"
-          title="حذف الإشعار">
-          <svg lucideTrash2 class="w-4 h-4"></svg>
+            title="حذف الإشعار">
+          <svg lucideTrash2 class="w-4 h-4" role="img" aria-label="حذف الإشعار"></svg>
         </button>
-      </div>
+      </header>
 
       <!-- TYPE BADGE -->
       <div class="flex items-center gap-3 mb-4">
         <div class="w-12 h-12 rounded-2xl flex items-center justify-center" [ngClass]="[notifBg(n.type)]">
           @switch (notifIcon(n.type)) {
-            @case ('check-circle') { <svg lucideCheckCircle class="w-6 h-6" [ngClass]="[notifColor(n.type)[0]]"></svg> }
-            @case ('x-circle') { <svg lucideXCircle class="w-6 h-6" [ngClass]="[notifColor(n.type)[0]]"></svg> }
-            @default { <svg lucideAlertCircle class="w-6 h-6" [ngClass]="[notifColor(n.type)[0]]"></svg> }
+            @case ('check-circle') { <svg lucideCheckCircle class="w-6 h-6" [ngClass]="[notifColor(n.type)[0]]" role="img" aria-label="إشعار نجاح"></svg> }
+            @case ('x-circle') { <svg lucideXCircle class="w-6 h-6" [ngClass]="[notifColor(n.type)[0]]" role="img" aria-label="إشعار خطأ"></svg> }
+            @default { <svg lucideAlertCircle class="w-6 h-6" [ngClass]="[notifColor(n.type)[0]]" role="img" aria-label="إشعار تنبيه"></svg> }
           }
         </div>
         <div class="flex flex-col">
@@ -42,14 +42,14 @@
       </div>
 
       <!-- CONTENT CARD -->
-      <div class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-5 shadow-sm">
+      <article class="bg-[var(--bg-card)] rounded-2xl border border-[var(--border)] p-5 shadow-sm">
         <p class="text-sm text-[var(--text-primary)] leading-relaxed">{{ n.body }}</p>
-      </div>
+      </article>
 
       <!-- METADATA -->
       @if (n.createdAt) {
         <div class="flex items-center gap-2 mt-4 text-xs text-[var(--text-secondary)] bg-[var(--bg-card)] rounded-xl px-4 py-3 border border-[var(--border)]">
-          <svg lucideCalendarClock class="w-3.5 h-3.5 flex-shrink-0"></svg>
+          <svg lucideCalendarClock class="w-3.5 h-3.5 flex-shrink-0" aria-hidden="true"></svg>
           <span>{{ n.createdAt | date:'EEEE d MMMM yyyy, h:mm a':'':'ar' }}</span>
         </div>
       }
@@ -57,7 +57,7 @@
     } @else {
       <div class="flex flex-col items-center justify-center py-20 gap-4">
         <div class="w-20 h-20 rounded-full bg-[var(--bg-card)] border border-[var(--border)] flex items-center justify-center shadow-sm">
-          <svg lucideBell class="w-10 h-10 text-[var(--text-secondary)] opacity-40"></svg>
+          <svg lucideBell class="w-10 h-10 text-[var(--text-secondary)] opacity-40" aria-hidden="true"></svg>
         </div>
         <div class="text-center">
           <p class="text-base font-bold text-[var(--text-primary)]">الإشعار غير موجود</p>
@@ -67,4 +67,4 @@
     }
 
   </div>
-</div>
+</section>

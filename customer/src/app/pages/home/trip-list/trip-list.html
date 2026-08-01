@@ -1,17 +1,18 @@
-<div dir="rtl"
+<section dir="rtl"
+     aria-labelledby="trip-list-title"
      class="max-w-4xl mx-auto px-4 py-8">
 
-  <div class="flex items-center
+  <header class="flex items-center
               justify-between mb-6">
     <div class="flex flex-col gap-1">
-      <h2 class="text-xl font-bold
+      <h2 id="trip-list-title" class="text-xl font-bold
                  text-[var(--text-primary)]">
        <span>
          كل الرحلات
        </span>
       </h2>
     </div>
-  </div>
+  </header>
 
   @if (isLoading()) {
     <div class="flex flex-col items-center
@@ -19,7 +20,8 @@
                 text-[var(--text-secondary)]">
       <svg lucideLoaderCircle
            class="w-10 h-10 animate-spin
-                  text-[var(--primary)]">
+                  text-[var(--primary)]"
+           aria-hidden="true">
       </svg>
       <p class="text-sm font-medium">
         جاري تحميل الرحلات...
@@ -32,7 +34,8 @@
                 justify-center py-20 gap-4">
       <svg lucideSearchX
            class="w-12 h-12
-                  text-[var(--text-secondary)]">
+                  text-[var(--text-secondary)]"
+           aria-hidden="true">
       </svg>
       <p class="text-base font-semibold
                 text-[var(--text-primary)]">
@@ -52,4 +55,4 @@
     </div>
   }
 
-</div>
+</section>

@@ -42,7 +42,9 @@
 
       <!-- Theme toggle -->
       <button
+        type="button"
         (click)="themeService.toggle()"
+        aria-label="تبديل السمة"
         class="w-9 h-9 rounded-xl
                flex items-center justify-center
                text-[var(--text-secondary)]
@@ -51,11 +53,13 @@
                transition-all duration-150">
         @if (themeService.isDark()) {
           <svg lucideSun
-               class="w-[18px] h-[18px] text-warning">
+               class="w-[18px] h-[18px] text-warning"
+               aria-hidden="true">
           </svg>
         } @else {
           <svg lucideMoon
-               class="w-[18px] h-[18px]">
+               class="w-[18px] h-[18px]"
+               aria-hidden="true">
           </svg>
         }
       </button>
@@ -83,7 +87,8 @@
                     transition-all duration-150
                     no-underline">
             <svg lucideLogIn
-                 class="w-4 h-4 flex-shrink-0">
+                 class="w-4 h-4 flex-shrink-0"
+                 aria-hidden="true">
             </svg>
             <span>تسجيل الدخول</span>
           </a>
@@ -102,7 +107,8 @@
                     shadow-sm
                     hover:shadow-md">
             <svg lucideUserPlus
-                 class="w-4 h-4 flex-shrink-0">
+                 class="w-4 h-4 flex-shrink-0"
+                 aria-hidden="true">
             </svg>
             <span>إنشاء حساب</span>
           </a>
@@ -111,7 +117,9 @@
 
         <!-- Mobile hamburger (not logged in) -->
         <button
+          type="button"
           (click)="toggleMobileMenu()"
+          aria-label="القائمة"
           class="md:hidden w-9 h-9 rounded-xl
                  flex items-center justify-center
                  text-[var(--text-secondary)]
@@ -119,9 +127,9 @@
                  hover:text-[var(--primary)]
                  transition-all duration-150">
           @if (showMobileMenu()) {
-            <svg lucideX class="w-5 h-5"></svg>
+            <svg lucideX class="w-5 h-5" aria-hidden="true"></svg>
           } @else {
-            <svg lucideMenu class="w-5 h-5"></svg>
+            <svg lucideMenu class="w-5 h-5" aria-hidden="true"></svg>
           }
         </button>
 
@@ -144,7 +152,9 @@
 
           <!-- Avatar trigger button -->
           <button
+            type="button"
             (click)="toggleUserMenu()"
+            aria-label="قائمة المستخدم"
             class="flex items-center gap-2
                    px-2 py-1.5 rounded-xl
                    hover:bg-[var(--primary-light)]
@@ -162,7 +172,8 @@
                         shadow-sm">
               <svg lucideUserRound
                    class="w-4 h-4"
-                   color="white">
+                   color="white"
+                   aria-hidden="true">
               </svg>
             </div>
 
@@ -187,7 +198,8 @@
                         hidden md:block
                         transition-transform
                         duration-200"
-                 [class.rotate-180]="showUserMenu()">
+                 [class.rotate-180]="showUserMenu()"
+                 aria-hidden="true">
             </svg>
 
           </button>
@@ -223,7 +235,8 @@
                               to-[var(--primary-hover)]">
                     <svg lucideUserRound
                          class="w-5 h-5"
-                         color="white">
+                         color="white"
+                         aria-hidden="true">
                     </svg>
                   </div>
                   <div class="flex flex-col
@@ -259,7 +272,8 @@
                        class="w-4 h-4 flex-shrink-0
                               text-[var(--text-secondary)]
                               group-hover:text-[var(--primary)]
-                              transition-colors">
+                              transition-colors"
+                       aria-hidden="true">
                   </svg>
                   <span>حجوزاتي</span>
                 </a>
@@ -279,7 +293,8 @@
                        class="w-4 h-4 flex-shrink-0
                               text-[var(--text-secondary)]
                               group-hover:text-[var(--primary)]
-                              transition-colors">
+                              transition-colors"
+                       aria-hidden="true">
                   </svg>
                   <span>الملف الشخصي</span>
                 </a>
@@ -291,6 +306,7 @@
 
                 <!-- Logout -->
                 <button
+                  type="button"
                   (click)="logout()"
                   class="flex items-center gap-3
                          px-3 py-2.5 rounded-xl
@@ -304,7 +320,8 @@
                        class="w-4 h-4 flex-shrink-0
                               transition-transform
                               duration-150
-                              group-hover:-translate-x-0.5">
+                              group-hover:-translate-x-0.5"
+                       aria-hidden="true">
                   </svg>
                   <span>تسجيل الخروج</span>
                 </button>
@@ -341,7 +358,7 @@
                 hover:bg-[var(--primary-light)]
                 transition-all duration-150
                 no-underline">
-        <svg lucideLogIn class="w-4 h-4"></svg>
+        <svg lucideLogIn class="w-4 h-4" aria-hidden="true"></svg>
         <span>تسجيل الدخول</span>
       </a>
 
@@ -355,7 +372,7 @@
                 hover:bg-[var(--primary-hover)]
                 transition-all duration-150
                 no-underline">
-        <svg lucideUserPlus class="w-4 h-4"></svg>
+        <svg lucideUserPlus class="w-4 h-4" aria-hidden="true"></svg>
         <span>إنشاء حساب</span>
       </a>
 

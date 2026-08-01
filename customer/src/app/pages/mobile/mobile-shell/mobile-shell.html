@@ -1,39 +1,39 @@
-<div dir="rtl" class="h-screen w-full bg-[var(--bg-base)] grid grid-rows-[1fr_auto]">
+<div dir="rtl" class="h-screen w-full max-w-full overflow-x-hidden bg-[var(--bg-base)] grid grid-rows-[1fr_auto]">
   <div class="overflow-y-auto">
     <router-outlet />
   </div>
-  <nav class="bg-[var(--bg-card)] border-t border-[var(--border)] flex items-center justify-around px-2 py-1 shadow-[0_-2px_12px_rgba(0,0,0,0.05)]">
+  <nav aria-label="التنقل الرئيسي" class="bg-[var(--bg-card)] border-t border-[var(--border)] flex items-center justify-around px-1 py-1 w-full max-w-full box-border shrink-0 shadow-[0_-2px_12px_rgba(0,0,0,0.05)]">
     <a routerLink="/m/home"
-      class="flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-xl"
+      class="flex flex-1 min-w-0 flex-col items-center gap-0.5 py-1.5 px-1 rounded-xl"
       [ngClass]="isHomeActive() ? 'bg-[var(--primary-light)] text-[var(--primary)]' : 'text-[var(--text-muted)]'">
-      <svg lucideHome class="w-5 h-5" [class.text-[var(--primary)]]="isHomeActive()"></svg>
-      <span class="text-[10px] font-bold" [class.text-[var(--primary)]]="isHomeActive()">الرئيسية</span>
+      <svg lucideHome class="w-5 h-5" [class.text-[var(--primary)]]="isHomeActive()" aria-hidden="true"></svg>
+      <span class="text-[10px] font-bold truncate w-full max-w-full text-center" [class.text-[var(--primary)]]="isHomeActive()">الرئيسية</span>
     </a>
     <a routerLink="/m/bookings"
-      class="flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-xl"
+      class="flex flex-1 min-w-0 flex-col items-center gap-0.5 py-1.5 px-1 rounded-xl"
       [ngClass]="isBookingsActive() ? 'bg-[var(--primary-light)] text-[var(--primary)]' : 'text-[var(--text-muted)]'">
-      <svg lucideCalendarClock class="w-5 h-5" [class.text-[var(--primary)]]="isBookingsActive()"></svg>
-      <span class="text-[10px] font-bold" [class.text-[var(--primary)]]="isBookingsActive()">حجوزاتي</span>
+      <svg lucideCalendarClock class="w-5 h-5" [class.text-[var(--primary)]]="isBookingsActive()" aria-hidden="true"></svg>
+      <span class="text-[10px] font-bold truncate w-full max-w-full text-center" [class.text-[var(--primary)]]="isBookingsActive()">حجوزاتي</span>
     </a>
     <a routerLink="/m/notifications"
-      class="flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-xl relative"
+      class="flex flex-1 min-w-0 flex-col items-center gap-0.5 py-1.5 px-1 rounded-xl relative"
       [ngClass]="isNotifsActive() ? 'bg-[var(--primary-light)] text-[var(--primary)]' : 'text-[var(--text-muted)]'">
       <div class="relative">
-        <svg lucideBell class="w-5 h-5" [class.text-[var(--primary)]]="isNotifsActive()"></svg>
+        <svg lucideBell class="w-5 h-5" [class.text-[var(--primary)]]="isNotifsActive()" aria-hidden="true"></svg>
       </div>
-      <span class="text-[10px] font-bold" [class.text-[var(--primary)]]="isNotifsActive()">الإشعارات</span>
+      <span class="text-[10px] font-bold truncate w-full max-w-full text-center" [class.text-[var(--primary)]]="isNotifsActive()">الإشعارات</span>
     </a>
     <a routerLink="/m/blogs"
-      class="flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-xl"
+      class="flex flex-1 min-w-0 flex-col items-center gap-0.5 py-1.5 px-1 rounded-xl"
       [ngClass]="isBlogActive() ? 'bg-[var(--primary-light)] text-[var(--primary)]' : 'text-[var(--text-muted)]'">
-      <svg lucideNewspaper class="w-5 h-5" [class.text-[var(--primary)]]="isBlogActive()"></svg>
-      <span class="text-[10px] font-bold" [class.text-[var(--primary)]]="isBlogActive()">المدونة</span>
+      <svg lucideNewspaper class="w-5 h-5" [class.text-[var(--primary)]]="isBlogActive()" aria-hidden="true"></svg>
+      <span class="text-[10px] font-bold truncate w-full max-w-full text-center" [class.text-[var(--primary)]]="isBlogActive()">المدونة</span>
     </a>
     <a routerLink="/m/profile"
-      class="flex flex-col items-center gap-0.5 py-1.5 px-4 rounded-xl"
+      class="flex flex-1 min-w-0 flex-col items-center gap-0.5 py-1.5 px-1 rounded-xl"
       [ngClass]="isProfileActive() ? 'bg-[var(--primary-light)] text-[var(--primary)]' : 'text-[var(--text-muted)]'">
-      <svg lucideUser class="w-5 h-5" [class.text-[var(--primary)]]="isProfileActive()"></svg>
-      <span class="text-[10px] font-bold" [class.text-[var(--primary)]]="isProfileActive()">حسابي</span>
+      <svg lucideUser class="w-5 h-5" [class.text-[var(--primary)]]="isProfileActive()" aria-hidden="true"></svg>
+      <span class="text-[10px] font-bold truncate w-full max-w-full text-center" [class.text-[var(--primary)]]="isProfileActive()">حسابي</span>
     </a>
   </nav>
 </div>

@@ -1,55 +1,55 @@
-<div dir="rtl" class="min-h-[calc(100vh-4rem)] bg-[var(--bg-base)]">
+<section dir="rtl" class="min-h-[calc(100vh-4rem)] bg-[var(--bg-base)]">
   <div class="max-w-lg mx-auto px-4 md:px-6 py-6 md:py-8">
     @if (isLoggedIn()) {
       <div class="bg-[var(--bg-card)] rounded-3xl border border-[var(--border)] overflow-hidden">
-        <div class="flex flex-col items-center py-8 md:py-10 gap-4 bg-gradient-to-b from-[var(--primary-light)]/50 to-transparent">
+        <header class="flex flex-col items-center py-8 md:py-10 gap-4 bg-gradient-to-b from-[var(--primary-light)]/50 to-transparent">
           <div class="w-20 h-20 rounded-full bg-gradient-to-br from-[var(--primary)] to-[var(--primary-hover)] flex items-center justify-center">
-            <svg class="w-10 h-10 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <svg class="w-10 h-10 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           </div>
-          <span class="text-lg font-bold text-[var(--text-primary)]">{{ customerName() }}</span>
-        </div>
+          <h1 class="text-lg font-bold text-[var(--text-primary)]">{{ customerName() }}</h1>
+        </header>
 
-        <div class="p-4 flex flex-col gap-2">
-          <button (click)="goToAwards()" class="flex items-center justify-between w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-base)] border border-[var(--border)] active:scale-[0.99] transition-all">
+        <nav class="p-4 flex flex-col gap-2">
+          <button type="button" (click)="goToAwards()" class="flex items-center justify-between w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-base)] border border-[var(--border)] active:scale-[0.99] transition-all">
             <div class="flex items-center gap-3">
               <div class="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center">
-                <svg class="w-[18px] h-[18px] text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+                <svg class="w-[18px] h-[18px] text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
               </div>
               <span class="text-sm font-bold text-[var(--text-primary)]">المكافآت</span>
             </div>
-            <svg class="w-4 h-4 text-[var(--text-secondary)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+            <svg class="w-4 h-4 text-[var(--text-secondary)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
           </button>
 
-          <button (click)="goToSettings()" class="flex items-center justify-between w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-base)] border border-[var(--border)] active:scale-[0.99] transition-all">
+          <button type="button" (click)="goToSettings()" class="flex items-center justify-between w-full px-4 py-3.5 rounded-2xl bg-[var(--bg-base)] border border-[var(--border)] active:scale-[0.99] transition-all">
             <div class="flex items-center gap-3">
               <div class="w-9 h-9 rounded-xl bg-indigo-100 flex items-center justify-center">
-                <svg class="w-[18px] h-[18px] text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+                <svg class="w-[18px] h-[18px] text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
               </div>
               <span class="text-sm font-bold text-[var(--text-primary)]">الملف الشخصي</span>
             </div>
-            <svg class="w-4 h-4 text-[var(--text-secondary)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+            <svg class="w-4 h-4 text-[var(--text-secondary)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
           </button>
-        </div>
+        </nav>
       </div>
 
       <div class="flex flex-col gap-2 mt-4">
-        <button (click)="logout()" class="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 font-bold text-sm active:scale-[0.98] transition-all">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <button type="button" (click)="logout()" class="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 font-bold text-sm active:scale-[0.98] transition-all">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
           <span>تسجيل الخروج</span>
         </button>
 
-        <button (click)="openDeleteConfirm()" class="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl text-xs font-medium text-[var(--text-secondary)] hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-950/10 transition-all active:scale-[0.98]">
-          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        <button type="button" (click)="openDeleteConfirm()" class="flex items-center justify-center gap-1.5 w-full py-2 rounded-xl text-xs font-medium text-[var(--text-secondary)] hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-950/10 transition-all active:scale-[0.98]">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
           <span>حذف الحساب</span>
         </button>
       </div>
 
       @if (showConfirmDelete()) {
         <div class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4" (click)="cancelDelete()">
-          <div class="bg-[var(--bg-card)] rounded-3xl p-6 max-w-sm w-full flex flex-col gap-4 shadow-xl" (click)="$event.stopPropagation()">
+          <aside role="dialog" aria-modal="true" aria-label="تأكيد حذف الحساب" class="bg-[var(--bg-card)] rounded-3xl p-6 max-w-sm w-full flex flex-col gap-4 shadow-xl" (click)="$event.stopPropagation()">
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 rounded-full bg-red-50 dark:bg-red-950/20 flex items-center justify-center flex-shrink-0">
-                <svg class="w-5 h-5 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <svg class="w-5 h-5 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
               </div>
               <div class="flex flex-col">
                 <span class="text-[15px] font-bold text-[var(--text-primary)]">حذف الحساب</span>
@@ -62,34 +62,34 @@
             }
 
             <div class="flex items-center gap-2">
-              <button (click)="confirmDelete()" [disabled]="isDeleting()"
+              <button type="button" (click)="confirmDelete()" [disabled]="isDeleting()"
                 class="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-red-500 text-white font-bold text-sm active:scale-[0.98] transition-all"
                 [class.opacity-60]="isDeleting()">
                 <span>{{ isDeleting() ? 'جاري الحذف...' : 'تأكيد الحذف' }}</span>
               </button>
-              <button (click)="cancelDelete()"
+              <button type="button" (click)="cancelDelete()"
                 class="flex-1 py-3 rounded-2xl border border-[var(--border)] text-[var(--text-secondary)] font-bold text-sm active:scale-[0.98] transition-all">
                 إلغاء
               </button>
             </div>
-          </div>
+          </aside>
         </div>
       }
 
     } @else {
       <div class="flex flex-col items-center justify-center py-16 px-6 gap-5 text-center">
         <div class="w-20 h-20 rounded-full bg-[var(--bg-card)] border-2 border-[var(--border)] flex items-center justify-center">
-          <svg class="w-10 h-10 text-[var(--text-secondary)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <svg class="w-10 h-10 text-[var(--text-secondary)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         </div>
         <div class="flex flex-col gap-1">
-          <span class="text-lg font-bold text-[var(--text-primary)]">تسجيل الدخول</span>
+          <h1 class="text-lg font-bold text-[var(--text-primary)]">تسجيل الدخول</h1>
           <span class="text-sm text-[var(--text-secondary)]">سجل الدخول لمتابعة حجوزاتك</span>
         </div>
-        <button (click)="login()" class="flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl bg-[var(--primary)] text-white font-bold text-[15px] active:scale-[0.98] transition-all shadow-lg">
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        <button type="button" (click)="login()" class="flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl bg-[var(--primary)] text-white font-bold text-[15px] active:scale-[0.98] transition-all shadow-lg">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
           <span>تسجيل الدخول</span>
         </button>
       </div>
     }
   </div>
-</div>
+</section>

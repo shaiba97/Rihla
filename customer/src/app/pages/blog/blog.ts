@@ -9,17 +9,17 @@ import { environment } from '../../../environments/environment';
   selector: 'app-blog',
   imports: [RouterLink, DatePipe, LucideCalendar, LucideArrowRight, LucideArrowLeft, LucideLoaderCircle, LucideFileText],
   template: `
-    <div dir="rtl" class="p-4 md:p-6 max-w-4xl mx-auto">
+    <section dir="rtl" class="p-4 md:p-6 max-w-4xl mx-auto">
       <!-- BACK -->
       <a routerLink="/home" class="inline-flex items-center gap-1.5 text-sm text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors no-underline mb-4">
-        <svg lucideArrowRight class="w-4 h-4"></svg>
+        <svg lucideArrowRight class="w-4 h-4" aria-hidden="true"></svg>
         <span>العودة إلى الرئيسية</span>
       </a>
 
       <!-- HEADER -->
       <div class="mb-6">
         <div class="flex items-center gap-3 mb-1">
-          <svg lucideFileText class="w-6 h-6 text-[var(--primary)]"></svg>
+          <svg lucideFileText class="w-6 h-6 text-[var(--primary)]" aria-hidden="true"></svg>
           <h1 class="text-xl font-extrabold text-[var(--text-primary)]">المدونة</h1>
         </div>
         <p class="text-sm text-[var(--text-secondary)]">آخر المقالات والتحديثات</p>
@@ -27,7 +27,7 @@ import { environment } from '../../../environments/environment';
 
       @if (loading()) {
         <div class="flex justify-center py-20">
-          <svg lucideLoaderCircle class="w-8 h-8 text-[var(--primary)] animate-spin"></svg>
+          <svg lucideLoaderCircle class="w-8 h-8 text-[var(--primary)] animate-spin" aria-hidden="true"></svg>
         </div>
       } @else if (error()) {
         <div class="text-center py-20">
@@ -35,7 +35,7 @@ import { environment } from '../../../environments/environment';
         </div>
       } @else if (posts().length === 0) {
         <div class="text-center py-20">
-          <svg lucideFileText class="w-16 h-16 text-[var(--text-secondary)] mx-auto mb-4"></svg>
+          <svg lucideFileText class="w-16 h-16 text-[var(--text-secondary)] mx-auto mb-4" aria-hidden="true"></svg>
           <p class="text-[var(--text-secondary)]">لا توجد مقالات بعد</p>
         </div>
       } @else {
@@ -48,7 +48,7 @@ import { environment } from '../../../environments/environment';
               }
               <div class="p-5">
               <div class="flex items-center gap-1.5 text-xs text-[var(--text-secondary)] mb-3">
-                <svg lucideCalendar class="w-3.5 h-3.5"></svg>
+                <svg lucideCalendar class="w-3.5 h-3.5" aria-hidden="true"></svg>
                 <span>{{ post.createdAt | date:'d MMM yyyy' }}</span>
                 <span class="mx-1.5">·</span>
                 <span>{{ post.author.name }}</span>
@@ -59,14 +59,14 @@ import { environment } from '../../../environments/environment';
               }
               <div class="flex items-center gap-1 mt-3 text-xs font-semibold text-[var(--primary)]">
                 <span>اقرأ المزيد</span>
-                <svg lucideArrowLeft class="w-3.5 h-3.5"></svg>
+                <svg lucideArrowLeft class="w-3.5 h-3.5" aria-hidden="true"></svg>
               </div>
             </div>
             </a>
           }
         </div>
       }
-    </div>
+    </section>
   `,
 })
 export class BlogComponent implements OnInit {

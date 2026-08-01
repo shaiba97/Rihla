@@ -1,90 +1,90 @@
-<div dir="rtl" class="min-h-[calc(100vh-4rem)] bg-[var(--bg-base)]">
-  <div class="max-w-lg mx-auto px-4 md:px-6 py-6 md:py-8">
-    <button (click)="back()" class="flex items-center gap-1.5 text-sm font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors mb-6">
-      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+<section dir="rtl" class="min-h-[calc(100vh-4rem)] bg-[var(--bg-base)]">
+  <form class="max-w-2xl mx-auto px-4 md:px-6 py-6 md:py-8">
+    <button type="button" (click)="back()" class="flex items-center gap-1.5 text-sm font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors mb-4">
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
       <span>العودة</span>
     </button>
 
     <h1 class="text-2xl font-extrabold text-[var(--text-primary)] mb-6">الملف الشخصي</h1>
 
     @if (saveSuccess()) {
-      <p class="text-sm font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 px-4 py-3 rounded-2xl mb-4">{{ saveSuccess() }}</p>
+      <div class="mb-4 px-4 py-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 text-sm font-semibold text-emerald-600 dark:text-emerald-400 text-center">{{ saveSuccess() }}</div>
     }
 
     @if (saveError()) {
-      <p class="text-sm font-semibold text-red-600 bg-red-50 border border-red-200 px-4 py-3 rounded-2xl mb-4">{{ saveError() }}</p>
+      <div class="mb-4 px-4 py-3 rounded-xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 text-sm font-semibold text-red-500 text-center">{{ saveError() }}</div>
     }
 
     <!-- General Info -->
-    <div class="bg-[var(--bg-card)] rounded-3xl border border-[var(--border)] overflow-hidden">
+    <div class="bg-[var(--bg-card)] rounded-3xl border border-[var(--border)] overflow-hidden mb-4">
       <div class="px-5 py-4 border-b border-[var(--border)]">
-        <h2 class="text-sm font-bold text-[var(--text-primary)]">معلومات عامة</h2>
+        <span class="text-sm font-bold text-[var(--text-primary)]">المعلومات العامة</span>
       </div>
-      <div class="p-5 flex flex-col gap-4">
-        <div>
-          <label class="text-xs font-medium text-[var(--text-secondary)] block mb-1.5">الاسم الكامل</label>
-          @if (editMode()) {
-            <input type="text" [ngModel]="editName()" (ngModelChange)="editName.set($event)"
-              class="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-base)] text-sm font-semibold text-[var(--text-primary)] outline-none focus:border-[var(--primary)]"
-              placeholder="الاسم">
-          } @else {
-            <div class="flex items-center justify-between">
-              <span class="text-sm font-semibold text-[var(--text-primary)]">{{ customerName() }}</span>
-            </div>
-          }
-        </div>
+      <div class="px-5 py-4">
+        @if (editMode()) {
+          <input type="text" [ngModel]="editName()" (ngModelChange)="editName.set($event)"
+            class="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--bg-base)] text-sm font-semibold text-[var(--text-primary)] outline-none focus:border-[var(--primary)]"
+            placeholder="الاسم الكامل">
+        } @else {
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-[var(--text-secondary)]">الاسم</span>
+            <span class="text-sm font-bold text-[var(--text-primary)]">{{ customerName() }}</span>
+          </div>
+        }
       </div>
     </div>
 
     <!-- Protection -->
-    <div class="bg-[var(--bg-card)] rounded-3xl border border-[var(--border)] overflow-hidden mt-4">
+    <div class="bg-[var(--bg-card)] rounded-3xl border border-[var(--border)] overflow-hidden mb-6">
       <div class="px-5 py-4 border-b border-[var(--border)]">
-        <h2 class="text-sm font-bold text-[var(--text-primary)]">الحماية</h2>
+        <span class="text-sm font-bold text-[var(--text-primary)]">معلومات الحماية</span>
       </div>
-      <div class="p-5 flex flex-col gap-4">
+      <div class="px-5 py-4 flex flex-col gap-4">
         @if (editMode()) {
           <div>
-            <label class="text-xs font-medium text-[var(--text-secondary)] block mb-1.5">رقم الهاتف</label>
-            <input type="tel" [ngModel]="editPhone()" (ngModelChange)="editPhone.set($event)"
-              class="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-base)] text-sm font-semibold text-[var(--text-primary)] outline-none focus:border-[var(--primary)]"
-              placeholder="رقم الهاتف" dir="ltr">
+            <label class="text-xs font-bold text-[var(--text-secondary)] mb-1 block">رقم الهاتف</label>
+            <input type="text" [ngModel]="editPhone()" (ngModelChange)="editPhone.set($event)"
+              class="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--bg-base)] text-sm font-semibold text-[var(--text-primary)] outline-none focus:border-[var(--primary)]"
+              placeholder="رقم الهاتف">
           </div>
           <div>
-            <label class="text-xs font-medium text-[var(--text-secondary)] block mb-1.5">البريد الإلكتروني</label>
+            <label class="text-xs font-bold text-[var(--text-secondary)] mb-1 block">البريد الإلكتروني</label>
             <input type="email" [ngModel]="editEmail()" (ngModelChange)="editEmail.set($event)"
-              class="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-base)] text-sm font-semibold text-[var(--text-primary)] outline-none focus:border-[var(--primary)]"
+              class="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--bg-base)] text-sm font-semibold text-[var(--text-primary)] outline-none focus:border-[var(--primary)]"
               placeholder="البريد الإلكتروني">
           </div>
         } @else {
-          <div>
-            <label class="text-xs font-medium text-[var(--text-secondary)] block mb-1.5">رقم الهاتف</label>
-            <span class="text-sm font-semibold text-[var(--text-primary)]" dir="ltr">{{ customerPhone() || '—' }}</span>
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-[var(--text-secondary)]">رقم الهاتف</span>
+            <span class="text-sm font-bold text-[var(--text-primary)]" dir="ltr">{{ customerPhone() || '—' }}</span>
           </div>
-          <div>
-            <label class="text-xs font-medium text-[var(--text-secondary)] block mb-1.5">البريد الإلكتروني</label>
-            <span class="text-sm font-semibold text-[var(--text-primary)]">{{ customerEmail() || '—' }}</span>
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-[var(--text-secondary)]">البريد الإلكتروني</span>
+            <span class="text-sm font-bold text-[var(--text-primary)]">{{ customerEmail() || '—' }}</span>
           </div>
         }
       </div>
     </div>
 
     @if (editMode()) {
-      <div class="flex items-center gap-2 mt-6">
-        <button (click)="save()" [disabled]="isSaving()"
+      <div class="flex items-center gap-3">
+        <button type="button" (click)="saveProfile()" [disabled]="isSaving()"
           class="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-[var(--primary)] text-white font-bold text-sm active:scale-[0.98] transition-all"
           [class.opacity-60]="isSaving()">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
           <span>{{ isSaving() ? 'جاري الحفظ...' : 'حفظ التغييرات' }}</span>
         </button>
-        <button (click)="cancelEdit()"
-          class="px-5 py-3.5 rounded-2xl border border-[var(--border)] text-[var(--text-secondary)] font-bold text-sm active:scale-[0.98] transition-all">
-          إلغاء
+        <button type="button" (click)="cancelEdit()"
+          class="flex items-center justify-center gap-2 px-5 py-3.5 rounded-2xl border border-[var(--border)] text-[var(--text-secondary)] font-bold text-sm active:scale-[0.98] transition-all">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <span>إلغاء</span>
         </button>
       </div>
     } @else {
-      <button (click)="startEdit()" class="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl border border-[var(--border)] text-[var(--text-primary)] font-bold text-sm active:scale-[0.98] transition-all mt-6">
-        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+      <button type="button" (click)="startEdit()" class="flex items-center justify-center gap-2 w-full py-3.5 rounded-2xl border border-[var(--border)] text-[var(--text-primary)] font-bold text-sm active:scale-[0.98] transition-all">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="M15 5l4 4"/></svg>
         <span>تعديل البيانات</span>
       </button>
     }
-  </div>
-</div>
+  </form>
+</section>

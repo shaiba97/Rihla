@@ -5,7 +5,7 @@ import { Component, output, signal, ChangeDetectionStrategy } from '@angular/cor
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="onboard-root" role="dialog" aria-label="شاشة الترحيب">
-      <button class="onboard-skip" (click)="finish()" aria-label="تخطي">تخطي</button>
+      <button class="onboard-skip" type="button" (click)="finish()" aria-label="تخطي">تخطي</button>
 
       <div class="slide" [style.animation]="'slideIn 0.45s cubic-bezier(0.34,1.56,0.64,1) both'">
         @switch (step()) {
@@ -70,7 +70,7 @@ import { Component, output, signal, ChangeDetectionStrategy } from '@angular/cor
         }
       </div>
 
-      <button class="onboard-btn" (click)="next()">
+      <button class="onboard-btn" type="button" (click)="next()">
         @if (step() < 2) {
           التالي
         } @else {

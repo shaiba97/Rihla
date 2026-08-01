@@ -30,18 +30,20 @@ import { AuthStoreService } from '../../services/auth-store/auth-store.service';
             <h2 class="text-base font-bold text-[var(--text-primary)]">عرض التذكرة</h2>
             <div class="flex items-center gap-2">
               <button
+                type="button"
                 (click)="print()"
                 class="w-9 h-9 rounded-full flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--primary-light)] hover:text-[var(--primary)] transition-all duration-150"
                 aria-label="طباعة"
               >
-                <svg lucidePrinter class="w-5 h-5"></svg>
+                <svg lucidePrinter class="w-5 h-5" aria-hidden="true"></svg>
               </button>
               <button
+                type="button"
                 (click)="close()"
                 class="w-9 h-9 rounded-full flex items-center justify-center text-[var(--text-secondary)] hover:bg-[var(--primary-light)] hover:text-[var(--primary)] transition-all duration-150"
                 aria-label="إغلاق"
               >
-                <svg lucideX class="w-5 h-5"></svg>
+                <svg lucideX class="w-5 h-5" aria-hidden="true"></svg>
               </button>
             </div>
           </div>

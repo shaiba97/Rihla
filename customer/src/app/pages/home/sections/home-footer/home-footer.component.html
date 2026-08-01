@@ -10,14 +10,14 @@
           المنصة الرائدة في السودان لحجز تذاكر الحافلات والرحلات البرية بكل سهولة وأمان.
         </p>
       </div>
-      <div class="flex flex-col items-end gap-3">
-        <h4 class="text-sm font-bold text-[var(--text-primary)] mb-1">الدعم</h4>
+      <nav class="flex flex-col items-end gap-3" aria-labelledby="footer-support-title">
+        <h2 id="footer-support-title" class="text-sm font-bold text-[var(--text-primary)] mb-1">الدعم</h2>
         @for (link of supportLinks; track link.path) {
           <a [routerLink]="link.path" class="text-sm text-[var(--primary)] hover:underline transition-all">
             {{ link.label }}
           </a>
         }
-      </div>
+      </nav>
     </div>
     <div class="h-px bg-[var(--border)] mb-6"></div>
     <p class="text-xs text-[var(--primary)] text-center">
