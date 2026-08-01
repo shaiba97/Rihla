@@ -7,6 +7,7 @@ import { TripSearchService } from '../../services/trip-search/trip-search.servic
 import { MobileTripCardComponent } from '../../shared/mobile-trip-card';
 import { CitySelectComponent } from '../../shared/city-select/city-select';
 import { AuthStoreService } from '../../services/auth-store/auth-store.service';
+import { CitiesService } from '../../services/cities/cities.service';
 
 @Component({
   selector: 'app-home',
@@ -19,6 +20,7 @@ export class Home implements OnInit, AfterViewInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private tripSvc = inject(TripSearchService);
+  private citiesSvc = inject(CitiesService);
   private authStore = inject(AuthStoreService);
   private hostElement = inject(ElementRef<HTMLElement>);
   private destroyRef = inject(DestroyRef);
@@ -98,7 +100,7 @@ export class Home implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    this.tripSvc.getAllCities().subscribe({ next: r => this.cities.set([...new Set(r.data ?? [])]), error: () => {} });
+    this.citiesSvc.getAllCities().subscribe({ next: data => this.cities.set(data), error: () => {} });
     this.isLoadingTrips.set(true);
     this.tripSvc.getAllTrips().subscribe({
       next: r => { this.featuredTrips.set(r.data ?? []); this.isLoadingTrips.set(false); },

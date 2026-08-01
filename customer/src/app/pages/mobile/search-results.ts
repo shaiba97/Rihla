@@ -8,6 +8,7 @@ import { TripSearchService } from '../../services/trip-search/trip-search.servic
 import { MobileTripCardComponent } from '../../shared/mobile-trip-card';
 import { ArabicNumberPipe } from '../../pipes/arabic-number/arabic-number-pipe';
 import { AuthStoreService } from '../../services/auth-store/auth-store.service';
+import { CitiesService } from '../../services/cities/cities.service';
 
 @Component({
   selector: 'app-search-results',
@@ -19,6 +20,7 @@ export class SearchResults implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private tripSvc = inject(TripSearchService);
+  private citiesSvc = inject(CitiesService);
   private authStore = inject(AuthStoreService);
   private destroyRef = inject(DestroyRef);
 
@@ -69,7 +71,7 @@ export class SearchResults implements OnInit {
   }
 
   ngOnInit(): void {
-    this.tripSvc.getAllCities().subscribe({ next: r => this.cities.set([...new Set(r.data ?? [])]), error: () => {} });
+    this.citiesSvc.getAllCities().subscribe({ next: data => this.cities.set(data), error: () => {} });
     this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(p => {
       this.from.set(p['from'] ?? ''); this.to.set(p['to'] ?? ''); this.date.set(p['date'] ?? '');
       this.editFrom.set(p['from'] ?? ''); this.editTo.set(p['to'] ?? ''); this.editDate.set(p['date'] ?? '');
