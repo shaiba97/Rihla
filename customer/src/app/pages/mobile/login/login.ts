@@ -1,22 +1,29 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { LucideArrowRight, LucidePhone, LucideLock, LucideLogIn } from '@lucide/angular';
 import { AuthStoreService } from '../../../services/auth-store/auth-store.service';
+import { JsonLdService } from '../../../services/json-ld/json-ld.service';
+import { currentPath, pageGraph } from '../../../services/json-ld/json-ld';
 
 @Component({
   selector: 'app-login',
   imports: [FormsModule, LucideArrowRight, LucidePhone, LucideLock, LucideLogIn],
   templateUrl: './login.html',
 })
-export class Login {
+export class Login implements OnInit {
   private router = inject(Router);
   private authStore = inject(AuthStoreService);
+  private jsonLd = inject(JsonLdService);
 
   identifier = signal<string>('');
   password = signal<string>('');
   error = signal<string>('');
   isLoading = signal<boolean>(false);
+
+  ngOnInit(): void {
+    this.jsonLd.set('page', pageGraph('تسجيل الدخول', currentPath(this.router.url), [{ name: 'تسجيل الدخول' }]));
+  }
 
   submit(): void {
     const id = this.identifier().trim();

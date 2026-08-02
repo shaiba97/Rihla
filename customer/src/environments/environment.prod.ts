@@ -1,5 +1,6 @@
 export const environment = {
   production: true,
+  webUrl: 'https://app-customer-frontend.onrender.com',
   apiUrl: {
     company:  'https://app-backend-gz2l.onrender.com/api-company',
     customer: 'https://app-backend-gz2l.onrender.com/api-customer',

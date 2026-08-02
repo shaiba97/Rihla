@@ -1,5 +1,5 @@
 <section dir="rtl" class="min-h-[calc(100vh-4rem)] bg-[var(--bg-base)]">
-  <form class="max-w-2xl mx-auto px-4 md:px-6 py-6 md:py-8">
+  <form class="max-w-2xl mx-auto px-4 md:px-6 py-6 md:py-8" (ngSubmit)="save()">
     <button type="button" (click)="back()" class="flex items-center gap-1.5 text-sm font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors mb-4">
       <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>
       <span>العودة</span>
@@ -68,7 +68,7 @@
 
     @if (editMode()) {
       <div class="flex items-center gap-3">
-        <button type="button" (click)="saveProfile()" [disabled]="isSaving()"
+        <button type="submit" [disabled]="isSaving()"
           class="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-[var(--primary)] text-white font-bold text-sm active:scale-[0.98] transition-all"
           [class.opacity-60]="isSaving()">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>

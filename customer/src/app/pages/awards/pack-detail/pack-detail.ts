@@ -1,6 +1,8 @@
 import { Component, inject, computed, signal, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AwardsService, PackDetailResponse } from '../../../core/services/awards/awards.service';
+import { JsonLdService } from '../../../services/json-ld/json-ld.service';
+import { currentPath, pageGraph } from '../../../services/json-ld/json-ld';
 
 @Component({
   selector: 'app-pack-detail',
@@ -11,6 +13,7 @@ export class PackDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private svc = inject(AwardsService);
+  private jsonLd = inject(JsonLdService);
 
   data = signal<PackDetailResponse | null>(null);
   loading = signal(true);
@@ -24,6 +27,9 @@ export class PackDetailComponent implements OnInit {
   ngOnInit() {
     const packId = this.route.snapshot.paramMap.get('packId');
     if (!packId) { this.router.navigate(['/profile']); return; }
+    const path = currentPath(this.router.url);
+    const awardsUrl = path.replace(/\/pack\/[^/]+$/, '');
+    this.jsonLd.set('page', pageGraph('تفاصيل المكافأة', path, [{ name: 'حسابي', url: `${awardsUrl.replace(/\/awards$/, '')}` }, { name: 'المكافآت', url: awardsUrl }, { name: 'التفاصيل' }]));
     this.svc.getPackDetail(packId).subscribe({
       next: (res) => { this.data.set(res); this.loading.set(false); },
       error: () => { this.loading.set(false); this.error.set('فشل تحميل التفاصيل'); },

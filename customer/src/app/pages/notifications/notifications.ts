@@ -7,6 +7,8 @@ import {
   LucideAlertCircle,
 } from '@lucide/angular';
 import { NotificationsService, AppNotification } from '../../core/services/notifications/notifications.service';
+import { JsonLdService } from '../../services/json-ld/json-ld.service';
+import { currentPath, pageGraph } from '../../services/json-ld/json-ld';
 
 @Component({
   selector: 'app-notifications-page',
@@ -21,12 +23,14 @@ import { NotificationsService, AppNotification } from '../../core/services/notif
 export class NotificationsPage implements OnInit, OnDestroy {
   notifSvc = inject(NotificationsService);
   router = inject(Router);
+  private jsonLd = inject(JsonLdService);
 
   notifications = this.notifSvc.notifications;
   unreadCount = this.notifSvc.unreadCount;
   settings = this.notifSvc.settings;
 
   ngOnInit(): void {
+    this.jsonLd.set('page', pageGraph('الإشعارات', currentPath(this.router.url), [{ name: 'الإشعارات' }]));
     this.notifSvc.fetch();
   }
 

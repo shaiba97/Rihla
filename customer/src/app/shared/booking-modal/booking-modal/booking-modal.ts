@@ -33,6 +33,8 @@ import { SessionService } from '../../../services/session/session.service';
 import { TimeFormatPipe } from '../../../pipes/time-format/time-format-pipe';
 import { ArabicNumberPipe } from '../../../pipes/arabic-number/arabic-number-pipe';
 import { AuthStoreService } from '../../../services/auth-store/auth-store.service';
+import { JsonLdService } from '../../../services/json-ld/json-ld.service';
+import { reservation } from '../../../services/json-ld/json-ld';
 
 @Component({
   selector: 'app-booking-modal',
@@ -80,6 +82,7 @@ export class BookingModalComponent implements OnInit, OnDestroy {
   private ws = inject(WsService);
   private authStore = inject(AuthStoreService);
   private router = inject(Router);
+  private jsonLd = inject(JsonLdService);
 
   private wsCleanups: (() => void)[] = [];
 
@@ -394,6 +397,11 @@ export class BookingModalComponent implements OnInit, OnDestroy {
             this.isSubmitting.set(false);
             this.sessionSvc.releaseSeats();
             this.submitSuccess.set(true);
+            const trip = this.trip();
+            const bid = this.bookingId();
+            if (trip && bid) {
+              this.jsonLd.set('reservation', reservation(bid, `${trip.fromCity} إلى ${trip.toCity}`, this.totalPayment(), 'SDG', new Date().toISOString()));
+            }
           },
           error: (err: any) => {
             this.isSubmitting.set(false);

@@ -9,6 +9,8 @@ import { ArabicNumberPipe } from '../../pipes/arabic-number/arabic-number-pipe';
 import { formatArabicDateTime, formatArabicTime } from '../../pipes/arabic-number/arabic-number.util';
 import { AuthStoreService } from '../../services/auth-store/auth-store.service';
 import { environment } from '../../../environments/environment';
+import { JsonLdService } from '../../services/json-ld/json-ld.service';
+import { currentPath, pageGraph, reservation } from '../../services/json-ld/json-ld';
 
 @Component({
   selector: 'app-payment-details',
@@ -22,6 +24,7 @@ export class PaymentDetails implements OnInit, OnDestroy {
   private bookingSvc = inject(BookingService);
   private sessionSvc = inject(SessionService);
   private authStore = inject(AuthStoreService);
+  private jsonLd = inject(JsonLdService);
 
   private onPop = (): void => { this.sessionSvc.exit(this.trip()?.id); };
 
@@ -86,6 +89,7 @@ export class PaymentDetails implements OnInit, OnDestroy {
   isExpired = computed(() => this.sessionSvc.isExpired());
 
   ngOnInit(): void {
+    this.jsonLd.set('page', pageGraph('تفاصيل الدفع', currentPath(this.router.url), [{ name: 'تفاصيل الدفع' }]));
     if (!this.authStore.isLoggedIn()) {
       this.showLoginPrompt.set(true);
       return;
@@ -158,10 +162,19 @@ export class PaymentDetails implements OnInit, OnDestroy {
       price: tripPrice,
       currency: 'SDG',
     }).subscribe({
-      next: () => {
+      next: (res: any) => {
         this.submitSuccess.set(true);
         this.sessionSvc.releaseSeats();
         this.isSubmitting.set(false);
+        const booking = res?.data ?? res;
+        const bookingId = booking?.id;
+        if (bookingId) {
+          const trip = this.trip();
+          const tripName = trip
+            ? `${trip.boardingCity ?? ''} إلى ${trip.destCity ?? ''}`
+            : '';
+          this.jsonLd.set('reservation', reservation(bookingId, tripName, Number(this.totalAmount() ?? 0), 'SDG', new Date().toISOString()));
+        }
       },
       error: (err) => {
         this.submitError.set(err?.error?.message ?? 'فشل إنشاء الحجز');

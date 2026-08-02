@@ -2,6 +2,8 @@ import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AwardsService, AwardPack, Earnings } from '../../../core/services/awards/awards.service';
+import { JsonLdService } from '../../../services/json-ld/json-ld.service';
+import { currentPath, pageGraph } from '../../../services/json-ld/json-ld';
 
 @Component({
   selector: 'app-awards-page',
@@ -11,6 +13,7 @@ import { AwardsService, AwardPack, Earnings } from '../../../core/services/award
 export class AwardsPage implements OnInit {
   private router = inject(Router);
   private awardsSvc = inject(AwardsService);
+  private jsonLd = inject(JsonLdService);
 
   loading = signal(true);
   packs = signal<AwardPack[]>([]);
@@ -26,6 +29,8 @@ export class AwardsPage implements OnInit {
   submitSuccess = signal('');
 
   ngOnInit() {
+    const path = currentPath(this.router.url);
+    this.jsonLd.set('page', pageGraph('المكافآت', path, [{ name: 'حسابي', url: `${path.replace(/\/awards$/, '')}` }, { name: 'المكافآت' }]));
     this.awardsSvc.getPacks().subscribe({
       next: (p) => { this.packs.set(p); this.loading.set(false); },
       error: () => { this.loading.set(false); },

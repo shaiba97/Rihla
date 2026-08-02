@@ -35,6 +35,8 @@ import { Trips, Trip as TripResp }
 import { CitiesService } from '../../services/cities/cities.service';
 import { CitySelectComponent } from '../../shared/city-select/city-select';
 import { ArabicNumberPipe } from '../../pipes/arabic-number/arabic-number-pipe';
+import { JsonLdService } from '../../services/json-ld/json-ld.service';
+import { currentPath, pageGraph, tripItemList } from '../../services/json-ld/json-ld';
 
 type SortOption = 'price-asc' | 'price-desc'
                 | 'time-asc'  | 'time-desc';
@@ -67,6 +69,7 @@ export class SearchResultsComponent implements OnInit {
   private router            = inject(Router);
   private tripsService = inject(Trips);
   private citiesSvc    = inject(CitiesService);
+  private jsonLd       = inject(JsonLdService);
 
   from = signal<string>('');
   to   = signal<string>('');
@@ -195,7 +198,11 @@ export class SearchResultsComponent implements OnInit {
       this.from.set(params['from'] ?? '');
       this.to.set(params['to'] ?? '');
       this.date.set(params['date'] || this.today);
-      if (this.from() && this.to()) {
+      const from = this.from();
+      const to = this.to();
+      const name = from && to ? `رحلة من ${from} إلى ${to}` : 'نتائج البحث';
+      this.jsonLd.set('page', pageGraph(name, currentPath(this.router.url), [{ name: 'نتائج البحث' }], name));
+      if (from && to) {
         this.loadTrips();
       }
     });
@@ -213,6 +220,8 @@ export class SearchResultsComponent implements OnInit {
     }).subscribe({
       next: (res) => {
         this.allTrips.set((res.data ?? []).map(t => this.mapTrip(t)));
+        const list = tripItemList(this.allTrips(), this.searchLabel(), currentPath(this.router.url));
+        if (list) this.jsonLd.set('trips', list);
         this.isLoading.set(false);
       },
       error: () => {

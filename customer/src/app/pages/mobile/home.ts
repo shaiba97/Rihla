@@ -8,6 +8,8 @@ import { MobileTripCardComponent } from '../../shared/mobile-trip-card';
 import { CitySelectComponent } from '../../shared/city-select/city-select';
 import { AuthStoreService } from '../../services/auth-store/auth-store.service';
 import { CitiesService } from '../../services/cities/cities.service';
+import { JsonLdService } from '../../services/json-ld/json-ld.service';
+import { currentPath, pageGraph, tripItemList } from '../../services/json-ld/json-ld';
 
 @Component({
   selector: 'app-home',
@@ -24,6 +26,7 @@ export class Home implements OnInit, AfterViewInit {
   private authStore = inject(AuthStoreService);
   private hostElement = inject(ElementRef<HTMLElement>);
   private destroyRef = inject(DestroyRef);
+  private jsonLd = inject(JsonLdService);
 
   from = signal<string>('');
   to = signal<string>('');
@@ -100,10 +103,16 @@ export class Home implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
+    this.jsonLd.set('page', pageGraph('الرئيسية', currentPath(this.router.url), [{ name: 'الرئيسية' }]));
     this.citiesSvc.getAllCities().subscribe({ next: data => this.cities.set(data), error: () => {} });
     this.isLoadingTrips.set(true);
     this.tripSvc.getAllTrips().subscribe({
-      next: r => { this.featuredTrips.set(r.data ?? []); this.isLoadingTrips.set(false); },
+      next: r => {
+        this.featuredTrips.set(r.data ?? []);
+        const list = tripItemList(this.featuredTrips(), 'الرحلات المتاحة', currentPath(this.router.url));
+        if (list) this.jsonLd.set('trips', list);
+        this.isLoadingTrips.set(false);
+      },
       error: () => this.isLoadingTrips.set(false),
     });
     this.date.set(this.today);

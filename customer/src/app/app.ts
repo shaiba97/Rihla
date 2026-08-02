@@ -1,4 +1,5 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformServer } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
 import { SplashScreen } from './shared/splash-screen/splash-screen';
 import { OnboardingScreen } from './shared/onboarding-screen/onboarding-screen';
@@ -11,7 +12,7 @@ import { OfflineScreen } from './shared/offline-screen/offline-screen';
   styleUrl: './app.css'
 })
 export class App {
-  protected readonly splashDone = signal(false);
+  protected readonly splashDone = signal(isPlatformServer(inject(PLATFORM_ID)));
   protected readonly showOnboarding = signal(false);
 
   onSplashDone(): void {

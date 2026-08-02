@@ -1,9 +1,11 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { BlogService, BlogPost } from '../../core/services/blog/blog.service';
 import { LucideCalendar, LucideArrowRight, LucideArrowLeft, LucideLoaderCircle, LucideFileText } from '@lucide/angular';
 import { environment } from '../../../environments/environment';
+import { JsonLdService } from '../../services/json-ld/json-ld.service';
+import { blogItemList, currentPath, pageGraph } from '../../services/json-ld/json-ld';
 
 @Component({
   selector: 'app-blog',
@@ -71,6 +73,8 @@ import { environment } from '../../../environments/environment';
 })
 export class BlogComponent implements OnInit {
   private blogSvc = inject(BlogService);
+  private router = inject(Router);
+  private jsonLd = inject(JsonLdService);
   posts = signal<BlogPost[]>([]);
   loading = signal(true);
   error = signal(false);
@@ -81,8 +85,14 @@ export class BlogComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.jsonLd.set('page', pageGraph('المدونة', currentPath(this.router.url), [{ name: 'المدونة' }], 'آخر المقالات والتحديثات من تفية'));
     this.blogSvc.getPosts().subscribe({
-      next: res => { this.posts.set(res); this.loading.set(false); },
+      next: res => {
+        this.posts.set(res);
+        const list = blogItemList(res);
+        if (list) this.jsonLd.set('blog', list);
+        this.loading.set(false);
+      },
       error: () => { this.error.set(true); this.loading.set(false); },
     });
   }

@@ -1,9 +1,11 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { BlogService, BlogPost } from '../../core/services/blog/blog.service';
 import { LucideCalendar, LucideArrowRight, LucideLoaderCircle, LucideUser, LucideFileText } from '@lucide/angular';
 import { environment } from '../../../environments/environment';
+import { JsonLdService } from '../../services/json-ld/json-ld.service';
+import { blogPosting, currentPath, pageGraph } from '../../services/json-ld/json-ld';
 
 @Component({
   selector: 'app-blog-detail',
@@ -51,6 +53,8 @@ import { environment } from '../../../environments/environment';
 export class BlogDetailComponent implements OnInit {
   private blogSvc = inject(BlogService);
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private jsonLd = inject(JsonLdService);
   post = signal<BlogPost | null>(null);
   loading = signal(true);
   error = signal(false);
@@ -62,9 +66,15 @@ export class BlogDetailComponent implements OnInit {
 
   ngOnInit(): void {
     const slug = this.route.snapshot.paramMap.get('slug');
+    const pagePath = currentPath(this.router.url);
+    this.jsonLd.set('page', pageGraph('مقال المدونة', pagePath, [{ name: 'المدونة', url: `${environment.webUrl}/blogs` }, { name: 'مقال' }]));
     if (!slug) { this.error.set(true); this.loading.set(false); return; }
     this.blogSvc.getPost(slug).subscribe({
-      next: res => { this.post.set(res); this.loading.set(false); },
+      next: res => {
+        this.post.set(res);
+        if (res) this.jsonLd.set('article', blogPosting(res));
+        this.loading.set(false);
+      },
       error: () => { this.error.set(true); this.loading.set(false); },
     });
   }

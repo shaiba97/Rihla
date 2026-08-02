@@ -9,6 +9,7 @@ if (!apiUrl) {
 const base = apiUrl.replace(/\/api$/, '');
 const env = `export const environment = {
   production: true,
+  webUrl: 'https://app-customer-frontend.onrender.com',
   apiUrl: {
     company:  '${base}/api-company',
     customer: '${base}/api-customer',

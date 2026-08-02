@@ -7,6 +7,8 @@ import {
   LucideCalendarClock,
 } from '@lucide/angular';
 import { NotificationsService, AppNotification } from '../../core/services/notifications/notifications.service';
+import { JsonLdService } from '../../services/json-ld/json-ld.service';
+import { currentPath, pageGraph } from '../../services/json-ld/json-ld';
 
 @Component({
   selector: 'app-notification-detail',
@@ -22,6 +24,7 @@ export class NotificationDetailPage implements OnInit {
   notifSvc = inject(NotificationsService);
   router = inject(Router);
   route = inject(ActivatedRoute);
+  private jsonLd = inject(JsonLdService);
 
   notif = signal<AppNotification | null>(null);
   loading = signal(true);
@@ -42,6 +45,8 @@ export class NotificationDetailPage implements OnInit {
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
+    const path = currentPath(this.router.url);
+    this.jsonLd.set('page', pageGraph('تفاصيل الإشعار', path, [{ name: 'الإشعارات', url: `${path.replace(/\/[^/]+$/, '')}` }, { name: 'تفاصيل الإشعار' }]));
     if (!id) {
       this.router.navigate(['/notifications']);
       return;

@@ -1,18 +1,21 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { LucideBus, LucideLock, LucideUser, LucideUserPlus, LucidePhone } from '@lucide/angular';
 import { AuthStoreService, LoginResponse } from '../../../services/auth-store/auth-store.service';
 import { switchMap } from 'rxjs';
+import { JsonLdService } from '../../../services/json-ld/json-ld.service';
+import { currentPath, pageGraph } from '../../../services/json-ld/json-ld';
 
 @Component({
   selector: 'app-register',
   imports: [FormsModule, RouterLink, LucideBus, LucideLock, LucideUser, LucideUserPlus, LucidePhone],
   templateUrl: './register.html',
 })
-export class Register {
+export class Register implements OnInit {
   private router = inject(Router);
   private authStore = inject(AuthStoreService);
+  private jsonLd = inject(JsonLdService);
 
   name = signal<string>('');
   identifier = signal<string>('');
@@ -20,6 +23,10 @@ export class Register {
   agreedToTerms = signal<boolean>(false);
   error = signal<string>('');
   isLoading = signal<boolean>(false);
+
+  ngOnInit(): void {
+    this.jsonLd.set('page', pageGraph('إنشاء حساب جديد', currentPath(this.router.url), [{ name: 'إنشاء حساب جديد' }]));
+  }
 
   submit(): void {
     const n = this.name().trim();

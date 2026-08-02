@@ -71,22 +71,24 @@ import { Component, signal, ChangeDetectionStrategy, OnDestroy } from '@angular/
   `],
 })
 export class OfflineScreen implements OnDestroy {
-  offline = signal(!navigator.onLine);
+  offline = signal(typeof navigator === 'undefined' ? false : !navigator.onLine);
 
   private onOnline = () => this.offline.set(false);
   private onOffline = () => this.offline.set(true);
 
   constructor() {
+    if (typeof window === 'undefined') return;
     window.addEventListener('online', this.onOnline);
     window.addEventListener('offline', this.onOffline);
   }
 
   ngOnDestroy(): void {
+    if (typeof window === 'undefined') return;
     window.removeEventListener('online', this.onOnline);
     window.removeEventListener('offline', this.onOffline);
   }
 
   retry(): void {
-    window.location.reload();
+    if (typeof window !== 'undefined') window.location.reload();
   }
 }

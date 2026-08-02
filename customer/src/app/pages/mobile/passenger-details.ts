@@ -7,6 +7,8 @@ import { LucideArrowRight, LucideUser, LucideSmartphone, LucideAlertCircle, Luci
 import { ArabicNumberPipe } from '../../pipes/arabic-number/arabic-number-pipe';
 import { SessionService } from '../../services/session/session.service';
 import { AuthStoreService } from '../../services/auth-store/auth-store.service';
+import { JsonLdService } from '../../services/json-ld/json-ld.service';
+import { currentPath, pageGraph } from '../../services/json-ld/json-ld';
 
 @Component({
   selector: 'app-passenger-details',
@@ -20,6 +22,7 @@ export class PassengerDetails implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private sessionSvc = inject(SessionService);
   private authStore = inject(AuthStoreService);
+  private jsonLd = inject(JsonLdService);
 
   private onPop = (): void => { this.sessionSvc.exit(this.trip()?.id); };
 
@@ -41,6 +44,7 @@ export class PassengerDetails implements OnInit, OnDestroy {
   canProceed = computed(() => this.contactStatus() === 'VALID' && this.passengerStatus() === 'VALID' && this.selectedSeats().length > 0);
 
   ngOnInit(): void {
+    this.jsonLd.set('page', pageGraph('بيانات الركاب', currentPath(this.router.url), [{ name: 'بيانات الركاب' }]));
     if (!this.authStore.isLoggedIn()) {
       this.showLoginPrompt.set(true);
       return;

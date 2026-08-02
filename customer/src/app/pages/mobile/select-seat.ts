@@ -8,6 +8,8 @@ import { TimeFormatPipe } from '../../pipes/time-format/time-format-pipe';
 import { ArabicNumberPipe } from '../../pipes/arabic-number/arabic-number-pipe';
 import { WsService } from '../../services/ws.service';
 import { AuthStoreService } from '../../services/auth-store/auth-store.service';
+import { JsonLdService } from '../../services/json-ld/json-ld.service';
+import { busTrip, currentPath, pageGraph } from '../../services/json-ld/json-ld';
 
 type SeatStatus = 'available' | 'reserved' | 'booked';
 interface Seat { number: number; status: SeatStatus; }
@@ -25,6 +27,7 @@ export class SelectSeat implements OnInit, OnDestroy {
   private sessionSvc = inject(SessionService);
   private ws = inject(WsService);
   private authStore = inject(AuthStoreService);
+  private jsonLd = inject(JsonLdService);
 
   private _tripId = '';
   private wsCleanups: (() => void)[] = [];
@@ -65,6 +68,8 @@ export class SelectSeat implements OnInit, OnDestroy {
   backSeats = computed(() => this.seatMap().slice(-5));
 
   ngOnInit(): void {
+    const pagePath = currentPath(this.router.url);
+    this.jsonLd.set('page', pageGraph('حجز مقعد', pagePath, [{ name: 'حجز مقعد' }]));
     if (!this.authStore.isLoggedIn()) {
       this.showLoginPrompt.set(true);
       return;
@@ -72,6 +77,10 @@ export class SelectSeat implements OnInit, OnDestroy {
     this._tripId = this.route.snapshot.paramMap.get('tripId') ?? '';
     const nav = history.state?.trip;
     if (nav) this.trip.set(nav);
+    if (this.trip()) {
+      const trip = busTrip(this.trip());
+      if (trip) this.jsonLd.set('trip', trip);
+    }
     this.bookingSvc.getActiveFee().subscribe(fee => {
       if (fee) this.platformFeePct.set(Number(fee.percentage));
     });

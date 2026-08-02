@@ -9,6 +9,8 @@ import { WsService } from '../../../services/ws.service';
 import { NgClass, DatePipe } from '@angular/common';
 import { environment } from '../../../../environments/environment';
 import { TicketPreviewComponent } from '../../../shared/ticket-preview/ticket-preview';
+import { JsonLdService } from '../../../services/json-ld/json-ld.service';
+import { currentPath, pageGraph } from '../../../services/json-ld/json-ld';
 
 @Component({
   selector: 'app-bookings',
@@ -20,6 +22,7 @@ export class Bookings implements OnInit, OnDestroy {
   private bookingSvc = inject(BookingService);
   private ws = inject(WsService);
   authStore = inject(AuthStoreService);
+  private jsonLd = inject(JsonLdService);
 
   bookings = signal<any[]>([]);
   isLoading = signal<boolean>(false);
@@ -29,7 +32,7 @@ export class Bookings implements OnInit, OnDestroy {
   private wsCleanups: (() => void)[] = [];
 
   ngOnInit(): void {
-    
+    this.jsonLd.set('page', pageGraph('حجوزاتي', currentPath(this.router.url), [{ name: 'حجوزاتي' }]));
     if (this.authStore.isLoggedIn()) {
       this.loadBookings();
     }

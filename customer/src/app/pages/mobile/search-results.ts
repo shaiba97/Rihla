@@ -9,6 +9,8 @@ import { MobileTripCardComponent } from '../../shared/mobile-trip-card';
 import { ArabicNumberPipe } from '../../pipes/arabic-number/arabic-number-pipe';
 import { AuthStoreService } from '../../services/auth-store/auth-store.service';
 import { CitiesService } from '../../services/cities/cities.service';
+import { JsonLdService } from '../../services/json-ld/json-ld.service';
+import { currentPath, pageGraph, tripItemList } from '../../services/json-ld/json-ld';
 
 @Component({
   selector: 'app-search-results',
@@ -23,6 +25,7 @@ export class SearchResults implements OnInit {
   private citiesSvc = inject(CitiesService);
   private authStore = inject(AuthStoreService);
   private destroyRef = inject(DestroyRef);
+  private jsonLd = inject(JsonLdService);
 
   from = signal<string>('');
   to = signal<string>('');
@@ -41,6 +44,12 @@ export class SearchResults implements OnInit {
   editMonth = signal<string>(this.today.slice(0, 7));
 
   canGoPrevEdit = computed(() => this.editMonth() > this.today.slice(0, 7));
+
+  searchLabel = computed(() => {
+    const f = this.from();
+    const t = this.to();
+    return f && t ? `${f} إلى ${t}` : 'نتائج البحث';
+  });
 
   dateLabel = computed(() => {
     if (!this.date()) return '';
@@ -75,6 +84,10 @@ export class SearchResults implements OnInit {
     this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(p => {
       this.from.set(p['from'] ?? ''); this.to.set(p['to'] ?? ''); this.date.set(p['date'] ?? '');
       this.editFrom.set(p['from'] ?? ''); this.editTo.set(p['to'] ?? ''); this.editDate.set(p['date'] ?? '');
+      const from = this.from();
+      const to = this.to();
+      const name = from && to ? `رحلة من ${from} إلى ${to}` : 'نتائج البحث';
+      this.jsonLd.set('page', pageGraph(name, currentPath(this.router.url), [{ name: 'نتائج البحث' }], name));
       this.loadTrips();
     });
   }
@@ -82,7 +95,12 @@ export class SearchResults implements OnInit {
   loadTrips(): void {
     this.isLoading.set(true); this.trips.set([]); this.error.set('');
     this.tripSvc.searchTrips({ from: this.from(), to: this.to(), date: this.date() }).subscribe({
-      next: r => { this.trips.set(r.data ?? []); this.isLoading.set(false); },
+      next: r => {
+        this.trips.set(r.data ?? []);
+        const list = tripItemList(this.trips(), this.searchLabel(), currentPath(this.router.url));
+        if (list) this.jsonLd.set('trips', list);
+        this.isLoading.set(false);
+      },
       error: e => { this.error.set(e?.error?.message ?? 'حدث خطأ أثناء البحث'); this.isLoading.set(false); },
     });
   }
