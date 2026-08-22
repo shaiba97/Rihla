@@ -106,12 +106,12 @@ export class AuthStoreService {
   }
 
   register(data: RegisterPayload): Observable<CreateUserResponse> {
+    // Role is forced server-side; sending it only invites confusion.
     return this.http.post<CreateUserResponse>(`${this.apiUrl}/users/post-user`, {
       name: data.name,
       phone: data.phone,
       email: data.email,
       password: data.password,
-      role: 'USER',
     });
   }
 

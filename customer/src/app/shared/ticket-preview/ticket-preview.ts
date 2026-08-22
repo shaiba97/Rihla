@@ -91,12 +91,14 @@ export class TicketPreviewComponent {
   constructor() {
     effect(() => {
       const id = this.bookingId();
-      if (!id) {
+      // Defense-in-depth: only well-formed booking ids may reach a trusted
+      // resource URL (the id comes from API data, never from this input).
+      if (!id || !/^[a-zA-Z0-9_-]{1,64}$/.test(id)) {
         this.safeUrl.set('');
         return;
       }
       const token = this.authStore.token();
-      if (!token) {
+      if (!token || !/^[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+\.[A-Za-z0-9-_]+$/.test(token)) {
         this.safeUrl.set('');
         return;
       }

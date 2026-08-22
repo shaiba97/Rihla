@@ -46,16 +46,8 @@ export const routes: Routes = [
         path: 'notifications',
         loadComponent: () => import('./pages/notifications/notifications').then(m => m.NotificationsPage),
       },
-          {
-            path: 'awards/pack/:packId',
-            loadComponent: () => import('./pages/awards/pack-detail/pack-detail').then(m => m.PackDetailComponent),
-          },
-          {
-            path: 'notifications',
-            loadComponent: () => import('./pages/notifications/notifications').then(m => m.NotificationsPage),
-          },
-          {
-            path: 'blogs',
+      {
+        path: 'blogs',
         loadComponent: () => import('./pages/blog/blog').then(m => m.BlogComponent),
       },
       {
